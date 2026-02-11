@@ -1,0 +1,3522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Conformidade ANAC - Aeroportos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ANAC Color Palette - Professional ERP Design */
+        :root {
+            --anac-primary: #003366;        /* Azul escuro ANAC */
+            --anac-primary-dark: #002244;    /* Azul mais escuro */
+            --anac-primary-light: #0066CC;   /* Azul médio */
+            --anac-accent: #004488;          /* Azul accent */
+            --anac-bg-light: #E6F2FF;        /* Background azul claro */
+            --anac-gray-50: #F8F9FA;         /* Cinza muito claro */
+            --anac-gray-100: #F1F3F5;        /* Cinza claro */
+            --anac-gray-200: #E4E7EB;        /* Cinza médio claro */
+            --anac-gray-300: #CBD5E1;         /* Cinza médio */
+            --anac-gray-600: #64748B;        /* Cinza escuro */
+            --anac-gray-700: #475569;        /* Cinza mais escuro */
+            --anac-gray-900: #1E293B;        /* Cinza quase preto */
+            --anac-success: #059669;         /* Verde sucesso */
+            --anac-warning: #D97706;         /* Laranja aviso */
+            --anac-error: #DC2626;           /* Vermelho erro */
+            --anac-info: #0284C7;            /* Azul informação */
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 51, 102, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 51, 102, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 51, 102, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--anac-gray-50);
+            min-height: 100vh;
+            color: var(--anac-gray-900);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        /* Professional Header with ANAC Branding */
+        header {
+            background: var(--white);
+            border-bottom: 4px solid var(--anac-primary);
+            padding: 24px 32px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 0;
+        }
+        
+        header h1 {
+            color: var(--anac-primary);
+            margin-bottom: 6px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--anac-gray-600);
+            font-size: 14px;
+            font-weight: 400;
+        }
+        
+        /* Professional Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: var(--white);
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--anac-gray-200);
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--anac-gray-600);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .tab:hover {
+            background: var(--anac-gray-50);
+            color: var(--anac-primary);
+        }
+        
+        .tab.active {
+            background: var(--anac-primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+            padding: 24px 32px;
+        }
+        
+        /* Professional Cards */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 28px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--anac-gray-200);
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .card h2 {
+            color: var(--anac-primary);
+            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--anac-primary);
+            padding-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        /* Form Elements - Professional Style */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--anac-gray-700);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: var(--anac-gray-600);
+            margin-top: 4px;
+            font-style: normal;
+            font-weight: 400;
+            text-transform: none;
+        }
+        
+        select, input[type="text"], input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--anac-gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: var(--white);
+            color: var(--anac-gray-900);
+            font-family: inherit;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--anac-primary);
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+        
+        select:hover, input:hover {
+            border-color: var(--anac-gray-600);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        input[type="checkbox"], input[type="radio"] {
+            width: auto;
+            cursor: pointer;
+        }
+        
+        textarea {
+            font-family: inherit;
+            resize: vertical;
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--anac-gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: var(--white);
+            color: var(--anac-gray-900);
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--anac-primary);
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+        
+        /* Professional Buttons */
+        button {
+            background: var(--anac-primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+        
+        button:hover {
+            background: var(--anac-primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        button:disabled {
+            background: var(--anac-gray-300);
+            color: var(--anac-gray-600);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.secondary {
+            background: var(--anac-gray-600);
+        }
+        
+        button.secondary:hover {
+            background: var(--anac-gray-700);
+        }
+        
+        button.danger {
+            background: var(--anac-error);
+        }
+        
+        button.danger:hover {
+            background: #B91C1C;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .button-group button {
+            flex: 1;
+        }
+        
+        /* Professional Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-compliant {
+            background: var(--anac-success);
+            color: var(--white);
+        }
+        
+        .status-non-compliant {
+            background: var(--anac-error);
+            color: var(--white);
+        }
+        
+        .status-partial {
+            background: var(--anac-warning);
+            color: var(--white);
+        }
+        
+        .status-pending {
+            background: var(--anac-gray-600);
+            color: var(--white);
+        }
+        
+        /* Compliance Items - Professional Style */
+        .compliance-item {
+            border-left: 4px solid var(--anac-gray-300);
+            padding: 20px;
+            margin-bottom: 16px;
+            background: var(--white);
+            border-radius: 6px;
+            border: 1px solid var(--anac-gray-200);
+            transition: all 0.2s ease;
+        }
+        
+        .compliance-item:hover {
+            border-left-color: var(--anac-primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .compliance-item h3 {
+            color: var(--anac-gray-900);
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .compliance-item p {
+            color: var(--anac-gray-600);
+            font-size: 14px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        /* Summary Cards - Professional Dashboard Style */
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+        
+        .summary-item {
+            text-align: center;
+            padding: 24px 20px;
+            background: var(--white);
+            border-radius: 8px;
+            border: 1px solid var(--anac-gray-200);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+        
+        .summary-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .summary-item .number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--anac-primary);
+            line-height: 1;
+        }
+        
+        .summary-item .label {
+            font-size: 12px;
+            color: var(--anac-gray-600);
+            margin-top: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Alert Boxes - Professional Style */
+        .recommendations {
+            background: #FEF3C7;
+            border-left: 4px solid var(--anac-warning);
+            padding: 20px;
+            margin-top: 24px;
+            border-radius: 6px;
+            border: 1px solid #FCD34D;
+        }
+        
+        .recommendations h3 {
+            color: #92400E;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .recommendations ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .recommendations li {
+            padding: 10px 0;
+            color: #78350F;
+            border-bottom: 1px solid #FDE68A;
+            font-size: 14px;
+        }
+        
+        .recommendations li:last-child {
+            border-bottom: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--anac-gray-600);
+            font-size: 16px;
+        }
+        
+        .error {
+            background: #FEE2E2;
+            border-left: 4px solid var(--anac-error);
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 6px;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+            font-size: 14px;
+        }
+        
+        .success {
+            background: #D1FAE5;
+            border-left: 4px solid var(--anac-success);
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 6px;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+            font-size: 14px;
+        }
+        
+        .action-items {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .action-items ul {
+            list-style: disc;
+            padding-left: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .airport-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        /* Airport List Items */
+        .airport-item {
+            padding: 16px 20px;
+            border: 1px solid var(--anac-gray-200);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: var(--white);
+        }
+        
+        .airport-item:hover {
+            background: var(--anac-bg-light);
+            border-color: var(--anac-primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .airport-item.selected {
+            background: var(--anac-bg-light);
+            border-color: var(--anac-primary);
+            border-width: 2px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Info Boxes */
+        .info-box {
+            background: var(--anac-bg-light);
+            border-left: 4px solid var(--anac-primary);
+            padding: 20px;
+            margin: 24px 0;
+            border-radius: 6px;
+            border: 1px solid #B3D9FF;
+        }
+        
+        .info-box h4 {
+            color: var(--anac-primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .info-box p {
+            color: var(--anac-gray-700);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        /* Toast Notification System - Professional Style */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 420px;
+        }
+        
+        .toast {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            animation: slideIn 0.3s ease-out;
+            min-width: 320px;
+            border: 1px solid var(--anac-gray-200);
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--anac-success);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--anac-error);
+        }
+        
+        .toast.warning {
+            border-left: 4px solid var(--anac-warning);
+        }
+        
+        .toast.info {
+            border-left: 4px solid var(--anac-info);
+        }
+        
+        .toast-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-message {
+            font-weight: 600;
+            color: var(--anac-gray-900);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--anac-gray-600);
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: color 0.2s ease;
+        }
+        
+        .toast-close:hover {
+            color: var(--anac-gray-900);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Filter and Search Styles - Professional */
+        .filters-container {
+            background: var(--white);
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--anac-gray-200);
+        }
+        
+        .filters-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 16px;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--anac-gray-700);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .search-input {
+            padding: 10px 14px;
+            border: 1px solid var(--anac-gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: var(--white);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--anac-primary);
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+            border-color: #667eea;
+        }
+        
+        .filter-select {
+            padding: 10px 14px;
+            border: 1px solid var(--anac-gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--anac-gray-900);
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--anac-primary);
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+        
+        .filter-select:hover {
+            border-color: var(--anac-gray-600);
+        }
+        
+        .clear-filters-btn {
+            padding: 10px 20px;
+            background: var(--anac-gray-100);
+            border: 1px solid var(--anac-gray-300);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--anac-gray-700);
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .clear-filters-btn:hover {
+            background: var(--anac-gray-200);
+            border-color: var(--anac-gray-600);
+            color: var(--anac-gray-900);
+        }
+        
+        /* Form Validation Styles */
+        .form-group.error input,
+        .form-group.error select {
+            border-color: var(--anac-error);
+        }
+        
+        .form-group.error label {
+            color: var(--anac-error);
+        }
+        
+        .form-group.error .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+        
+        .form-group.success input,
+        .form-group.success select {
+            border-color: #10b981;
+        }
+        
+        /* Loading States */
+        .btn-loading {
+            position: relative;
+            color: transparent;
+            pointer-events: none;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Accessibility improvements */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        /* Form Sections (Collapsible) - Professional */
+        .form-section {
+            border: 1px solid var(--anac-gray-200);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .form-section-header {
+            background: var(--anac-gray-50);
+            padding: 18px 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--anac-gray-200);
+        }
+        
+        .form-section-header:hover {
+            background: var(--anac-bg-light);
+        }
+        
+        .form-section-header h3 {
+            color: var(--anac-primary);
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .form-section-header:hover {
+            background: #f0f0f0;
+        }
+        
+        .form-section-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-section-toggle {
+            font-size: 18px;
+            color: #666;
+            transition: transform 0.3s;
+        }
+        
+        .form-section.collapsed .form-section-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .form-section-content {
+            padding: 20px;
+            display: block;
+        }
+        
+        .form-section.collapsed .form-section-content {
+            display: none;
+        }
+        
+        /* Progress Bar for Action Items */
+        .action-items-progress {
+            margin: 15px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        /* Progress Bar - Professional Style */
+        .progress-bar-container {
+            width: 100%;
+            height: 28px;
+            background: var(--anac-gray-200);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 10px;
+            position: relative;
+            border: 1px solid var(--anac-gray-300);
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--anac-success) 0%, #047857 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .progress-bar-text {
+            font-size: 13px;
+            color: var(--anac-gray-700);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        /* Sort Controls - Professional */
+        .sort-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--white);
+            border-radius: 8px;
+            border: 1px solid var(--anac-gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .sort-controls label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--anac-gray-700);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0;
+        }
+        
+        .sort-select {
+            padding: 9px 14px;
+            border: 1px solid var(--anac-gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--anac-gray-900);
+        }
+        
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--anac-primary);
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+        
+        /* Autocomplete */
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .autocomplete-suggestions.show {
+            display: block;
+        }
+        
+        .autocomplete-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background: #f0f0ff;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                width: 100%;
+            }
+            
+            .summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .compliance-item {
+                padding: 15px;
+            }
+            
+            .toast-container {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+            
+            .toast {
+                min-width: auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .sort-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+        
+        /* Tour Guide Styles - ANAC Professional Design */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 41, 59, 0.75);
+            z-index: 9998;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        
+        .tour-overlay.active {
+            display: block;
+        }
+        
+        .tour-highlight {
+            position: relative;
+            z-index: 9999;
+            box-shadow: 0 0 0 4px var(--anac-primary), 
+                        0 0 0 8px rgba(0, 51, 102, 0.2),
+                        0 0 30px rgba(0, 51, 102, 0.4);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+        
+        .tour-popup {
+            position: fixed;
+            background: var(--white);
+            border-radius: 8px;
+            padding: 28px;
+            box-shadow: var(--shadow-lg), 0 20px 60px rgba(0, 51, 102, 0.3);
+            z-index: 10000;
+            max-width: 420px;
+            display: none;
+            border: 1px solid var(--anac-gray-200);
+            border-top: 4px solid var(--anac-primary);
+        }
+        
+        .tour-popup.active {
+            display: block;
+            animation: tourFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes tourFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .tour-popup h3 {
+            margin: 0 0 14px 0;
+            color: var(--anac-primary);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        
+        .tour-popup p {
+            margin: 0 0 24px 0;
+            color: var(--anac-gray-700);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .tour-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .tour-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .tour-btn-primary {
+            background: var(--anac-primary);
+            color: var(--white);
+        }
+        
+        .tour-btn-primary:hover {
+            background: var(--anac-primary-dark);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        
+        .tour-btn-secondary {
+            background: var(--anac-gray-100);
+            color: var(--anac-gray-700);
+            border: 1px solid var(--anac-gray-300);
+        }
+        
+        .tour-btn-secondary:hover {
+            background: var(--anac-gray-200);
+            border-color: var(--anac-gray-600);
+            color: var(--anac-gray-900);
+        }
+        
+        /* Batch Edit Mode - ANAC Professional */
+        .batch-edit-mode {
+            background: #FEF3C7;
+            border-left: 4px solid var(--anac-warning);
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            border: 1px solid #FCD34D;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .batch-edit-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .batch-edit-controls strong {
+            color: #92400E;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: auto;
+        }
+        
+        .batch-select-all {
+            padding: 10px 20px;
+            background: var(--anac-primary);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+        
+        .batch-select-all:hover {
+            background: var(--anac-primary-dark);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .batch-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .batch-action-btn {
+            padding: 9px 18px;
+            background: var(--white);
+            border: 1px solid var(--anac-primary);
+            color: var(--anac-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+        
+        .batch-action-btn:hover {
+            background: var(--anac-primary);
+            color: var(--white);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+        
+        .compliance-item.batch-selected {
+            border: 2px solid var(--anac-primary);
+            background: var(--anac-bg-light);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .batch-checkbox {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--anac-primary);
+        }
+        
+        /* Export Button */
+        /* Export Button - ANAC Professional */
+        .export-btn {
+            padding: 10px 20px;
+            background: var(--anac-success);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+        
+        .export-btn:hover {
+            background: #047857;
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+        
+        /* History/Changes Log - ANAC Professional */
+        .changes-log {
+            background: var(--anac-gray-50);
+            border-left: 4px solid var(--anac-primary);
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--anac-gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .changes-log h4 {
+            margin: 0 0 14px 0;
+            color: var(--anac-primary);
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .change-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--anac-gray-200);
+            font-size: 13px;
+            color: var(--anac-gray-700);
+        }
+        
+        .change-item:last-child {
+            border-bottom: none;
+        }
+        
+        .change-item strong {
+            color: var(--anac-gray-900);
+            font-weight: 600;
+        }
+        
+        .change-time {
+            color: var(--anac-gray-600);
+            font-size: 11px;
+            margin-top: 6px;
+            font-style: italic;
+        }
+        
+        /* Auto-save indicator - ANAC Professional */
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--anac-success);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+            z-index: 9999;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #047857;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .auto-save-indicator.show {
+            display: block;
+            animation: fadeInOut 2s ease-in-out;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { 
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            20%, 80% { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container" role="region" aria-live="polite" aria-atomic="true"></div>
+    
+    <!-- Tour Overlay -->
+    <div id="tourOverlay" class="tour-overlay"></div>
+    <div id="tourPopup" class="tour-popup">
+        <h3 id="tourTitle">Bem-vindo!</h3>
+        <p id="tourDescription">Vamos começar o tour guiado do sistema.</p>
+        <div class="tour-buttons">
+            <button class="tour-btn tour-btn-secondary" onclick="skipTour()">Pular</button>
+            <button class="tour-btn tour-btn-primary" onclick="nextTourStep()">Próximo</button>
+        </div>
+    </div>
+    
+    <!-- Auto-save Indicator -->
+    <div id="autoSaveIndicator" class="auto-save-indicator">💾 Rascunho salvo</div>
+    
+    <div class="container">
+        <header>
+            <h1>✈️ Sistema de Conformidade ANAC</h1>
+            <p class="subtitle">Sistema de gestão de conformidade para aeroportos brasileiros - Informe os dados do seu aeroporto para verificar a conformidade</p>
+        </header>
+        
+        <nav class="tabs" role="tablist" aria-label="Navegação principal">
+            <button class="tab active" onclick="switchTab('manage')" role="tab" aria-selected="true" aria-controls="manageTab" id="manageTabBtn">Gerenciar Aeroportos</button>
+            <button class="tab" onclick="switchTab('compliance')" role="tab" aria-selected="false" aria-controls="complianceTab" id="complianceTabBtn">Verificar Conformidade</button>
+        </nav>
+        
+        <!-- Manage Airports Tab -->
+        <div id="manageTab" class="tab-content active">
+        <div class="main-content">
+            <div class="card">
+                    <h2 id="formTitle">Cadastrar Novo Aeroporto</h2>
+                <form id="airportForm">
+                        <input type="hidden" id="airportId" value="">
+                        
+                        <div class="form-group">
+                            <label for="name">Nome do Aeroporto <span aria-label="obrigatório">*</span></label>
+                            <input type="text" id="name" required 
+                                   aria-required="true" 
+                                   aria-describedby="name-help"
+                                   onblur="validateField('name', this.value)">
+                            <div class="help-text" id="name-help">Nome completo do aeroporto (ex: Aeroporto Internacional de São Paulo - Guarulhos)</div>
+                            <span class="error-message" id="name-error" style="display: none;"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="code">Código ICAO <span aria-label="obrigatório">*</span></label>
+                            <input type="text" id="code" maxlength="4" required 
+                                   style="text-transform: uppercase;"
+                                   aria-required="true"
+                                   aria-describedby="code-help"
+                                   pattern="[A-Z]{4}"
+                                   onblur="validateField('code', this.value)"
+                                   oninput="this.value = this.value.toUpperCase()">
+                            <div class="help-text" id="code-help">Código ICAO de 4 letras (ex: SBGR, SBCF)</div>
+                            <span class="error-message" id="code-error" style="display: none;"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="size">Tamanho do Aeroporto *</label>
+                            <select id="size" required>
+                                <option value="">Selecione...</option>
+                                <option value="small">Pequeno (até 200.000 passageiros/ano)</option>
+                                <option value="medium">Médio (200.000 a 1.000.000 passageiros/ano)</option>
+                                <option value="large">Grande (1.000.000 a 10.000.000 passageiros/ano)</option>
+                                <option value="international">Internacional (acima de 10.000.000 passageiros/ano)</option>
+                            </select>
+                            <div class="help-text">O tamanho determina quais normas ANAC se aplicam ao seu aeroporto</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="airport_type">Tipo de Aeroporto *</label>
+                            <select id="airport_type" required>
+                                <option value="">Selecione...</option>
+                                <option value="commercial">Comercial</option>
+                                <option value="general_aviation">Aviação Geral</option>
+                                <option value="military">Militar</option>
+                                <option value="mixed">Misto</option>
+                            </select>
+                            <div class="help-text">Tipo de operação principal do aeroporto</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="annual_passengers">Passageiros Anuais</label>
+                            <input type="number" id="annual_passengers" min="0">
+                            <div class="help-text">Número total de passageiros por ano. Algumas normas dependem deste número.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="number_of_runways">Número de Pistas *</label>
+                            <input type="number" id="number_of_runways" min="1" value="1" required>
+                            <div class="help-text">Número de pistas de pouso e decolagem</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="max_aircraft_weight">Peso Máximo de Aeronaves (toneladas)</label>
+                            <input type="number" id="max_aircraft_weight" min="0">
+                            <div class="help-text">Peso máximo de decolagem (MTOW) da maior aeronave que opera regularmente</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="has_international_operations">
+                                <label for="has_international_operations" style="margin: 0;">Operações Internacionais</label>
+                            </div>
+                            <div class="help-text">Selecione se o aeroporto recebe voos internacionais. Requer normas adicionais de segurança e alfândega.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="has_cargo_operations">
+                                <label for="has_cargo_operations" style="margin: 0;">Operações de Carga</label>
+                            </div>
+                            <div class="help-text">Selecione se o aeroporto realiza operações de carga. Requer infraestrutura específica.</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="has_maintenance_facility">
+                                <label for="has_maintenance_facility" style="margin: 0;">Facilidades de Manutenção Aeronáutica</label>
+                            </div>
+                            <div class="help-text">Selecione se o aeroporto possui hangares e facilidades para manutenção de aeronaves.</div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button type="submit" id="submitBtn" aria-label="Salvar aeroporto">
+                        <span id="submitBtnText">Salvar Aeroporto</span>
+                    </button>
+                            <button type="button" class="secondary" onclick="resetForm()" id="cancelBtn" style="display: none;">Cancelar</button>
+                        </div>
+                    </form>
+                    
+                    <div id="formMessage"></div>
+                </div>
+                
+                <div class="card">
+                    <h2>Aeroportos Cadastrados</h2>
+                    <div class="info-box">
+                        <h4>ℹ️ Como usar</h4>
+                        <p>Cadastre seu aeroporto informando todas as características acima. O sistema usará essas informações para determinar quais normas ANAC se aplicam e gerar um plano de ação personalizado.</p>
+                    </div>
+                    <div id="airportList" class="airport-list">
+                        <div class="loading">Carregando aeroportos...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Compliance Check Tab -->
+        <div id="complianceTab" class="tab-content">
+            <div class="main-content">
+                <div class="card">
+                    <h2>Selecionar Aeroporto</h2>
+                    <form id="complianceForm">
+                    <div class="form-group">
+                        <label for="airportSelect">Aeroporto:</label>
+                        <select id="airportSelect">
+                            <option value="">Carregando...</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="checkComplianceBtn" aria-label="Verificar conformidade do aeroporto selecionado">
+                        <span id="checkComplianceBtnText">Verificar Conformidade</span>
+                    </button>
+                </form>
+                
+                <div id="airportInfo" style="margin-top: 20px; display: none;">
+                    <h3 style="margin-bottom: 10px; color: #333;">Informações do Aeroporto</h3>
+                    <div id="airportDetails" style="font-size: 14px; color: #666;"></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Status de Conformidade</h2>
+                <div id="complianceContent">
+                    <div class="loading">Selecione um aeroporto para verificar a conformidade</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let currentEditingId = null;
+        
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tabName === 'manage') {
+                const manageTabBtn = document.getElementById('manageTabBtn');
+                const manageTab = document.getElementById('manageTab');
+                if (manageTabBtn) {
+                    manageTabBtn.classList.add('active');
+                    manageTabBtn.setAttribute('aria-selected', 'true');
+                }
+                if (manageTab) {
+                    manageTab.classList.add('active');
+                }
+                loadAirports();
+            } else {
+                const complianceTabBtn = document.getElementById('complianceTabBtn');
+                const complianceTab = document.getElementById('complianceTab');
+                if (complianceTabBtn) {
+                    complianceTabBtn.classList.add('active');
+                    complianceTabBtn.setAttribute('aria-selected', 'true');
+                }
+                if (complianceTab) {
+                    complianceTab.classList.add('active');
+                }
+                loadAirportsForCompliance();
+            }
+        }
+        
+        // Load airports for management
+        async function loadAirports() {
+            try {
+                const response = await fetch(`${API_BASE}/airports`);
+                const airports = await response.json();
+                
+                const listDiv = document.getElementById('airportList');
+                
+                if (airports.length === 0) {
+                    listDiv.innerHTML = '<div class="loading">Nenhum aeroporto cadastrado. Use o formulário ao lado para cadastrar.</div>';
+                    return;
+                }
+                
+                listDiv.innerHTML = airports.map(airport => `
+                    <div class="airport-item" onclick="selectAirport(${airport.id})">
+                        <strong>${airport.name}</strong> (${airport.code})<br>
+                        <small style="color: #666;">${getSizeLabel(airport.size)} • ${getTypeLabel(airport.airport_type)}</small>
+                        <div style="margin-top: 10px; display: flex; gap: 5px;">
+                            <button onclick="event.stopPropagation(); editAirport(${airport.id})" style="padding: 5px 10px; font-size: 12px; width: auto;">Editar</button>
+                            <button onclick="event.stopPropagation(); deleteAirport(${airport.id})" class="danger" style="padding: 5px 10px; font-size: 12px; width: auto;">Excluir</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading airports:', error);
+                document.getElementById('airportList').innerHTML = 
+                    '<div class="error">Erro ao carregar aeroportos</div>';
+            }
+        }
+        
+        // Load airports for compliance check
+        async function loadAirportsForCompliance() {
+            try {
+                const response = await fetch(`${API_BASE}/airports`);
+                const airports = await response.json();
+                
+                const select = document.getElementById('airportSelect');
+                select.innerHTML = '<option value="">Selecione um aeroporto...</option>';
+                
+                airports.forEach(airport => {
+                    const option = document.createElement('option');
+                    option.value = airport.id;
+                    option.textContent = `${airport.name} (${airport.code})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading airports:', error);
+                document.getElementById('airportSelect').innerHTML = 
+                    '<option value="">Erro ao carregar aeroportos</option>';
+            }
+        }
+        
+        // Form submission
+        document.getElementById('airportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('name').value,
+                code: document.getElementById('code').value.toUpperCase(),
+                size: document.getElementById('size').value,
+                airport_type: document.getElementById('airport_type').value,
+                annual_passengers: document.getElementById('annual_passengers').value ? parseInt(document.getElementById('annual_passengers').value) : null,
+                number_of_runways: parseInt(document.getElementById('number_of_runways').value),
+                max_aircraft_weight: document.getElementById('max_aircraft_weight').value ? parseInt(document.getElementById('max_aircraft_weight').value) : null,
+                has_international_operations: document.getElementById('has_international_operations').checked,
+                has_cargo_operations: document.getElementById('has_cargo_operations').checked,
+                has_maintenance_facility: document.getElementById('has_maintenance_facility').checked
+            };
+            
+            // Validate all required fields
+            const nameValid = validateField('name', document.getElementById('name').value);
+            const codeValid = validateField('code', document.getElementById('code').value);
+            
+            if (!nameValid || !codeValid) {
+                showToast('Por favor, corrija os erros no formulário', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const originalText = submitBtnText.textContent;
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.classList.add('btn-loading');
+            submitBtnText.textContent = 'Salvando...';
+            
+            try {
+                let response;
+                if (currentEditingId) {
+                    response = await fetch(`${API_BASE}/airports/${currentEditingId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    response = await fetch(`${API_BASE}/airports`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                }
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Erro ao salvar aeroporto');
+                }
+                
+                const airport = await response.json();
+                showToast('Aeroporto salvo com sucesso!', 'success');
+                resetForm();
+                loadAirports();
+            } catch (error) {
+                showToast(`Erro: ${error.message}`, 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-loading');
+                submitBtnText.textContent = originalText;
+            }
+        });
+        
+        // Select airport (for viewing/editing)
+        function selectAirport(id) {
+            editAirport(id);
+        }
+        
+        // Edit airport
+        async function editAirport(id) {
+            try {
+                const response = await fetch(`${API_BASE}/airports/${id}`);
+                const airport = await response.json();
+                
+                currentEditingId = airport.id;
+                document.getElementById('airportId').value = airport.id;
+                document.getElementById('name').value = airport.name;
+                document.getElementById('code').value = airport.code;
+                document.getElementById('size').value = airport.size;
+                document.getElementById('airport_type').value = airport.airport_type;
+                document.getElementById('annual_passengers').value = airport.annual_passengers || '';
+                document.getElementById('number_of_runways').value = airport.number_of_runways;
+                document.getElementById('max_aircraft_weight').value = airport.max_aircraft_weight || '';
+                document.getElementById('has_international_operations').checked = airport.has_international_operations;
+                document.getElementById('has_cargo_operations').checked = airport.has_cargo_operations;
+                document.getElementById('has_maintenance_facility').checked = airport.has_maintenance_facility;
+                
+                document.getElementById('formTitle').textContent = 'Editar Aeroporto';
+                document.getElementById('submitBtn').textContent = 'Atualizar Aeroporto';
+                document.getElementById('cancelBtn').style.display = 'block';
+                
+                document.getElementById('airportForm').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                showMessage(`Erro ao carregar aeroporto: ${error.message}`, 'error');
+            }
+        }
+        
+        // Delete airport
+        async function deleteAirport(id) {
+            // Use a more accessible confirmation
+            const confirmed = confirm('Tem certeza que deseja excluir este aeroporto?');
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/airports/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Erro ao excluir aeroporto');
+                
+                showMessage('Aeroporto excluído com sucesso!', 'success');
+                loadAirports();
+            } catch (error) {
+                showMessage(`Erro: ${error.message}`, 'error');
+            }
+        }
+        
+        // Reset form
+        function resetForm() {
+            document.getElementById('airportForm').reset();
+            currentEditingId = null;
+            document.getElementById('airportId').value = '';
+            document.getElementById('formTitle').textContent = 'Cadastrar Novo Aeroporto';
+            document.getElementById('submitBtn').textContent = 'Salvar Aeroporto';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('formMessage').innerHTML = '';
+        }
+        
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <span class="toast-icon" aria-hidden="true">${icons[type] || icons.info}</span>
+                <div class="toast-content">
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="this.parentElement.remove()" aria-label="Fechar notificação">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto-remove after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, duration);
+            }
+        }
+        
+        // Show message (legacy support - now uses toast)
+        function showMessage(message, type) {
+            showToast(message, type === 'error' ? 'error' : type === 'success' ? 'success' : 'info');
+        }
+        
+        // Form validation
+        function validateField(fieldId, value) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            const formGroup = field.closest('.form-group');
+            
+            if (!field || !errorElement || !formGroup) return;
+            
+            let isValid = true;
+            let errorMessage = '';
+            
+            switch(fieldId) {
+                case 'name':
+                    if (!value || value.trim().length < 3) {
+                        isValid = false;
+                        errorMessage = 'Nome deve ter pelo menos 3 caracteres';
+                    }
+                    break;
+                case 'code':
+                    if (!value || value.length !== 4) {
+                        isValid = false;
+                        errorMessage = 'Código ICAO deve ter exatamente 4 letras';
+                    } else if (!/^[A-Z]{4}$/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Código ICAO deve conter apenas letras maiúsculas';
+                    }
+                    break;
+            }
+            
+            if (isValid) {
+                formGroup.classList.remove('error');
+                formGroup.classList.add('success');
+                errorElement.style.display = 'none';
+                field.setAttribute('aria-invalid', 'false');
+            } else {
+                formGroup.classList.remove('success');
+                formGroup.classList.add('error');
+                errorElement.textContent = errorMessage;
+                errorElement.style.display = 'block';
+                field.setAttribute('aria-invalid', 'true');
+                field.setAttribute('aria-describedby', `${fieldId}-help ${fieldId}-error`);
+            }
+            
+            return isValid;
+        }
+        
+        // Toggle form section
+        function toggleSection(header) {
+            const section = header.closest('.form-section');
+            section.classList.toggle('collapsed');
+        }
+        
+        // Helper functions
+        function getSizeLabel(size) {
+            const map = {
+                    'small': 'Pequeno',
+                    'medium': 'Médio',
+                    'large': 'Grande',
+                    'international': 'Internacional'
+                };
+            return map[size] || size;
+        }
+                
+        function getTypeLabel(type) {
+            const map = {
+                    'commercial': 'Comercial',
+                    'general_aviation': 'Aviação Geral',
+                    'military': 'Militar',
+                    'mixed': 'Misto'
+                };
+            return map[type] || type;
+        }
+        
+        // Compliance check form
+        document.getElementById('complianceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const airportId = document.getElementById('airportSelect').value;
+            
+            if (!airportId) {
+                showToast('Por favor, selecione um aeroporto', 'warning');
+                return;
+            }
+            
+            await checkCompliance(airportId);
+            await loadAirportInfo(airportId);
+        });
+        
+        // Load airport information
+        async function loadAirportInfo(airportId) {
+            try {
+                const response = await fetch(`${API_BASE}/airports/${airportId}`);
+                const airport = await response.json();
+                
+                const infoDiv = document.getElementById('airportInfo');
+                const detailsDiv = document.getElementById('airportDetails');
+                
+                detailsDiv.innerHTML = `
+                    <p><strong>Tamanho:</strong> ${getSizeLabel(airport.size)}</p>
+                    <p><strong>Tipo:</strong> ${getTypeLabel(airport.airport_type)}</p>
+                    ${airport.annual_passengers ? `<p><strong>Passageiros/ano:</strong> ${airport.annual_passengers.toLocaleString('pt-BR')}</p>` : ''}
+                    <p><strong>Operações Internacionais:</strong> ${airport.has_international_operations ? 'Sim' : 'Não'}</p>
+                    <p><strong>Operações de Carga:</strong> ${airport.has_cargo_operations ? 'Sim' : 'Não'}</p>
+                    <p><strong>Pistas:</strong> ${airport.number_of_runways}</p>
+                `;
+                
+                infoDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading airport info:', error);
+            }
+        }
+        
+        // Check compliance
+        async function checkCompliance(airportId) {
+            const contentDiv = document.getElementById('complianceContent');
+            const checkBtn = document.getElementById('checkComplianceBtn');
+            const checkBtnText = document.getElementById('checkComplianceBtnText');
+            
+            contentDiv.innerHTML = '<div class="loading">Verificando conformidade...</div>';
+            
+            // Show loading state on button
+            if (checkBtn && checkBtnText) {
+                checkBtn.disabled = true;
+                checkBtn.classList.add('btn-loading');
+                const originalText = checkBtnText.textContent;
+                checkBtnText.textContent = 'Verificando...';
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/compliance/check`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ airport_id: parseInt(airportId) })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao verificar conformidade');
+                }
+                
+                const data = await response.json();
+                displayCompliance(data);
+                showToast(`Conformidade verificada: ${data.total_regulations} normas aplicáveis`, 'success', 3000);
+            } catch (error) {
+                contentDiv.innerHTML = `
+                    <div class="error" role="alert">
+                        <strong>Erro:</strong> ${error.message}
+                        <br>Certifique-se de que o servidor está rodando em http://localhost:8000
+                    </div>
+                `;
+                showToast('Erro ao verificar conformidade', 'error');
+            } finally {
+                // Reset button state
+                if (checkBtn && checkBtnText) {
+                    checkBtn.disabled = false;
+                    checkBtn.classList.remove('btn-loading');
+                    checkBtnText.textContent = 'Verificar Conformidade';
+                }
+            }
+        }
+        
+        // Display compliance results
+        function displayCompliance(data) {
+            const contentDiv = document.getElementById('complianceContent');
+            
+            let html = `
+                <div class="summary">
+                    <div class="summary-item">
+                        <div class="number">${data.total_regulations}</div>
+                        <div class="label">Normas Aplicáveis</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="number" style="color: #10b981;">${data.compliant_count}</div>
+                        <div class="label">Conformes</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="number" style="color: #ef4444;">${data.non_compliant_count}</div>
+                        <div class="label">Não Conformes</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="number" style="color: #f59e0b;">${data.partial_count}</div>
+                        <div class="label">Parciais</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="number" style="color: #6b7280;">${data.pending_count}</div>
+                        <div class="label">Pendentes</div>
+                    </div>
+                </div>
+            `;
+            
+            // Display ANAC scores if available
+            if (data.anac_scores) {
+                const scores = data.anac_scores;
+                const essentialColor = scores.essential_compliant ? '#10b981' : '#ef4444';
+                html += `
+                    <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 15px; color: #333;">📊 Pontuação ANAC</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                            <div style="padding: 15px; background: ${essentialColor}15; border-radius: 6px; border-left: 4px solid ${essentialColor};">
+                                <div style="font-size: 24px; font-weight: bold; color: ${essentialColor};">
+                                    ${scores.essential_percentage}%
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                    Requisitos Essenciais (D)
+                                </div>
+                                <div style="font-size: 11px; color: #999; margin-top: 3px;">
+                                    ${scores.essential_compliant ? '✓ ACOP elegível (≥85%)' : '⚠️ Abaixo do mínimo (85%)'}
+                                </div>
+                            </div>
+                            <div style="padding: 15px; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                                <div style="font-size: 24px; font-weight: bold; color: #3b82f6;">
+                                    ${scores.complementary_percentage}%
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                    Complementares (C)
+                                </div>
+                            </div>
+                            <div style="padding: 15px; background: #fef3c7; border-radius: 6px; border-left: 4px solid #f59e0b;">
+                                <div style="font-size: 24px; font-weight: bold; color: #f59e0b;">
+                                    ${scores.recommended_percentage}%
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                    Recomendadas (B)
+                                </div>
+                            </div>
+                            <div style="padding: 15px; background: #f3e8ff; border-radius: 6px; border-left: 4px solid #8b5cf6;">
+                                <div style="font-size: 24px; font-weight: bold; color: #8b5cf6;">
+                                    ${scores.best_practices_percentage}%
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                    Melhores Práticas (A)
+                                </div>
+                            </div>
+                            <div style="padding: 15px; background: #ecfdf5; border-radius: 6px; border-left: 4px solid #10b981;">
+                                <div style="font-size: 24px; font-weight: bold; color: #10b981;">
+                                    ${scores.overall_score}%
+                                </div>
+                                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                    Pontuação Geral
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px; font-size: 12px; color: #666;">
+                            <strong>Legenda:</strong> D = Essenciais (85% mínimo para ACOP) | C = Complementares | B = Recomendadas | A = Melhores Práticas
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Generate and show action plan
+            html += generateActionPlan(data);
+            
+            // Show reminders for expiring/expired items
+            const reminders = generateReminders(data);
+            if (reminders) {
+                html += reminders;
+            }
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                html += `
+                    <div class="recommendations" style="margin-top: 20px;">
+                        <h3>💡 Recomendações Gerais</h3>
+                        <ul>
+                            ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">';
+            html += '<div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">';
+            html += '<h3>Checklist de Conformidade</h3>';
+            html += `<span style="color: #666; font-size: 14px;">${data.compliance_records.length} norma(s) encontrada(s)</span>`;
+            html += '</div>';
+            html += '<div style="display: flex; gap: 10px; flex-wrap: wrap;">';
+            html += '<button onclick="toggleBatchEdit()" id="batchEditBtn" style="padding: 10px 20px; background: var(--anac-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s ease;">📝 Edição em Lote</button>';
+            html += '<button onclick="exportReport()" class="export-btn">📥 Exportar Relatório</button>';
+            html += '</div>';
+            html += '</div>';
+            
+            // Batch edit mode banner
+            html += `
+                <div id="batchEditBanner" class="batch-edit-mode" style="display: none;">
+                    <div class="batch-edit-controls">
+                        <strong>Modo de Edição em Lote</strong>
+                        <button onclick="selectAllForBatch()" class="batch-select-all">Selecionar Todas</button>
+                        <div class="batch-actions">
+                            <button onclick="batchUpdateStatus('compliant')" class="batch-action-btn">Marcar como Conforme</button>
+                            <button onclick="batchUpdateStatus('partial')" class="batch-action-btn">Marcar como Parcial</button>
+                            <button onclick="batchUpdateStatus('non_compliant')" class="batch-action-btn">Marcar como Não Conforme</button>
+                            <button onclick="batchUpdateStatus('pending_review')" class="batch-action-btn">Marcar como Pendente</button>
+                        </div>
+                        <button onclick="toggleBatchEdit()" style="padding: 10px 20px; background: var(--anac-error); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.2s ease;">Cancelar</button>
+                    </div>
+                    <div id="batchSelectedCount" style="margin-top: 12px; font-size: 13px; color: var(--anac-gray-700); font-weight: 500;">0 norma(s) selecionada(s)</div>
+                </div>
+            `;
+            
+            // Add filters and search
+            html += `
+                <div class="filters-container">
+                    <div class="filters-row">
+                        <div class="filter-group autocomplete-container">
+                            <label for="searchRegulations">Buscar Norma</label>
+                            <input type="text" id="searchRegulations" class="search-input" 
+                                   placeholder="Buscar por código ou título..." 
+                                   aria-label="Buscar normas"
+                                   autocomplete="off">
+                            <div id="autocompleteSuggestions" class="autocomplete-suggestions"></div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterStatus">Status</label>
+                            <select id="filterStatus" class="filter-select" aria-label="Filtrar por status">
+                                <option value="">Todos</option>
+                                <option value="compliant">Conforme</option>
+                                <option value="partial">Parcial</option>
+                                <option value="non_compliant">Não Conforme</option>
+                                <option value="pending_review">Pendente</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterClassification">Classificação</label>
+                            <select id="filterClassification" class="filter-select" aria-label="Filtrar por classificação">
+                                <option value="">Todas</option>
+                                <option value="D">D - Essencial</option>
+                                <option value="C">C - Complementar</option>
+                                <option value="B">B - Recomendada</option>
+                                <option value="A">A - Melhor Prática</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filterCategory">Categoria</label>
+                            <select id="filterCategory" class="filter-select" aria-label="Filtrar por categoria">
+                                <option value="">Todas</option>
+                                <option value="operational_safety">Segurança Operacional</option>
+                                <option value="fire_safety">Segurança contra Incêndio</option>
+                                <option value="security">Segurança</option>
+                                <option value="infrastructure">Infraestrutura</option>
+                                <option value="emergency_response">Resposta a Emergências</option>
+                            </select>
+                        </div>
+                        <button type="button" class="clear-filters-btn" onclick="clearFilters()" aria-label="Limpar filtros">
+                            Limpar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Add sort controls
+            html += `
+                <div class="sort-controls">
+                    <label for="sortBy" style="font-size: 13px; color: #666; white-space: nowrap;">Ordenar por:</label>
+                    <select id="sortBy" class="sort-select" aria-label="Ordenar normas">
+                        <option value="code">Código (A-Z)</option>
+                        <option value="code-desc">Código (Z-A)</option>
+                        <option value="status">Status</option>
+                        <option value="classification">Classificação (D→A)</option>
+                        <option value="category">Categoria</option>
+                    </select>
+                </div>
+            `;
+            
+            html += '<p style="color: #666; margin-bottom: 20px;">Marque cada norma como conforme, parcialmente conforme ou não conforme. O sistema gerará automaticamente um plano de ação baseado nas suas respostas.</p>';
+            
+            // Store original records for filtering
+            window.allComplianceRecords = data.compliance_records;
+            
+            data.compliance_records.forEach((record, index) => {
+                // Safely get status value (handle both string and object formats)
+                let statusValue = 'pending_review';
+                if (typeof record.status === 'string') {
+                    statusValue = record.status;
+                } else if (record.status && record.status.value) {
+                    statusValue = record.status.value;
+                } else if (record.status) {
+                    statusValue = String(record.status);
+                }
+                
+                const statusClass = `status-${String(statusValue).replace('_', '-')}`;
+                const statusText = {
+                    'compliant': 'Conforme',
+                    'non_compliant': 'Não Conforme',
+                    'partial': 'Parcial',
+                    'pending_review': 'Pendente',
+                    'not_applicable': 'Não Aplicável'
+                }[statusValue] || statusValue;
+                
+                // Safely get regulation data
+                const regulation = record.regulation || {};
+                const regulationCode = regulation.code || 'N/A';
+                const regulationTitle = regulation.title || 'Norma não encontrada';
+                
+                // Handle safety_category (can be string or object)
+                let safetyCategory = 'unknown';
+                if (typeof regulation.safety_category === 'string') {
+                    safetyCategory = regulation.safety_category;
+                } else if (regulation.safety_category && regulation.safety_category.value) {
+                    safetyCategory = regulation.safety_category.value;
+                } else if (regulation.safety_category) {
+                    safetyCategory = String(regulation.safety_category);
+                }
+                
+                const categoryDisplay = String(safetyCategory).replace(/_/g, ' ').toUpperCase();
+                const requirements = regulation.requirements || 'Requisitos não disponíveis';
+                
+                // ANAC Classification information
+                let classification = regulation.requirement_classification;
+                if (classification && typeof classification !== 'string') {
+                    classification = classification.value || classification;
+                }
+                const classificationLabels = {
+                    'D': { text: 'Essencial', desc: 'Requisitos essenciais (85% mínimo para ACOP)', color: '#ef4444' },
+                    'C': { text: 'Complementar', desc: 'Requisitos complementares', color: '#3b82f6' },
+                    'B': { text: 'Recomendada', desc: 'Práticas recomendadas', color: '#f59e0b' },
+                    'A': { text: 'Melhor Prática', desc: 'Melhores práticas', color: '#8b5cf6' }
+                };
+                const classInfo = classification ? classificationLabels[classification] : null;
+                
+                // Evaluation type
+                let evalType = regulation.evaluation_type;
+                if (evalType && typeof evalType !== 'string') {
+                    evalType = evalType.value || evalType;
+                }
+                const evalTypeLabels = {
+                    'DOCS': 'Documental (remoto)',
+                    'TOPS': 'Operacional (no local)',
+                    'BOTH': 'Documental e Operacional'
+                };
+                const evalTypeDisplay = evalType ? (evalTypeLabels[evalType] || evalType) : '';
+                
+                // Weight and ANAC reference
+                const weight = regulation.weight || null;
+                const anacRef = regulation.anac_reference || null;
+                
+                // Get action items
+                let actionItems = [];
+                if (record.action_items) {
+                    try {
+                        actionItems = typeof record.action_items === 'string' 
+                            ? JSON.parse(record.action_items) 
+                            : record.action_items;
+                        if (!Array.isArray(actionItems)) {
+                            actionItems = [];
+                        }
+                    } catch (e) {
+                        actionItems = [];
+                    }
+                }
+                
+                // Status selection buttons
+                const recordId = record.id;
+                html += `
+                    <div class="compliance-item" id="record-${recordId}" data-record-id="${recordId}">
+                        <div id="batchCheckbox-${recordId}" class="batch-checkbox" style="display: none; margin-bottom: 10px;">
+                            <input type="checkbox" id="batch-select-${recordId}" onchange="updateBatchSelection()" style="width: auto; margin-right: 8px;">
+                            <label for="batch-select-${recordId}" style="cursor: pointer; font-weight: 500;">Selecionar para edição em lote</label>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px;">
+                                    <span class="status-badge ${statusClass}" id="badge-${recordId}">${statusText}</span>
+                                    ${classInfo ? `<span style="background: ${classInfo.color}20; color: ${classInfo.color}; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid ${classInfo.color}40;" title="${classInfo.desc}">${classification}: ${classInfo.text}</span>` : ''}
+                                    ${weight ? `<span style="background: #e0e0e0; color: #666; padding: 4px 10px; border-radius: 4px; font-size: 11px;" title="Peso do item">Peso: ${weight}</span>` : ''}
+                                    ${evalTypeDisplay ? `<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 4px; font-size: 11px;" title="Tipo de avaliação">${evalTypeDisplay}</span>` : ''}
+                                </div>
+                                <h3 style="margin-top: 5px;">${regulationCode}: ${regulationTitle}</h3>
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: #666;">
+                                    <span><strong>Categoria:</strong> ${categoryDisplay}</span>
+                                    ${anacRef ? `<span><strong>Ref. ANAC:</strong> ${anacRef}</span>` : ''}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; flex-direction: column; align-items: end;">
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px;">
+                                    <input type="radio" name="status-${recordId}" value="compliant" ${statusValue === 'compliant' ? 'checked' : ''} 
+                                           onchange="updateComplianceStatus(${recordId}, 'compliant')">
+                                    <span>Conforme</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px;">
+                                    <input type="radio" name="status-${recordId}" value="partial" ${statusValue === 'partial' ? 'checked' : ''} 
+                                           onchange="updateComplianceStatus(${recordId}, 'partial')">
+                                    <span>Parcial</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px;">
+                                    <input type="radio" name="status-${recordId}" value="non_compliant" ${statusValue === 'non_compliant' ? 'checked' : ''} 
+                                           onchange="updateComplianceStatus(${recordId}, 'non_compliant')">
+                                    <span>Não Conforme</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px;">
+                                    <input type="radio" name="status-${recordId}" value="pending_review" ${statusValue === 'pending_review' ? 'checked' : ''} 
+                                           onchange="updateComplianceStatus(${recordId}, 'pending_review')">
+                                    <span>Pendente</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                            <strong style="color: #333;">O que seu aeroporto precisa ter/fazer:</strong>
+                            <p style="margin-top: 8px; color: #555;">${requirements}</p>
+                        </div>
+                        
+                        ${actionItems.length > 0 ? `
+                                <div class="action-items">
+                                <strong style="color: #333;">Plano de Ação (${actionItems.length} itens):</strong>
+                                <p style="color: #666; font-size: 12px; margin-top: 5px;">Marque os itens conforme você os completa. O status será atualizado automaticamente.</p>
+                                
+                                <!-- Progress Bar -->
+                                ${(() => {
+                                    const completedItems = record.completed_action_items || [];
+                                    const completedCount = Array.isArray(completedItems) ? completedItems.length : 0;
+                                    const totalCount = actionItems.length;
+                                    const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                                    return `
+                                        <div class="action-items-progress">
+                                            <div class="progress-bar-text">
+                                                Progresso: ${completedCount} de ${totalCount} itens completos (${percentage}%)
+                                            </div>
+                                            <div class="progress-bar-container">
+                                                <div class="progress-bar-fill" style="width: ${percentage}%">
+                                                    ${percentage > 10 ? percentage + '%' : ''}
+                                                </div>
+                                            </div>
+                                </div>
+                            `;
+                                })()}
+                                
+                                <ul style="margin-top: 10px;">
+                                    ${actionItems.map((item, idx) => {
+                                        const completedItems = record.completed_action_items || [];
+                                        const isChecked = Array.isArray(completedItems) && completedItems.includes(idx);
+                                        const dueDates = record.action_item_due_dates || {};
+                                        const dueDate = dueDates[idx] || null;
+                                        
+                                        // Only show as crossed out if status is compliant AND item is checked
+                                        const isCompliantStatus = statusValue === 'compliant';
+                                        const shouldStrikeThrough = isChecked && isCompliantStatus && !dateStatus.includes('EXPIRADO');
+                                        
+                                        // Check if expired or expiring soon
+                                        let dateStatus = '';
+                                        let dateClass = '';
+                                        if (dueDate) {
+                                            const today = new Date();
+                                            today.setHours(0, 0, 0, 0);
+                                            const due = new Date(dueDate);
+                                            due.setHours(0, 0, 0, 0);
+                                            const daysDiff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+                                            
+                                            if (daysDiff < 0) {
+                                                dateStatus = `⚠️ EXPIRADO há ${Math.abs(daysDiff)} dia(s)`;
+                                                dateClass = 'expired';
+                                            } else if (daysDiff <= 7) {
+                                                dateStatus = `⚠️ Expira em ${daysDiff} dia(s)`;
+                                                dateClass = 'expiring-soon';
+                                            } else if (daysDiff <= 30) {
+                                                dateStatus = `⏰ Expira em ${daysDiff} dia(s)`;
+                                                dateClass = 'expiring-month';
+                                            } else {
+                                                dateStatus = `✓ Válido até ${new Date(dueDate).toLocaleDateString('pt-BR')}`;
+                                                dateClass = 'valid';
+                                            }
+                                        }
+                                        
+                                        // Determine background color based on status and checked state
+                                        let bgColor = '#f8f9fa';
+                                        let borderColor = '#e0e0e0';
+                                        if (dateStatus.includes('EXPIRADO')) {
+                                            bgColor = '#f8d7da';
+                                            borderColor = '#ef4444';
+                                        } else if (shouldStrikeThrough) {
+                                            bgColor = '#d4edda';
+                                            borderColor = '#10b981';
+                                        } else if (statusValue === 'non_compliant') {
+                                            bgColor = '#f8d7da';
+                                            borderColor = '#ef4444';
+                                        }
+                                        
+                                        return `
+                                        <li style="margin-bottom: 12px; padding: 12px; background: ${bgColor}; border-radius: 4px; border-left: 3px solid ${borderColor};">
+                                            <div style="display: flex; align-items: start; gap: 8px;">
+                                                <input type="checkbox" id="action-${recordId}-${idx}" 
+                                                       ${isChecked ? 'checked' : ''}
+                                                       onchange="toggleActionItem(${recordId}, ${idx}, ${actionItems.length})"
+                                                       style="width: auto; margin-top: 4px;">
+                                                <div style="flex: 1;">
+                                                    <span style="${shouldStrikeThrough ? 'text-decoration: line-through; color: #666;' : ''}">${item}</span>
+                                                    ${isChecked ? `
+                                                        <div style="margin-top: 8px;">
+                                                            <label style="display: block; font-size: 12px; color: #666; margin-bottom: 4px;">
+                                                                Data de validade/renovação (opcional):
+                                                            </label>
+                                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                                <input type="date" 
+                                                                       id="due-date-${recordId}-${idx}" 
+                                                                       value="${dueDate || ''}"
+                                                                       onchange="saveDueDate(${recordId}, ${idx})"
+                                                                       style="padding: 6px; border: 2px solid #e0e0e0; border-radius: 4px; font-size: 12px;">
+                                                                ${dueDate ? `
+                                                                    <span style="font-size: 11px; padding: 4px 8px; border-radius: 4px; background: ${dateClass === 'expired' ? '#fee' : dateClass === 'expiring-soon' ? '#fff3cd' : dateClass === 'expiring-month' ? '#e3f2fd' : '#d4edda'}; color: ${dateClass === 'expired' ? '#c33' : dateClass === 'expiring-soon' ? '#856404' : dateClass === 'expiring-month' ? '#1976d2' : '#155724'};">
+                                                                        ${dateStatus}
+                                                                    </span>
+                                                                ` : ''}
+                                                            </div>
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            </div>
+                                        </li>
+                                    `;
+                                    }).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="margin-top: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #555;">Notas:</label>
+                            <textarea id="notes-${recordId}" rows="2" style="width: 100%; padding: 8px; border: 2px solid #e0e0e0; border-radius: 4px; font-size: 14px; font-family: inherit;" 
+                                      placeholder="Adicione notas sobre o status de conformidade..."
+                                      onblur="saveNotes(${recordId})">${record.notes || ''}</textarea>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contentDiv.innerHTML = html;
+            
+            // Setup filter event listeners
+            setupFilters();
+        }
+        
+        // Setup filter functionality
+        function setupFilters() {
+            const searchInput = document.getElementById('searchRegulations');
+            const statusFilter = document.getElementById('filterStatus');
+            const classificationFilter = document.getElementById('filterClassification');
+            const categoryFilter = document.getElementById('filterCategory');
+            
+            if (!searchInput || !statusFilter) return;
+            
+            const applyFilters = () => {
+                const searchTerm = (searchInput?.value || '').toLowerCase();
+                const statusValue = statusFilter?.value || '';
+                const classificationValue = classificationFilter?.value || '';
+                const categoryValue = categoryFilter?.value || '';
+                
+                const records = document.querySelectorAll('.compliance-item');
+                let visibleCount = 0;
+                
+                records.forEach(record => {
+                    const recordId = record.id.replace('record-', '');
+                    const recordData = window.allComplianceRecords?.find(r => r.id == recordId);
+                    if (!recordData) {
+                        record.style.display = 'none';
+                        return;
+                    }
+                    
+                    // Get status
+                    const status = typeof recordData.status === 'string' 
+                        ? recordData.status 
+                        : (recordData.status?.value || 'pending_review');
+                    
+                    // Get regulation data
+                    const regulation = recordData.regulation || {};
+                    const code = (regulation.code || '').toLowerCase();
+                    const title = (regulation.title || '').toLowerCase();
+                    const classification = regulation.requirement_classification?.value || regulation.requirement_classification || '';
+                    const category = typeof regulation.safety_category === 'string'
+                        ? regulation.safety_category
+                        : (regulation.safety_category?.value || '');
+                    
+                    // Apply filters
+                    let matches = true;
+                    
+                    if (searchTerm && !code.includes(searchTerm) && !title.includes(searchTerm)) {
+                        matches = false;
+                    }
+                    
+                    if (statusValue && status !== statusValue) {
+                        matches = false;
+                    }
+                    
+                    if (classificationValue && String(classification) !== classificationValue) {
+                        matches = false;
+                    }
+                    
+                    if (categoryValue && category !== categoryValue) {
+                        matches = false;
+                    }
+                    
+                    record.style.display = matches ? 'block' : 'none';
+                    if (matches) visibleCount++;
+                });
+                
+                // Update count
+                const countElement = document.querySelector('h3 + span');
+                if (countElement) {
+                    countElement.textContent = `${visibleCount} norma(s) encontrada(s)`;
+                }
+            };
+            
+            // Autocomplete functionality
+            let autocompleteTimeout;
+            searchInput?.addEventListener('input', (e) => {
+                clearTimeout(autocompleteTimeout);
+                const term = e.target.value.toLowerCase();
+                const suggestionsDiv = document.getElementById('autocompleteSuggestions');
+                
+                if (term.length < 2) {
+                    suggestionsDiv?.classList.remove('show');
+                    applyFilters();
+                    return;
+                }
+                
+                // Debounce autocomplete
+                autocompleteTimeout = setTimeout(() => {
+                    if (!window.allComplianceRecords) return;
+                    
+                    const matches = [];
+                    window.allComplianceRecords.forEach(record => {
+                        const regulation = record.regulation || {};
+                        const code = (regulation.code || '').toLowerCase();
+                        const title = (regulation.title || '').toLowerCase();
+                        
+                        if (code.includes(term) || title.includes(term)) {
+                            matches.push({
+                                code: regulation.code || 'N/A',
+                                title: regulation.title || 'Norma',
+                                recordId: record.id
+                            });
+                        }
+                    });
+                    
+                    if (matches.length > 0 && suggestionsDiv) {
+                        suggestionsDiv.innerHTML = matches.slice(0, 5).map(match => 
+                            `<div class="autocomplete-item" onclick="selectAutocomplete('${match.code}', ${match.recordId})">
+                                <strong>${match.code}</strong>: ${match.title}
+                            </div>`
+                        ).join('');
+                        suggestionsDiv.classList.add('show');
+                    } else {
+                        suggestionsDiv?.classList.remove('show');
+                    }
+                    
+                    applyFilters();
+                }, 300);
+            });
+            
+            // Close autocomplete on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.autocomplete-container')) {
+                    document.getElementById('autocompleteSuggestions')?.classList.remove('show');
+                }
+            });
+            
+            // Sort functionality
+            const sortSelect = document.getElementById('sortBy');
+            sortSelect?.addEventListener('change', () => {
+                const sortValue = sortSelect.value;
+                const records = Array.from(document.querySelectorAll('.compliance-item'));
+                
+                records.sort((a, b) => {
+                    const aId = parseInt(a.id.replace('record-', ''));
+                    const bId = parseInt(b.id.replace('record-', ''));
+                    const aData = window.allComplianceRecords?.find(r => r.id === aId);
+                    const bData = window.allComplianceRecords?.find(r => r.id === bId);
+                    
+                    if (!aData || !bData) return 0;
+                    
+                    const aReg = aData.regulation || {};
+                    const bReg = bData.regulation || {};
+                    
+                    switch(sortValue) {
+                        case 'code':
+                            return (aReg.code || '').localeCompare(bReg.code || '');
+                        case 'code-desc':
+                            return (bReg.code || '').localeCompare(aReg.code || '');
+                        case 'status':
+                            const aStatus = typeof aData.status === 'string' ? aData.status : (aData.status?.value || '');
+                            const bStatus = typeof bData.status === 'string' ? bData.status : (bData.status?.value || '');
+                            return aStatus.localeCompare(bStatus);
+                        case 'classification':
+                            const aClass = aReg.requirement_classification?.value || aReg.requirement_classification || '';
+                            const bClass = bReg.requirement_classification?.value || bReg.requirement_classification || '';
+                            const classOrder = { 'D': 1, 'C': 2, 'B': 3, 'A': 4 };
+                            return (classOrder[aClass] || 99) - (classOrder[bClass] || 99);
+                        case 'category':
+                            const aCat = typeof aReg.safety_category === 'string' ? aReg.safety_category : (aReg.safety_category?.value || '');
+                            const bCat = typeof bReg.safety_category === 'string' ? bReg.safety_category : (bReg.safety_category?.value || '');
+                            return aCat.localeCompare(bCat);
+                        default:
+                            return 0;
+                    }
+                });
+                
+                // Re-append sorted records
+                const container = records[0]?.parentElement;
+                if (container) {
+                    records.forEach(record => container.appendChild(record));
+                }
+            });
+            
+            searchInput?.addEventListener('input', applyFilters);
+            statusFilter?.addEventListener('change', applyFilters);
+            classificationFilter?.addEventListener('change', applyFilters);
+            categoryFilter?.addEventListener('change', applyFilters);
+        }
+        
+        // Select autocomplete suggestion
+        function selectAutocomplete(code, recordId) {
+            const searchInput = document.getElementById('searchRegulations');
+            if (searchInput) {
+                searchInput.value = code;
+                document.getElementById('autocompleteSuggestions')?.classList.remove('show');
+                
+                // Scroll to the record
+                const recordElement = document.getElementById(`record-${recordId}`);
+                if (recordElement) {
+                    recordElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    recordElement.style.background = '#fff3cd';
+                    setTimeout(() => {
+                        recordElement.style.background = '';
+                    }, 2000);
+                }
+                
+                // Trigger filter update
+                const event = new Event('input', { bubbles: true });
+                searchInput.dispatchEvent(event);
+            }
+        }
+        
+        // Clear all filters
+        function clearFilters() {
+            const searchInput = document.getElementById('searchRegulations');
+            const statusFilter = document.getElementById('filterStatus');
+            const classificationFilter = document.getElementById('filterClassification');
+            const categoryFilter = document.getElementById('filterCategory');
+            
+            if (searchInput) searchInput.value = '';
+            if (statusFilter) statusFilter.value = '';
+            if (classificationFilter) classificationFilter.value = '';
+            if (categoryFilter) categoryFilter.value = '';
+            
+            // Show all records
+            const records = document.querySelectorAll('.compliance-item');
+            records.forEach(record => {
+                record.style.display = 'block';
+            });
+            
+            // Update count
+            const countElement = document.querySelector('h3 + span');
+            if (countElement && window.allComplianceRecords) {
+                countElement.textContent = `${window.allComplianceRecords.length} norma(s) encontrada(s)`;
+            }
+            
+            showToast('Filtros limpos', 'info', 2000);
+        }
+        
+        // Update compliance status
+        async function updateComplianceStatus(recordId, status) {
+            try {
+                // If marking as compliant, get all action items and mark them all
+                let completedItems = null;
+                if (status === 'compliant') {
+                    // Get total number of action items
+                    const recordElement = document.getElementById(`record-${recordId}`);
+                    if (recordElement) {
+                        const checkboxes = recordElement.querySelectorAll('input[type="checkbox"]');
+                        completedItems = Array.from({length: checkboxes.length}, (_, i) => i);
+                        // Mark all checkboxes
+                        checkboxes.forEach(cb => cb.checked = true);
+                    }
+                } else if (status === 'non_compliant') {
+                    // If marking as non-compliant, clear all completed items
+                    completedItems = [];
+                    // Uncheck all checkboxes
+                    const recordElement = document.getElementById(`record-${recordId}`);
+                    if (recordElement) {
+                        const checkboxes = recordElement.querySelectorAll('input[type="checkbox"]');
+                        checkboxes.forEach(cb => cb.checked = false);
+                    }
+                }
+                
+                const response = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        status: status,
+                        completed_action_items: completedItems
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
+                    throw new Error(errorData.detail || 'Erro ao atualizar status');
+                }
+                
+                // Update badge
+                const badge = document.getElementById(`badge-${recordId}`);
+                const statusMap = {
+                    'compliant': { text: 'Conforme', class: 'status-compliant' },
+                    'partial': { text: 'Parcial', class: 'status-partial' },
+                    'non_compliant': { text: 'Não Conforme', class: 'status-non-compliant' },
+                    'pending_review': { text: 'Pendente', class: 'status-pending' }
+                };
+                
+                if (badge && statusMap[status]) {
+                    badge.textContent = statusMap[status].text;
+                    badge.className = `status-badge ${statusMap[status].class}`;
+                }
+                
+                // Update visual style of action items based on status
+                const recordElement = document.getElementById(`record-${recordId}`);
+                if (recordElement) {
+                    const actionItemList = recordElement.querySelectorAll('li');
+                    actionItemList.forEach(li => {
+                        const checkbox = li.querySelector('input[type="checkbox"]');
+                        const span = li.querySelector('span');
+                        if (checkbox && span) {
+                            if (status === 'non_compliant') {
+                                // Non-compliant: uncheck and remove strike-through
+                                checkbox.checked = false;
+                                li.style.background = '#f8d7da';
+                                li.style.borderLeftColor = '#ef4444';
+                                span.style.textDecoration = 'none';
+                                span.style.color = '';
+                            } else if (status === 'compliant') {
+                                // Compliant: check and add strike-through
+                                checkbox.checked = true;
+                                li.style.background = '#d4edda';
+                                li.style.borderLeftColor = '#10b981';
+                                span.style.textDecoration = 'line-through';
+                                span.style.color = '#666';
+                            } else {
+                                // Partial or pending: reset to default
+                                li.style.background = '#f8f9fa';
+                                li.style.borderLeftColor = '#e0e0e0';
+                                span.style.textDecoration = 'none';
+                                span.style.color = '';
+                            }
+                        }
+                    });
+                }
+                
+                // Refresh compliance summary
+                const airportId = document.getElementById('airportSelect').value;
+                if (airportId) {
+                    await checkCompliance(airportId);
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showToast('Erro ao atualizar status. Tente novamente.', 'error');
+            }
+        }
+        
+        // Save notes
+        async function saveNotes(recordId) {
+            const notes = document.getElementById(`notes-${recordId}`).value;
+            try {
+                const response = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes: notes })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao salvar notas');
+                }
+            } catch (error) {
+                console.error('Error saving notes:', error);
+            }
+        }
+        
+        // Toggle action item and update status automatically
+        async function toggleActionItem(recordId, itemIndex, totalItems) {
+            const checkbox = document.getElementById(`action-${recordId}-${itemIndex}`);
+            if (!checkbox) return;
+            
+            // Get all checkboxes for this record
+            const recordElement = document.getElementById(`record-${recordId}`);
+            const checkboxes = recordElement.querySelectorAll('input[type="checkbox"]');
+            
+            // Build list of completed items
+            const completedItems = [];
+            checkboxes.forEach((cb, idx) => {
+                if (cb.checked) {
+                    completedItems.push(idx);
+                }
+            });
+            
+            try {
+                // Update completed action items (status will be auto-calculated)
+                const response = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        completed_action_items: completedItems
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao atualizar item de ação');
+                }
+                
+                const updatedRecord = await response.json();
+                
+                // Update the status badge and radio buttons based on new status
+                const newStatus = typeof updatedRecord.status === 'string' ? updatedRecord.status : (updatedRecord.status?.value || 'pending_review');
+                const statusMap = {
+                    'compliant': { text: 'Conforme', class: 'status-compliant' },
+                    'partial': { text: 'Parcial', class: 'status-partial' },
+                    'non_compliant': { text: 'Não Conforme', class: 'status-non-compliant' },
+                    'pending_review': { text: 'Pendente', class: 'status-pending' }
+                };
+                
+                // Update badge
+                const badge = document.getElementById(`badge-${recordId}`);
+                if (badge && statusMap[newStatus]) {
+                    badge.textContent = statusMap[newStatus].text;
+                    badge.className = `status-badge ${statusMap[newStatus].class}`;
+                }
+                
+                // Update radio button
+                const radioButton = document.querySelector(`input[name="status-${recordId}"][value="${newStatus}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+                
+                // Update visual style of action items - only strike through if status is compliant
+                const actionItem = checkbox.closest('li');
+                if (actionItem) {
+                    const span = actionItem.querySelector('span');
+                    if (checkbox.checked && newStatus === 'compliant') {
+                        // Only strike through if status is compliant
+                        actionItem.style.background = '#d4edda';
+                        actionItem.style.borderLeftColor = '#10b981';
+                        if (span) {
+                            span.style.textDecoration = 'line-through';
+                            span.style.color = '#666';
+                        }
+                    } else {
+                        // Don't strike through if status is not compliant
+                        if (newStatus === 'non_compliant') {
+                            actionItem.style.background = '#f8d7da';
+                            actionItem.style.borderLeftColor = '#ef4444';
+                        } else {
+                            actionItem.style.background = '#f8f9fa';
+                            actionItem.style.borderLeftColor = '#e0e0e0';
+                        }
+                        if (span) {
+                            span.style.textDecoration = 'none';
+                            span.style.color = '';
+                        }
+                    }
+                }
+                
+                // Update all action items in the record based on final status
+                const recordElement = document.getElementById(`record-${recordId}`);
+                if (recordElement && newStatus !== 'compliant') {
+                    const allActionItems = recordElement.querySelectorAll('li');
+                    allActionItems.forEach(li => {
+                        const cb = li.querySelector('input[type="checkbox"]');
+                        const sp = li.querySelector('span');
+                        if (cb && sp) {
+                            // If status is not compliant, remove strike-through even if checked
+                            if (newStatus === 'non_compliant') {
+                                li.style.background = '#f8d7da';
+                                li.style.borderLeftColor = '#ef4444';
+                            } else {
+                                li.style.background = '#f8f9fa';
+                                li.style.borderLeftColor = '#e0e0e0';
+                            }
+                            sp.style.textDecoration = 'none';
+                            sp.style.color = '';
+                        }
+                    });
+                } else if (recordElement && newStatus === 'compliant') {
+                    // If status is compliant, strike through all checked items
+                    const allActionItems = recordElement.querySelectorAll('li');
+                    allActionItems.forEach(li => {
+                        const cb = li.querySelector('input[type="checkbox"]');
+                        const sp = li.querySelector('span');
+                        if (cb && sp && cb.checked) {
+                            li.style.background = '#d4edda';
+                            li.style.borderLeftColor = '#10b981';
+                            sp.style.textDecoration = 'line-through';
+                            sp.style.color = '#666';
+                        }
+                    });
+                }
+                
+                // Refresh compliance summary
+                const airportId = document.getElementById('airportSelect').value;
+                if (airportId) {
+                    await checkCompliance(airportId);
+                }
+            } catch (error) {
+                console.error('Error toggling action item:', error);
+                // Revert checkbox if error
+                checkbox.checked = !checkbox.checked;
+                showToast('Erro ao atualizar item de ação. Tente novamente.', 'error');
+            }
+        }
+        
+        // Save due date for an action item
+        async function saveDueDate(recordId, itemIndex, dateValue = null) {
+            if (dateValue === null) {
+                const dateInput = document.getElementById(`due-date-${recordId}-${itemIndex}`);
+                if (!dateInput) return;
+                dateValue = dateInput.value;
+            }
+            
+            try {
+                // Get current due dates
+                const response = await fetch(`${API_BASE}/compliance/check`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        airport_id: parseInt(document.getElementById('airportSelect').value)
+                    })
+                });
+                
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                const record = data.compliance_records.find(r => r.id === recordId);
+                if (!record) return;
+                
+                const currentDueDates = record.action_item_due_dates || {};
+                const updatedDueDates = { ...currentDueDates };
+                
+                if (dateValue) {
+                    updatedDueDates[itemIndex] = dateValue;
+                } else {
+                    delete updatedDueDates[itemIndex];
+                }
+                
+                // Update the record
+                const updateResponse = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action_item_due_dates: updatedDueDates
+                    })
+                });
+                
+                if (updateResponse.ok) {
+                    // Refresh to show updated date status
+                    const airportId = document.getElementById('airportSelect').value;
+                    if (airportId) {
+                        await checkCompliance(airportId);
+                    }
+                }
+            } catch (error) {
+                console.error('Error saving due date:', error);
+            }
+        }
+        
+        // Generate reminders for expiring/expired items
+        function generateReminders(data) {
+            const reminders = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            data.compliance_records.forEach(record => {
+                if (!record.action_item_due_dates) return;
+                
+                const dueDates = record.action_item_due_dates;
+                const regulation = record.regulation || {};
+                
+                Object.keys(dueDates).forEach(itemIdx => {
+                    const dueDateStr = dueDates[itemIdx];
+                    const dueDate = new Date(dueDateStr);
+                    dueDate.setHours(0, 0, 0, 0);
+                    const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysDiff < 0) {
+                        reminders.push({
+                            type: 'expired',
+                            days: Math.abs(daysDiff),
+                            regulation: regulation.code || 'N/A',
+                            title: regulation.title || 'Norma',
+                            itemIndex: parseInt(itemIdx),
+                            dueDate: dueDateStr
+                        });
+                    } else if (daysDiff <= 30) {
+                        reminders.push({
+                            type: 'expiring',
+                            days: daysDiff,
+                            regulation: regulation.code || 'N/A',
+                            title: regulation.title || 'Norma',
+                            itemIndex: parseInt(itemIdx),
+                            dueDate: dueDateStr
+                        });
+                    }
+                });
+            });
+            
+            if (reminders.length === 0) return null;
+            
+            // Sort: expired first, then by days remaining
+            reminders.sort((a, b) => {
+                if (a.type === 'expired' && b.type !== 'expired') return -1;
+                if (a.type !== 'expired' && b.type === 'expired') return 1;
+                return a.days - b.days;
+            });
+            
+            let html = '<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 6px; margin-top: 20px;">';
+            html += '<h3 style="color: #856404; margin-bottom: 15px;">🔔 Lembretes e Itens Expirados</h3>';
+            
+            const expired = reminders.filter(r => r.type === 'expired');
+            const expiring = reminders.filter(r => r.type === 'expiring');
+            
+            if (expired.length > 0) {
+                html += '<div style="margin-bottom: 15px;">';
+                html += `<strong style="color: #c33;">⚠️ Itens Expirados (${expired.length}):</strong>`;
+                html += '<ul style="margin-top: 8px; padding-left: 20px;">';
+                expired.forEach(r => {
+                    html += `<li style="color: #c33; margin-bottom: 5px;">
+                        <strong>${r.regulation}</strong>: Item expirado há ${r.days} dia(s) - Renovar até ${new Date(r.dueDate).toLocaleDateString('pt-BR')}
+                    </li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            if (expiring.length > 0) {
+                html += '<div>';
+                html += `<strong style="color: #856404;">⏰ Itens Expirando em Breve (${expiring.length}):</strong>`;
+                html += '<ul style="margin-top: 8px; padding-left: 20px;">';
+                expiring.forEach(r => {
+                    html += `<li style="color: #856404; margin-bottom: 5px;">
+                        <strong>${r.regulation}</strong>: Expira em ${r.days} dia(s) - Renovar até ${new Date(r.dueDate).toLocaleDateString('pt-BR')}
+                    </li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        // Generate action plan
+        function generateActionPlan(data) {
+            const nonCompliant = data.compliance_records.filter(r => {
+                const status = typeof r.status === 'string' ? r.status : (r.status?.value || 'pending_review');
+                return status === 'non_compliant' || status === 'partial';
+            });
+            
+            // Only show success message if ALL records are compliant (not just if there are no non-compliant)
+            const allCompliant = data.compliance_records.length > 0 && 
+                                 data.compliance_records.every(r => {
+                                     const status = typeof r.status === 'string' ? r.status : (r.status?.value || 'pending_review');
+                                     return status === 'compliant';
+                                 });
+            
+            if (allCompliant && data.compliance_records.length > 0) {
+                return '<p style="color: #10b981; font-weight: 500; padding: 15px; background: #d4edda; border-radius: 6px; margin-top: 20px;">✅ Parabéns! Todas as normas estão em conformidade.</p>';
+            }
+            
+            // Only show action plan if there are non-compliant or partial records
+            if (nonCompliant.length === 0) {
+                return ''; // Don't show action plan if there are no non-compliant records
+            }
+            
+            let planHtml = '<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 6px; margin-top: 20px;">';
+            planHtml += '<h3 style="color: #856404; margin-bottom: 15px;">📋 Plano de Ação Prioritário</h3>';
+            planHtml += '<p style="color: #856404; margin-bottom: 15px;">Baseado nas normas não conformes ou parciais, aqui está o que precisa ser feito:</p>';
+            planHtml += '<ol style="color: #856404; padding-left: 20px;">';
+            
+            nonCompliant.forEach((record, idx) => {
+                const regulation = record.regulation || {};
+                const status = typeof record.status === 'string' ? record.status : (record.status?.value || 'pending_review');
+                const statusText = status === 'non_compliant' ? 'NÃO CONFORME' : 'PARCIAL';
+                
+                planHtml += `<li style="margin-bottom: 15px;">`;
+                planHtml += `<strong>${regulation.code || 'N/A'}: ${regulation.title || 'Norma'}</strong> <span style="color: #ef4444;">(${statusText})</span><br>`;
+                
+                // Get action items
+                let actionItems = [];
+                if (record.action_items) {
+                    try {
+                        actionItems = typeof record.action_items === 'string' 
+                            ? JSON.parse(record.action_items) 
+                            : record.action_items;
+                        if (!Array.isArray(actionItems)) actionItems = [];
+                    } catch (e) {
+                        actionItems = [];
+                    }
+                }
+                
+                if (actionItems.length > 0) {
+                    planHtml += '<ul style="margin-top: 8px; padding-left: 20px;">';
+                    actionItems.forEach(item => {
+                        planHtml += `<li style="margin-bottom: 5px;">${item}</li>`;
+                    });
+                    planHtml += '</ul>';
+                } else {
+                    planHtml += `<span style="color: #666;">${regulation.requirements || 'Revisar requisitos da norma'}</span>`;
+                }
+                
+                planHtml += `</li>`;
+            });
+            
+            planHtml += '</ol>';
+            planHtml += '</div>';
+            
+            return planHtml;
+        }
+        
+        // Initialize
+        loadAirports();
+        // ============================================
+        // FASE 3 - FUNCIONALIDADES AVANÇADAS
+        // ============================================
+        
+        // Tour Guide System
+        let currentTourStep = 0;
+        const tourSteps = [
+            {
+                title: 'Bem-vindo ao Sistema!',
+                description: 'Este é o sistema de conformidade ANAC. Vamos fazer um tour rápido para você conhecer as funcionalidades principais.',
+                element: 'header',
+                position: 'bottom'
+            },
+            {
+                title: 'Gerenciar Aeroportos',
+                description: 'Na primeira aba, você pode cadastrar e gerenciar seus aeroportos. O formulário está organizado em seções para facilitar o preenchimento.',
+                element: '.tab:first-child',
+                position: 'bottom'
+            },
+            {
+                title: 'Verificar Conformidade',
+                description: 'Na segunda aba, você pode verificar a conformidade de um aeroporto. O sistema mostrará todas as normas aplicáveis baseadas nas características do aeroporto.',
+                element: '.tab:last-child',
+                position: 'bottom'
+            },
+            {
+                title: 'Filtros e Busca',
+                description: 'Use os filtros e a busca para encontrar normas específicas rapidamente. O autocomplete ajuda a encontrar normas pelo código.',
+                element: '.filters-container',
+                position: 'bottom'
+            },
+            {
+                title: 'Checklist Interativo',
+                description: 'Marque cada norma como conforme, parcial ou não conforme. O sistema gerará automaticamente um plano de ação.',
+                element: '.compliance-item:first-child',
+                position: 'top'
+            }
+        ];
+        
+        function startTour() {
+            currentTourStep = 0;
+            if (tourSteps.length === 0) {
+                showToast('Tour não disponível no momento', 'info');
+                return;
+            }
+            showTourStep(0);
+        }
+        
+        function showTourStep(stepIndex) {
+            if (stepIndex >= tourSteps.length) {
+                endTour();
+                return;
+            }
+            
+            const step = tourSteps[stepIndex];
+            const element = document.querySelector(step.element);
+            
+            if (!element) {
+                // Skip this step if element not found
+                showTourStep(stepIndex + 1);
+                return;
+            }
+            
+            // Show overlay
+            document.getElementById('tourOverlay').classList.add('active');
+            
+            // Highlight element
+            element.classList.add('tour-highlight');
+            
+            // Position popup
+            const popup = document.getElementById('tourPopup');
+            const rect = element.getBoundingClientRect();
+            popup.classList.add('active');
+            
+            document.getElementById('tourTitle').textContent = step.title;
+            document.getElementById('tourDescription').textContent = step.description;
+            
+            // Update button text
+            const nextBtn = popup.querySelector('.tour-btn-primary');
+            if (stepIndex === tourSteps.length - 1) {
+                nextBtn.textContent = 'Finalizar';
+            } else {
+                nextBtn.textContent = 'Próximo';
+            }
+        }
+        
+        function nextTourStep() {
+            const currentElement = document.querySelector(tourSteps[currentTourStep].element);
+            if (currentElement) {
+                currentElement.classList.remove('tour-highlight');
+            }
+            
+            currentTourStep++;
+            if (currentTourStep < tourSteps.length) {
+                showTourStep(currentTourStep);
+            } else {
+                endTour();
+            }
+        }
+        
+        function skipTour() {
+            endTour();
+            // Save that user skipped tour
+            localStorage.setItem('tourSkipped', 'true');
+        }
+        
+        function endTour() {
+            document.getElementById('tourOverlay').classList.remove('active');
+            document.getElementById('tourPopup').classList.remove('active');
+            document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+            currentTourStep = 0;
+            localStorage.setItem('tourCompleted', 'true');
+        }
+        
+        // Check if tour should auto-start (first visit)
+        window.addEventListener('DOMContentLoaded', () => {
+            const tourCompleted = localStorage.getItem('tourCompleted');
+            const tourSkipped = localStorage.getItem('tourSkipped');
+            if (!tourCompleted && !tourSkipped) {
+                // Auto-start tour after 2 seconds
+                setTimeout(() => {
+                    if (confirm('Bem-vindo! Deseja fazer um tour guiado do sistema?')) {
+                        startTour();
+                    } else {
+                        localStorage.setItem('tourSkipped', 'true');
+                    }
+                }, 2000);
+            }
+        });
+        
+        // Batch Edit Mode
+        let batchEditMode = false;
+        let selectedRecords = new Set();
+        
+        function toggleBatchEdit() {
+            batchEditMode = !batchEditMode;
+            const banner = document.getElementById('batchEditBanner');
+            const checkboxes = document.querySelectorAll('.batch-checkbox');
+            const btn = document.getElementById('batchEditBtn');
+            
+            if (batchEditMode) {
+                banner.style.display = 'block';
+                checkboxes.forEach(cb => cb.style.display = 'block');
+                if (btn) btn.textContent = '✖️ Sair do Modo Lote';
+                selectedRecords.clear();
+                updateBatchSelection();
+            } else {
+                banner.style.display = 'none';
+                checkboxes.forEach(cb => cb.style.display = 'none');
+                if (btn) btn.textContent = '📝 Edição em Lote';
+                document.querySelectorAll('.compliance-item').forEach(item => {
+                    item.classList.remove('batch-selected');
+                });
+                document.querySelectorAll('input[type="checkbox"][id^="batch-select-"]').forEach(cb => {
+                    cb.checked = false;
+                });
+                selectedRecords.clear();
+            }
+        }
+        
+        function selectAllForBatch() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="batch-select-"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+                const recordId = parseInt(cb.id.replace('batch-select-', ''));
+                if (!allChecked) {
+                    selectedRecords.add(recordId);
+                } else {
+                    selectedRecords.delete(recordId);
+                }
+            });
+            
+            updateBatchSelection();
+        }
+        
+        function updateBatchSelection() {
+            selectedRecords.clear();
+            document.querySelectorAll('input[type="checkbox"][id^="batch-select-"]:checked').forEach(cb => {
+                const recordId = parseInt(cb.id.replace('batch-select-', ''));
+                selectedRecords.add(recordId);
+                const item = document.getElementById(`record-${recordId}`);
+                if (item) item.classList.add('batch-selected');
+            });
+            
+            document.querySelectorAll('.compliance-item').forEach(item => {
+                const recordId = parseInt(item.dataset.recordId);
+                if (!selectedRecords.has(recordId)) {
+                    item.classList.remove('batch-selected');
+                }
+            });
+            
+            const countDiv = document.getElementById('batchSelectedCount');
+            if (countDiv) {
+                countDiv.textContent = `${selectedRecords.size} norma(s) selecionada(s)`;
+            }
+        }
+        
+        async function batchUpdateStatus(status) {
+            if (selectedRecords.size === 0) {
+                showToast('Selecione pelo menos uma norma', 'warning');
+                return;
+            }
+            
+            const confirmed = confirm(`Tem certeza que deseja marcar ${selectedRecords.size} norma(s) como "${getStatusLabel(status)}"?`);
+            if (!confirmed) return;
+            
+            const updates = Array.from(selectedRecords).map(recordId => 
+                fetch(`${API_BASE}/compliance/records/${recordId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: status })
+                })
+            );
+            
+            try {
+                await Promise.all(updates);
+                showToast(`${selectedRecords.size} norma(s) atualizada(s) com sucesso!`, 'success');
+                
+                // Refresh compliance
+                const airportId = document.getElementById('airportSelect').value;
+                if (airportId) {
+                    await checkCompliance(airportId);
+                }
+                
+                toggleBatchEdit();
+            } catch (error) {
+                showToast('Erro ao atualizar normas em lote', 'error');
+            }
+        }
+        
+        function getStatusLabel(status) {
+            const labels = {
+                'compliant': 'Conforme',
+                'partial': 'Parcial',
+                'non_compliant': 'Não Conforme',
+                'pending_review': 'Pendente'
+            };
+            return labels[status] || status;
+        }
+        
+        // Export Report
+        async function exportReport() {
+            const airportId = document.getElementById('airportSelect').value;
+            if (!airportId) {
+                showToast('Selecione um aeroporto primeiro', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/compliance/check`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ airport_id: parseInt(airportId) })
+                });
+                
+                if (!response.ok) throw new Error('Erro ao obter dados');
+                
+                const data = await response.json();
+                const airportResponse = await fetch(`${API_BASE}/airports/${airportId}`);
+                const airport = await airportResponse.json();
+                
+                // Generate CSV content
+                let csv = 'Norma,Código,Status,Classificação,Categoria,Itens de Ação,Itens Completos\n';
+                
+                data.compliance_records.forEach(record => {
+                    const reg = record.regulation || {};
+                    const status = typeof record.status === 'string' ? record.status : (record.status?.value || '');
+                    const classification = reg.requirement_classification?.value || reg.requirement_classification || '';
+                    const category = typeof reg.safety_category === 'string' ? reg.safety_category : (reg.safety_category?.value || '');
+                    const actionItems = record.action_items ? (Array.isArray(record.action_items) ? record.action_items : JSON.parse(record.action_items)) : [];
+                    const completed = record.completed_action_items ? (Array.isArray(record.completed_action_items) ? record.completed_action_items : JSON.parse(record.completed_action_items)) : [];
+                    
+                    csv += `"${reg.title || ''}","${reg.code || ''}","${status}","${classification}","${category}",${actionItems.length},${completed.length}\n`;
+                });
+                
+                // Create and download file
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `relatorio_conformidade_${airport.code}_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast('Relatório exportado com sucesso!', 'success');
+            } catch (error) {
+                showToast('Erro ao exportar relatório', 'error');
+                console.error(error);
+            }
+        }
+        
+        // Auto-save functionality
+        let autoSaveTimeout;
+        const AUTO_SAVE_DELAY = 2000; // 2 seconds
+        
+        function setupAutoSave() {
+            const form = document.getElementById('airportForm');
+            if (!form) return;
+            
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    clearTimeout(autoSaveTimeout);
+                    autoSaveTimeout = setTimeout(() => {
+                        saveDraft();
+                    }, AUTO_SAVE_DELAY);
+                });
+            });
+        }
+        
+        function saveDraft() {
+            const form = document.getElementById('airportForm');
+            if (!form) return;
+            
+            const formData = {
+                name: document.getElementById('name')?.value || '',
+                code: document.getElementById('code')?.value || '',
+                size: document.getElementById('size')?.value || '',
+                airport_type: document.getElementById('airport_type')?.value || '',
+                annual_passengers: document.getElementById('annual_passengers')?.value || '',
+                number_of_runways: document.getElementById('number_of_runways')?.value || '',
+                max_aircraft_weight: document.getElementById('max_aircraft_weight')?.value || '',
+                has_international_operations: document.getElementById('has_international_operations')?.checked || false,
+                has_cargo_operations: document.getElementById('has_cargo_operations')?.checked || false,
+                has_maintenance_facility: document.getElementById('has_maintenance_facility')?.checked || false
+            };
+            
+            // Only save if there's meaningful data
+            if (formData.name || formData.code) {
+                localStorage.setItem('airportFormDraft', JSON.stringify(formData));
+                showAutoSaveIndicator();
+            }
+        }
+        
+        function loadDraft() {
+            const draft = localStorage.getItem('airportFormDraft');
+            if (!draft) return;
+            
+            try {
+                const formData = JSON.parse(draft);
+                if (confirm('Encontramos um rascunho não salvo. Deseja restaurar?')) {
+                    if (formData.name) document.getElementById('name').value = formData.name;
+                    if (formData.code) document.getElementById('code').value = formData.code;
+                    if (formData.size) document.getElementById('size').value = formData.size;
+                    if (formData.airport_type) document.getElementById('airport_type').value = formData.airport_type;
+                    if (formData.annual_passengers) document.getElementById('annual_passengers').value = formData.annual_passengers;
+                    if (formData.number_of_runways) document.getElementById('number_of_runways').value = formData.number_of_runways;
+                    if (formData.max_aircraft_weight) document.getElementById('max_aircraft_weight').value = formData.max_aircraft_weight;
+                    if (formData.has_international_operations !== undefined) document.getElementById('has_international_operations').checked = formData.has_international_operations;
+                    if (formData.has_cargo_operations !== undefined) document.getElementById('has_cargo_operations').checked = formData.has_cargo_operations;
+                    if (formData.has_maintenance_facility !== undefined) document.getElementById('has_maintenance_facility').checked = formData.has_maintenance_facility;
+                } else {
+                    localStorage.removeItem('airportFormDraft');
+                }
+            } catch (e) {
+                console.error('Error loading draft:', e);
+            }
+        }
+        
+        function showAutoSaveIndicator() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            if (indicator) {
+                indicator.classList.add('show');
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 2000);
+            }
+        }
+        
+        // Clear draft on successful save
+        document.addEventListener('DOMContentLoaded', () => {
+            setupAutoSave();
+            loadDraft();
+            
+            // Clear draft when form is successfully submitted
+            const form = document.getElementById('airportForm');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    // Wait for successful submission (handled in existing code)
+                    setTimeout(() => {
+                        if (!document.getElementById('name').value && !document.getElementById('code').value) {
+                            localStorage.removeItem('airportFormDraft');
+                        }
+                    }, 1000);
+                });
+            }
+        });
+        
+        // Changes History (simple version - stores in localStorage)
+        function logChange(recordId, field, oldValue, newValue, changedBy = 'Usuário') {
+            const history = JSON.parse(localStorage.getItem('complianceHistory') || '[]');
+            history.push({
+                recordId,
+                field,
+                oldValue,
+                newValue,
+                changedBy,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Keep only last 100 changes
+            if (history.length > 100) {
+                history.shift();
+            }
+            
+            localStorage.setItem('complianceHistory', JSON.stringify(history));
+        }
+        
+        function showChangesHistory(recordId) {
+            const history = JSON.parse(localStorage.getItem('complianceHistory') || '[]');
+            const recordHistory = history.filter(h => h.recordId === recordId).slice(-10).reverse();
+            
+            if (recordHistory.length === 0) {
+                showToast('Nenhum histórico encontrado para esta norma', 'info');
+                return;
+            }
+            
+            let html = '<div class="changes-log"><h4>Histórico de Mudanças</h4>';
+            recordHistory.forEach(change => {
+                const date = new Date(change.timestamp);
+                html += `
+                    <div class="change-item">
+                        <strong>${change.field}</strong>: "${change.oldValue}" → "${change.newValue}"
+                        <div class="change-time">${date.toLocaleString('pt-BR')} por ${change.changedBy}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            // Show in a modal or append to record
+            const recordElement = document.getElementById(`record-${recordId}`);
+            if (recordElement) {
+                const existingLog = recordElement.querySelector('.changes-log');
+                if (existingLog) {
+                    existingLog.remove();
+                }
+                recordElement.insertAdjacentHTML('beforeend', html);
+            }
+        }
+        
+        // Wrap updateComplianceStatus to add history logging
+        const originalUpdateComplianceStatusFn = window.updateComplianceStatus;
+        if (originalUpdateComplianceStatusFn) {
+            window.updateComplianceStatus = async function(recordId, status) {
+                // Get old status before update
+                try {
+                    const oldResponse = await fetch(`${API_BASE}/compliance/records/${recordId}`);
+                    if (oldResponse.ok) {
+                        const oldRecord = await oldResponse.json();
+                        const oldStatus = typeof oldRecord.status === 'string' ? oldRecord.status : (oldRecord.status?.value || '');
+                        
+                        // Call original function
+                        await originalUpdateComplianceStatusFn(recordId, status);
+                        
+                        // Log change if status changed
+                        if (oldStatus !== status) {
+                            logChange(recordId, 'status', oldStatus, status);
+                        }
+                    } else {
+                        await originalUpdateComplianceStatusFn(recordId, status);
+                    }
+                } catch (e) {
+                    // If error, still call original
+                    await originalUpdateComplianceStatusFn(recordId, status);
+                }
+            };
+        }
+    </script>
+</body>
+</html>

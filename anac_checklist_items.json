@@ -1,0 +1,2396 @@
+{
+  "docs": [
+    {
+      "item_num": "D1.1.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153186.01",
+      "item_avaliado": "153.323(e)",
+      "desempenho_esperado": "ATS/COE/Sala de Observação SCI/demais internos e externos/ANAC (Nº Processo). Observar versão em uso",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.1.2",
+      "peso": 5.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "153186.01",
+      "item_avaliado": "153.323(e)",
+      "desempenho_esperado": "COE/Sala de Observação SCI. Observar versão em uso",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.1.2",
+      "peso": 3.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "153186.01",
+      "item_avaliado": "153.323(e)",
+      "desempenho_esperado": "Recomendação aos aeroportos/verificar:\n   (1) Unificar as listas de acionamentos do PLEM, PRAI e PCINC\n   (2) A ordem dos acionamentos nos fluxogramas deve condizer com a prioridade do recurso para determinada emergencia\n   (3) Nao replicar os telefones dos recursos nos fluxogramas. Ao invés disso, é melhor informar o item das listas que aquele contato se encontra\n   (4) O operador pode criar um checklist estilo QRH contendo os fluxogramas com abas por tipo de emergencia e a lista com os acionamentos, de maneira que o operador do COE tenha em mãos de maneira rapida para consulta qual a sequencia de acionaemntos e os contatos para as emergencias previstas\n   (5) O operador do aeroporto deve ter uma escala de aferição das listas de acionamentos, de maneira que toda a lista unificada seja aferida 1x ao mês",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.2.1",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153190.01",
+      "item_avaliado": "153.331(a)",
+      "desempenho_esperado": "Registros do planejamento trimestral",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.2.2",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153190.01",
+      "item_avaliado": "153.331(b)",
+      "desempenho_esperado": "Registros do planejamento trimestral",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.2.3",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153190.01",
+      "item_avaliado": "153.331(b)",
+      "desempenho_esperado": "Registros do planejamento trimestral",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.2.4",
+      "peso": 6.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153193.02",
+      "item_avaliado": "153.331(d)",
+      "desempenho_esperado": "Relatório do último ESEA do módulo - Comparar dois relatórios do mesmo módulo",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.2.5",
+      "peso": 4.0,
+      "tipo": "B",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153193.01",
+      "item_avaliado": "153.331(g)",
+      "desempenho_esperado": "Previsão do procedimento no MOPS ou outra documentação / Verificar se confere com o modelo de avaliação padronizado",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.2.6",
+      "peso": 6.0,
+      "tipo": "A",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153193.02",
+      "item_avaliado": "153.331(g)",
+      "desempenho_esperado": "Relatório do último ESEA do módulo",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.3.1",
+      "peso": 4.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "-",
+      "item_avaliado": "153.303(a)(2)(i)\n153.311(a)",
+      "desempenho_esperado": "Registro do procedimento no MOPS/PLEM",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.3.2",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "-",
+      "item_avaliado": "153.311(a)(2)",
+      "desempenho_esperado": "Registro do procedimento no MOPS/PLEM",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.4.1",
+      "peso": 2.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153175.01",
+      "item_avaliado": "153.303(a)(2)(ii)",
+      "desempenho_esperado": "Registro do procedimento no MOPS/PLEM + Registro documental de sua existência (foto, documento, etc)",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.4.2",
+      "peso": 2.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153175.01",
+      "item_avaliado": "153.313(a)",
+      "desempenho_esperado": "Disponibilizado na área operacional, próximo ao local de trabalho do responsável pela utilização.",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D1.4.3",
+      "peso": 2.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "153175.01",
+      "item_avaliado": "153313",
+      "desempenho_esperado": "Registro do procedimento no MOPS/PLEM",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.1.1",
+      "peso": 10.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.403(c)",
+      "desempenho_esperado": "AISWEB + Seção AD2 da AIP",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.1.2",
+      "peso": 10.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.403(c)(2)",
+      "desempenho_esperado": "Registro do procedimento no MOPS/PLEM + Evidências da adoção de procedimento de publicação no caso de redução de CAT",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.1.3",
+      "peso": 10.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.325(b)(1)",
+      "desempenho_esperado": "Publicação no AISWEB + Seção AD2 da AIP da capacidade de remoção do aeródromo extressa em terrmos do modelo e peso da maior aeronave que o aeródromo está equipado para remover\nProcedimento de atualização via SDIA",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.1.3",
+      "peso": 10.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.325(b)(2)",
+      "desempenho_esperado": "Publicação no AISWEB + Seção AD2 da AIP dos contatos para a coordenação das ações do PRAI\nProcedimento de atualização via SDIA",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.2.1",
+      "peso": 6.0,
+      "tipo": "C",
+      "aplicabilidade": "Todas",
+      "referencia": "153209.01",
+      "item_avaliado": "153.409(c)",
+      "desempenho_esperado": "Registro documental",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.2.1",
+      "peso": 6.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "153209.01",
+      "item_avaliado": "153.409(c)",
+      "desempenho_esperado": "Registro documental de aferição mensal por equipe",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.2.2",
+      "peso": 2.0,
+      "tipo": "C",
+      "aplicabilidade": "Todas",
+      "referencia": "153209.01",
+      "item_avaliado": "153.409(c)",
+      "desempenho_esperado": "Registro documental",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.2.3",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.409-001-6.4.8",
+      "desempenho_esperado": "Registro documental",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.2.4",
+      "peso": 6.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.409-001-6.4.10",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.1",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153203.01",
+      "item_avaliado": "153.37(e)(6)",
+      "desempenho_esperado": "Apresentar o PTR adequado à tabela da IS, com a progrmação mensal evidenciando as 16h, evidencias dos treinamentos sendo realizados (fichas, imagens, vídeos, documentos, etc)",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.2",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153203.01",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental + PTR-BA - Planejamento",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.3",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153203.01",
+      "item_avaliado": "153.37(e)(6)",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.4",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153203.01",
+      "item_avaliado": "153.37(e)(6)\n153.417(b)",
+      "desempenho_esperado": "Registro documental: fotos, vídeos, e-mails / Treinamento anual específico de fogo APENAS para os Classe IV. Os demais são realizados no curso de atualização",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.5",
+      "peso": 2.0,
+      "tipo": "C",
+      "aplicabilidade": "Todas",
+      "referencia": "153203.01",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.6",
+      "peso": 10.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental: fotos, vídeos, e-mails informando a realização com empresas aéreas, ...",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.7",
+      "peso": 6.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental: fotos, vídeos, e-mails",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.8",
+      "peso": 4.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental: fotos, vídeos, e-mails",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.9",
+      "peso": 6.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.10",
+      "peso": 6.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental do procedimento",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.3.11",
+      "peso": 4.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.4.1",
+      "peso": 4.0,
+      "tipo": "C",
+      "aplicabilidade": "Todas",
+      "referencia": "153203.01",
+      "item_avaliado": "IS 153.37-001 (6.8.7)",
+      "desempenho_esperado": "Registro documental + Planilha de controle identificando o atendimento ao item 6.8.7 da IS 153.37",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.4.2",
+      "peso": 10.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.4.3",
+      "peso": 6.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.4.4",
+      "peso": 6.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.4.5",
+      "peso": 6.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.4.6",
+      "peso": 8.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental da avialiação realizada por profissional habilitado",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.4.7",
+      "peso": 4.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.1",
+      "peso": 10.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.417(a)(1)\n153.419",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.2",
+      "peso": 10.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.417(a)(2)\n153.419",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.3",
+      "peso": 10.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153214.01",
+      "item_avaliado": "153.417(a)(3)\n153.419",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.4",
+      "peso": 4.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153215.01",
+      "item_avaliado": "153.417(a)(2)(iii)\n153.419",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.5",
+      "peso": 4.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153212.01",
+      "item_avaliado": "153.417(b)\n153.419",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.6",
+      "peso": 6.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153214.01",
+      "item_avaliado": "153.419(b)\n153.419",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.7",
+      "peso": 10.0,
+      "tipo": "C",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "153.417(a)(1)\n153.419",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.5.8",
+      "peso": 6.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.417-001-6.1.4",
+      "desempenho_esperado": "Registro documental da ESCALA DE SERVIÇO e da LISTA DO EFETIVO (planilha), identificando a formação de cada profissional, as datas de realização dos treinamentos, atualizações e etc. Organizar os certificados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.1",
+      "peso": 8.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153225.02",
+      "item_avaliado": "IS 153.425-001-6.5.2",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.2",
+      "peso": 10.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.405 - 6.1.5",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.3",
+      "peso": 8.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.405 - 6.1.5",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.4",
+      "peso": 8.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.405 - 6.1.2",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.5",
+      "peso": 8.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.405 - 6.1.4",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.6",
+      "peso": 4.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.405 - 6.1.4",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.7",
+      "peso": 4.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.405 - 6.1.4",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.6.8",
+      "peso": 4.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "-",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.7.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.421(a)(1)",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens\nConforme itens 6.5.1, 6.9.2.1.1 e 6.9.3 da NR6 do MTE, o operador deverá comprovar que todos os EPIs do traje de proteção, descritos no parágrafo 153.421(a)(1) do RBAC nº 153, Emenda 07, encontram-se dentro da validade estabelecida pelos seus respectivos fabricantes.\nOperador deverá apresentar: declaração/controle documental contendo (1) quantidade, (2) tipo, (3) numeração, (4) fabricante, (5) C.A. válido na data da aquisição, (6) data de fabricação e (7) data de validade, conforme estabelecido pelo fabricante de cada item de proteção individual requerido pelo RBAC 153.421. No documento deve haver o evidenciamento de quantitativo suficiente de equipamentos, conforme 153.421(a) e (b).",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.7.2",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153421",
+      "desempenho_esperado": "Operador deve apresentar uma declaração e controle de todos os TPs constando claramente  a quantidade de TP e a validade. A validade dos TPs deve estar claramente identificada com declaração das validades emitidas pelos fabricantes ou outra forma de comprovação",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.7.3",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "Todas",
+      "referencia": "153217.01",
+      "item_avaliado": "153.421(a)(2)",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.7.4",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.421-001-6.1.2",
+      "desempenho_esperado": "Registro documental do procedimento + registro de cumprimento do procedimento",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.7.5",
+      "peso": 2.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "-",
+      "desempenho_esperado": "Registro documental + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.7.6",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001-6.2.10",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.8.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153206.01",
+      "item_avaliado": "153.421(b)",
+      "desempenho_esperado": "Abastecido com 1600L de ar (Volume em L x Pressão em BAR)",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.8.2",
+      "peso": 4.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "153218.01",
+      "item_avaliado": "153.421(c)",
+      "desempenho_esperado": "Abastecido com 1600L de ar (Volume em L x Pressão em BAR)",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.8.3",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.421-001-6.1.2",
+      "desempenho_esperado": "Registro documental do procedimento",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.8.4",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.421-001-6.3.7",
+      "desempenho_esperado": "Registro documental + Planilha de controle + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.8.5",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.37-001-6.2.10",
+      "desempenho_esperado": "Registro documental + Planilha de controle",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.9.1",
+      "peso": 6.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "-",
+      "desempenho_esperado": "Registro documental do procedimento + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.10.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.403(a)(2)",
+      "desempenho_esperado": "Registro documental + Tabela de apoio + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.10.2",
+      "peso": 1.5,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.1.8",
+      "desempenho_esperado": "Registro documental + Tabela de apoio + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.10.3",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.1.8",
+      "desempenho_esperado": "Registro documental + Tabela de apoio + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.10.4",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.3.5",
+      "desempenho_esperado": "Registro documental + Tabela de apoio + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.10.5",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.3.2",
+      "desempenho_esperado": "Registro documental + Tabela de apoio + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.10.6",
+      "peso": 4.0,
+      "tipo": "D",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "153.223(a)(1)(i)",
+      "desempenho_esperado": "Registro documental do procedimento",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.10.7",
+      "peso": 3.0,
+      "tipo": "B",
+      "aplicabilidade": "Todas",
+      "referencia": "-",
+      "item_avaliado": "IS 153.407-001-6.1.7",
+      "desempenho_esperado": "Registro documental do procedimento + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.11.3",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "II, III, IV",
+      "referencia": "-",
+      "item_avaliado": "153.423-001-6.1.3",
+      "desempenho_esperado": "Apresentação de checklist de verificação dos equipamentos, conforme listagem mínima da tabela 153.423-1 e  IS 153.423. Checklist deve estar previsto no MOPS/PLEM/PCINC",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.12.1",
+      "peso": 4.0,
+      "tipo": "B",
+      "aplicabilidade": "<1km de água",
+      "referencia": "-",
+      "item_avaliado": "IS 153.433-001-6.6.2",
+      "desempenho_esperado": "Registro documental (Acordo formal para prestação do serviço especializado)",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.12.2",
+      "peso": 4.0,
+      "tipo": "B",
+      "aplicabilidade": "<1km de água",
+      "referencia": "-",
+      "item_avaliado": "IS 153.433-001-6.1.7",
+      "desempenho_esperado": "Relatórios dos exercícios + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.12.3",
+      "peso": 4.0,
+      "tipo": "A",
+      "aplicabilidade": "<1km de água",
+      "referencia": "-",
+      "item_avaliado": "IS 153.433-001-6.3.6",
+      "desempenho_esperado": "Registro documental + Tabela de apoio + imagens",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.12.4",
+      "peso": 4.0,
+      "tipo": "A",
+      "aplicabilidade": "<1km de água",
+      "referencia": "-",
+      "item_avaliado": "IS 153.433-001-6.4",
+      "desempenho_esperado": "Registro documental + Planilha de controle + Registros de treinamento assinados",
+      "checklist_type": "DOCS"
+    },
+    {
+      "item_num": "D2.13.1",
+      "peso": 4.0,
+      "tipo": "B",
+      "aplicabilidade": "II, III e IV",
+      "referencia": "153.174.01",
+      "item_avaliado": "153309",
+      "desempenho_esperado": "Escala e certificados dos profissionais\nClasse II e III - Mínimo 1\nClasse IV - Mínimo 2 (1 Tipo D - UTI)",
+      "checklist_type": "DOCS"
+    }
+  ],
+  "tops": [
+    {
+      "item_num": "T3.1.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.317(a)(5)",
+      "desempenho_esperado": "O deslocamento deve ocorrer conforme o posicionamento previsto no MGI do PCINC. \nPosicionamentos recomendados: \n   (1) Padrao do MGI*\n   (2) Hangares remotos\n   (3) Patio principal\n   (4) Quadricula selecionada do MGI \n\n*Obs.: No posicionamento 1 para incrementar complexidade ao teste e verificacao, pode-se orientar o operador da TWR ou COE que, apos o posicionamento, informe ao BA-CE que a aeronave se aproximando alterou sua cabeceira, desta forma o BA-CE devera orientar o comboio de como se reposicionar. Observar nesse caso seu desempenho em relacao a fraseologia utilizada, a familiarizacao com o aeroporto e os procedimentos utilizados",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.1.3",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "ICA 100-37 itens 3.13 e 6.16.a",
+      "desempenho_esperado": "As informacoes minimas devem ser solicitadas. O ideal e que o BA-CE tenha no veiculo em que estiver se deslocando um checklist para solicitacao das informacoes",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.403(a)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.2",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.1.8",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.4",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153419",
+      "desempenho_esperado": "O regulamento obriga que a equipe de resgate esteja disponível no local do evento. Caso o operador apresente algum outro meio viável para deslocamento da equipe que não seja o CRS, deve-se avaliar sua capacidade de deslocamento, todos os elementos de operaionalidade de veículos e nos testes de deslocamento seu desempenho deve ser satisfatório.",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.4",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.3.5",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.5",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.3.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.6",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.3.3",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.7",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.1.7",
+      "desempenho_esperado": "Observar se o BA-MC estão utilizando checklist de verificacao diaria dos CCIs.\nObservar se no checklist há a previsao do check das valvulas dos distemas de espuma e PQ",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.12",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.403(a)",
+      "desempenho_esperado": "Realizar o reste com o acionamento pneumatico da valvula\nObservar se o BA-MC conhece o funcionamento dos sistemas do veiculo",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.8",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.407(b)(5)",
+      "desempenho_esperado": "Perguntar ao BA-MC a capacidade do veiculo. Verificar os tanques do CCI",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.9",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.407(b)(5)",
+      "desempenho_esperado": "Perguntar ao BA-MC a capacidade do veiculo. Verificar os tanques do CCI",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.11",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.403(a)",
+      "desempenho_esperado": "A proporcao utilizada deve condizer com a do LGE em uso no aeroporto. Verificar o ajuste eletrônico ou mecânico do CCI",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.13",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "IS 153.405 - 6.4.7",
+      "desempenho_esperado": "O operador deve apresentar um controle de estoque que contenha o lote, validade e data do abastecimento do LGE em uso no CCI",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.14",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.403(a)",
+      "desempenho_esperado": "Forma de realização do teste (para que o gasto do produto seja o menor possivel):\n   (1) Solicite ao BA-MC a estabilize a pressao da bomba em 10.5BAR\n   (2) Solicite a abertura do fluxo de agua do canhao de parachoque com jato entre neblinado e compacto\n   (3) Solicite o acionamento do LGE por 10 segundos e que o BA-MC espalhe o produto em uma superficie ampla e plana (preferencialmente asfalto)\n   (4) Solicite o fechamento da valvula do LGE e o corte do fluxo de agua\n   (5) Apos avaliacao qualitativa da espuma (filme continuo e com espuma fechada), solicite o procedimento de limpeza da linha do canhao utilizado (nao ha necessidade de realizar a limpeza de todas as linhas do CCI) \n\nObs.: O auditor pode optar por não realizar esse teste caso o teste das válvulas do CCI tenha obtido resultado 100% e o LGE nos tanques esteja em bom estado de conservação (sem bolor, mau cheiro e formando espuma na superfície do bocal do tanque). Como se trata de um resultado altamente dependente do funcionamento das válvulas, pode-se avaliar este item por inferencia direta.",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.15",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.407(b)(5)",
+      "desempenho_esperado": "Perguntar ao BA-MC a capacidade do veiculo",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.16",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.407(b)(5)",
+      "desempenho_esperado": "Perguntar ao BA-MC a capacidade do veiculo (Pressão mínima 200BAR em geral)",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.17",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.403(a)",
+      "desempenho_esperado": "Realizar o teste com o acionamento pneumatico as válvulas do sistema. As válvulas de expedição tendem a emperrar devido à presença de PQ na linha. Observar se o BA-MC conhece o funcionamento dos sistemas do veiculo",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.18",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.403(a)",
+      "desempenho_esperado": "Manter a valvula de pressurizacao do tanque de PQ fechada ao realizar a abertura dessa valvula. Após a abertura, solicitar que seja feito o alivio da pressao nas linhas",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.19",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.407(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.20",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.407(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.21",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.407(b)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.22",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.407(b)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.23",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.407(b)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.24",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.407(b)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.25",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.407(b)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.29",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153207.01",
+      "item_avaliado": "153.407(c)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.30",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153208.01",
+      "item_avaliado": "153.407(d)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.31",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153407",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.32",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "153228.01",
+      "item_avaliado": "IS 153.427-001-6.2.5",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.2.33",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153181.01",
+      "item_avaliado": "RBAC 153.321(a)(7)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.3.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.409(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.3.2",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.409(b)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.3.5",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.409-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.3.6",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.409-001-6.2.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153231.01",
+      "item_avaliado": "153.429(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.2",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153231.02",
+      "item_avaliado": "IS 153.429-001-6.1.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.3",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153232.01",
+      "item_avaliado": "153.429(b)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.4",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153232.02",
+      "item_avaliado": "153.429(b)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.5",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.429-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.6",
+      "peso": 5.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.429-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.7",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "154.303(o)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.9",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153223.01",
+      "item_avaliado": "153.425(b)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.13",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153224.01",
+      "item_avaliado": "153.425(b)(3)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.16",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153227.01",
+      "item_avaliado": "153.425(b)(6)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.17",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153226.01",
+      "item_avaliado": "153.425(b)(5)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.19",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153162.02",
+      "item_avaliado": "153.219(c)(1)(ii)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.20",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.425-001-6.1.4",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.21",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153225.02",
+      "item_avaliado": "IS 153.425-001-6.5.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.22",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.405-001",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.23",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.405-001",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.24",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.405-001",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.4.25",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.3.8",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.1",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153221.01",
+      "item_avaliado": "153.425(b)(1)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.2",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153221.01",
+      "item_avaliado": "153.425(b)(1)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.3",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153222.01",
+      "item_avaliado": "153.425(b)(1)(i)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.5",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153221.01",
+      "item_avaliado": "153.425(b)(1)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.6",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.425-001-6.4.3",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.7",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.425-001-6.4.4",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.8",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.425-001-6.4.5",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.9",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153228.01",
+      "item_avaliado": "153.427(a)(1)(i)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.10",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.427-001-6.2.4",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.13",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.427(a)(1)(iii)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.14",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153228.01",
+      "item_avaliado": "153.427(a)(1)(iv)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.15",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153228.01",
+      "item_avaliado": "153.427(a)(1)(ii)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.16",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153228.01",
+      "item_avaliado": "153.427(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.17",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "EF 153229]",
+      "item_avaliado": "153.427(a)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.18",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153228.01",
+      "item_avaliado": "153.427(a)(1)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.19",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153230",
+      "item_avaliado": "153.427(b)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.20",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153230",
+      "item_avaliado": "153.427(b)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.21",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153230",
+      "item_avaliado": "153.427(b)(1)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.22",
+      "peso": 3.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153230",
+      "item_avaliado": "153.427(b)(1)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.23",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.427 - 6.3.5",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.24",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.427 - 6.3.3",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.25",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153181.01",
+      "item_avaliado": "153.321(a)(3)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.26",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.323(e)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.5.27",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153184",
+      "item_avaliado": "153.323(c)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.1",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(a)",
+      "desempenho_esperado": "O entendimento desse requisito é que o COE não deve ter a estrutura compartilhada com outras atividades que não sejam capaz de dar suporte as açoes necessarias ao gerenciamento da emergencia. Quaisquer outras atividades, pessoas, equipamentos e procedimentos que sejam julgadas uteis DEVEM compor o grupo de recursos do COE",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.2",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(b)",
+      "desempenho_esperado": "A avaliação deste item engloba proficiência nas comunicações, visibilidade do lado ar e planificação atualizada e disponível. Pode-se alocar aqui elementos verificados que não estão previstos em outros itens do checklist",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.3",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": "153181.01",
+      "item_avaliado": "153.321(a)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.4",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "153.323(e)",
+      "desempenho_esperado": "Observar se o PLEM/PCINC encontram-se disponiveis e atualizados",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.5",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(c)",
+      "desempenho_esperado": "Solicitar que o operador do COE acione o PCM para deslocamento para uma determinada quadricula do MGI e aguarde orientaçoes.\nEsse teste não deve ser precedido de aviso previo a quaisquer outros integrantes da operaçao do aeroporto (TWR, supervisores, etc) de maneira que seja avaliado o desempenho dos envolvidos em situacao de normalidade do aeroporto. PAra deslocamentos que envolvam ingresso na area protegida das RWYs e TWYs, deve-se orientar o operador do COE que alerte o PCM em relacao a necessidade de obtençao de aprovacao do ATC, ou em caso de aerodromo com AFIS ou FCA, que o PCM esteja atento ao trafego aereo.",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.6",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(c)",
+      "desempenho_esperado": "Solicitar que o operador do COE acione os faiscas com equipagem completa para deslocamento para uma determinada quadricula do MGI e aguarde orientaçoes.\nEsse teste não deve ter aviso previo a quaisquer outros integrantes da operaçao do aeroporto (TWR, supervisores, etc) de maneira que seja avaliado o desempenho dos envolvidos em situacao de normalidade do aeroporto. Para deslocamentos que envolvam ingresso na area protegida das RWYs e TWYs, deve-se orientar o operador do COE que alerte o comboio;BA-CE em relacao a necessidade de obtençao de aprovacao do ATC, ou em caso de aerodromo com AFIS ou FCA, que o PCM esteja atento ao trafego aereo.",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.7",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(c)",
+      "desempenho_esperado": "Solicitar que o operador do COE identifique qual a capacidade maxima de remocao do aerodromo em termos do modelo de aeronave (informacao prevista no AIS - AIP AD2 e no PLEM)",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.8",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(c)",
+      "desempenho_esperado": "Solicitar que o operador do COE realize alguns acionamentos de recursos previstos no PRAI (empresas de guindastes, Recoveries LATAM e VCP, e outros que o auditor julgar necessario)",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.9",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(c)",
+      "desempenho_esperado": "Solicitar que o operador do COE realize alguns acionamentos de recursos chave previstos na lista do PLEM\nDurante a realizacao desse teste observar se o operador lança mao do uso de alguma lista paralela de acionamentos que não seja a do PLEM",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.10",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(c)",
+      "desempenho_esperado": "Durante todos os testes de deslocamento deve-se pedir ao operador do CMES que acompanhe os veiculos ou pessoas envolvidas. Uma forma alternativa de realizacao desse teste e solicitar que algum passageiro embarcando ou desembarcando seja acompanhado\nSolicitar visualizacao dos pontos criticos do aeroporto (cabeceiras, patios, PAA, cercas, etc)",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.11",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.311(c)",
+      "desempenho_esperado": "Fazer alguns acionamentos e verificar se os telefones estao atualizados. Recomendacoes aos aeroportos\n  (1) Unificar as listas de acionamentos do PLEM, PRAI e PCINC\n   (2) A ordem dos acionamentos nos fluxogramas deve condizer com a prioridade do recurso para determinada emergencia\n   (3) Nao replicar os telefones dos recursos nos fluxogramas. Ao invés disso, é melhor informar o item das listas que aquele contato se encontra\n   (4) O operador pode criar um checklist estilo QRH contendo os fluxogramas com abas por tipo de emergencia e a lista com os acionamentos, de maneira que o operador do COE tenha em mãos de maneira rapida para consulta qual a sequencia de acionaemntos e os contatos para as emergencias previstas\n   (5) O operador do aeroporto deve ter uma escala de aferição das listas de acionamentos, de maneira que toda a lista unificada seja aferida 1x ao mês",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.12",
+      "peso": 2.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153311",
+      "desempenho_esperado": "Solicitar contatos para check de radio",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.14",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": "153184",
+      "item_avaliado": "153311",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.6.15",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153184",
+      "item_avaliado": "153.323(c)",
+      "desempenho_esperado": "Realizar perguntas acerca dos procedimentos previstos para os testes realizados",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.7.1",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III e IV",
+      "referencia": "153175.01",
+      "item_avaliado": "153.313(a)",
+      "desempenho_esperado": "Avaliaçao conjunta com os testes do COE",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.7.2",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III e IV",
+      "referencia": "153176.01",
+      "item_avaliado": "153.313(c)",
+      "desempenho_esperado": "Avaliaçao conjunta com os testes do COE",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.7.3",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III e IV",
+      "referencia": "153177.01",
+      "item_avaliado": "153.313(d)",
+      "desempenho_esperado": "Avaliaçao conjunta com os testes do COE",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.7.4",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": "153181.01",
+      "item_avaliado": "153.321(a)(4)",
+      "desempenho_esperado": "Avaliaçao conjunta com os testes do COE + verificacao visual no veiculo",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.7.5",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.313(e)",
+      "desempenho_esperado": "O responsavel do PCM deve ser preferencialmente o supervisor do patio, ou algum funcionario que esteja no lado ar e tenha conhecimento da operacao e procedimentos do aeroporto",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.7.5",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "II, III e IV",
+      "referencia": null,
+      "item_avaliado": "153.313(e)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.1",
+      "peso": 5.0,
+      "tipo": "B",
+      "aplicabilidade": "C II, III e IV",
+      "referencia": "153219.01",
+      "item_avaliado": "IS 153.423-001-6.1.3",
+      "desempenho_esperado": "Checklist deve estar previstos no PCINC, referenciados para uso na sala de comunicacoes e a versao utilizada condiz com a versao do plano",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.2",
+      "peso": 5.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "153219.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.3",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.4",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.5",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.6",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.7",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.8",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.9",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.10",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.11",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.12",
+      "peso": null,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153219.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.13",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "C II, III e IV",
+      "referencia": "153219.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.14",
+      "peso": 5.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.15",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.16",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.17",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.18",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.19",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.20",
+      "peso": 5.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "153220.01",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.21",
+      "peso": 1.0,
+      "tipo": "C",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "153.423(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.22",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.23",
+      "peso": 5.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.24",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.25",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.26",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.27",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.28",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.29",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.30",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.31",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.32",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.33",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.34",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.35",
+      "peso": 5.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.36",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.37",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.2.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.8.38",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": "-",
+      "item_avaliado": "IS 153.423-001-6.1.7",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.10.1",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "II, III e IV",
+      "referencia": "153174.01",
+      "item_avaliado": "153.309(a)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.10.2",
+      "peso": 1.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153181.01",
+      "item_avaliado": "153.321(a)(8)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.11.1",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "<1km de água",
+      "referencia": null,
+      "item_avaliado": "IS 153.433-001-6.1.6",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.11.2",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "<1km de água",
+      "referencia": null,
+      "item_avaliado": "IS 153.433-001-6.3.3",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.11.3",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "<1km de água",
+      "referencia": null,
+      "item_avaliado": "IS 153.433-001-6.5",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.3",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.2.4",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.4",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.2.3",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.5",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.1.1",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.6",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153217.01",
+      "item_avaliado": "153.421(a)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.6",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153217.01",
+      "item_avaliado": "153421",
+      "desempenho_esperado": "Conferir a validade dos TPs utilizados (Deve estar claramente identificado nos TPs / Caso não esteja, o operador deve apresentar u controle com declaração das validades emitidas pelos fabricantes)",
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.7",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.2.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.8",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.1.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.9",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.1.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.10",
+      "peso": 5.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153206.01",
+      "item_avaliado": "153.421(b)(2)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.11",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS153.421-001-6.3.3",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.12",
+      "peso": 1.0,
+      "tipo": "A",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.3.4",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.13",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.407-001-6.2.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.14",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.1.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.13.15",
+      "peso": 2.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.421-001-6.1.2",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.14.1",
+      "peso": 3.0,
+      "tipo": "D",
+      "aplicabilidade": "Todos",
+      "referencia": "153225.04",
+      "item_avaliado": "153.425(b)(4)",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.14.2",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.425-001-6.5.4",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    },
+    {
+      "item_num": "T3.14.3",
+      "peso": 1.0,
+      "tipo": "B",
+      "aplicabilidade": "Todos",
+      "referencia": null,
+      "item_avaliado": "IS 153.425-001-6.5.6",
+      "desempenho_esperado": null,
+      "checklist_type": "TOPS"
+    }
+  ]
+}
