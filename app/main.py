@@ -672,11 +672,11 @@ async def check_compliance(
         result = engine.check_compliance(request.airport_id)
     except Exception as e:
         import traceback
-        error_detail = f"Erro ao verificar conformidade: {str(e)}\n{traceback.format_exc()}"
-        print(f"ERROR in check_compliance: {error_detail}")
+        tb = traceback.format_exc()
+        print(f"ERROR in check_compliance: {e}\n{tb}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=error_detail
+            detail=str(e)
         )
     
     # Convert compliance records to response format
@@ -819,14 +819,14 @@ async def check_compliance(
                 logging.error(traceback.format_exc())
                 regulation_dict = None
         
-        # Parse custom_fields if it's a JSON string
+        # Parse custom_fields: schema espera Dict
         custom_fields = None
         if record.custom_fields:
             try:
                 if isinstance(record.custom_fields, str):
-                    custom_fields = record.custom_fields  # Keep as string for API response
+                    custom_fields = json.loads(record.custom_fields)
                 else:
-                    custom_fields = json.dumps(record.custom_fields) if record.custom_fields else None
+                    custom_fields = record.custom_fields
             except (json.JSONDecodeError, TypeError):
                 custom_fields = None
         
@@ -867,11 +867,16 @@ async def check_compliance(
                     import logging
                     logging.error(f"Failed to create minimal RegulationResponse: {e2}")
         
+        status_val = record.status
+        if hasattr(status_val, 'value'):
+            status_val = status_val.value
+        elif status_val is not None:
+            status_val = str(status_val)
         record_dict = {
             "id": record.id,
             "airport_id": record.airport_id,
             "regulation_id": record.regulation_id,
-            "status": record.status,
+            "status": status_val or "pending_review",
             "notes": record.notes,
             "docs_score": record.docs_score,
             "tops_score": record.tops_score,
@@ -885,7 +890,15 @@ async def check_compliance(
             "verified_by": record.verified_by,
             "regulation": regulation_response
         }
-        records_response.append(schemas.ComplianceRecordResponse(**record_dict))
+        try:
+            records_response.append(schemas.ComplianceRecordResponse(**record_dict))
+        except Exception as rec_err:
+            import logging
+            logging.error(f"ComplianceRecordResponse validation failed for record {record.id}: {rec_err}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Erro ao serializar registro {record.id}: {rec_err}"
+            )
     
     return schemas.ComplianceCheckResponse(
         airport_id=result["airport_id"],
@@ -990,14 +1003,14 @@ async def get_airport_compliance(airport_id: int, db: Session = Depends(get_db))
                 "expected_performance": regulation.expected_performance
             }
         
-        # Parse custom_fields if it's a JSON string
+        # Parse custom_fields: schema espera Dict
         custom_fields = None
         if record.custom_fields:
             try:
                 if isinstance(record.custom_fields, str):
-                    custom_fields = record.custom_fields  # Keep as string for API response
+                    custom_fields = json.loads(record.custom_fields)
                 else:
-                    custom_fields = json.dumps(record.custom_fields) if record.custom_fields else None
+                    custom_fields = record.custom_fields
             except (json.JSONDecodeError, TypeError):
                 custom_fields = None
         

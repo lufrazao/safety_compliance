@@ -3569,7 +3569,9 @@
                     if (response.status === 401) {
                         throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
                     }
-                    throw new Error('Erro ao verificar conformidade');
+                    const errBody = await response.json().catch(() => ({}));
+                    const msg = errBody.detail || `Erro ao verificar conformidade (${response.status})`;
+                    throw new Error(typeof msg === 'string' ? msg : msg[0]?.msg || 'Erro ao verificar conformidade');
                 }
                 
                 const data = await response.json();

@@ -52,7 +52,8 @@ class ComplianceEngine:
                     else:
                         airport_size = AirportSize.SMALL  # Default
                 
-                if airport_size and airport_size.value not in applicable_sizes:
+                size_val = airport_size.value if hasattr(airport_size, 'value') else str(airport_size) if airport_size else None
+                if size_val and size_val not in applicable_sizes:
                     return False
             except (json.JSONDecodeError, TypeError):
                 pass
@@ -61,7 +62,10 @@ class ComplianceEngine:
         if regulation.applies_to_types:
             try:
                 applicable_types = json.loads(regulation.applies_to_types)
-                airport_type_val = (airport.airport_type.value if airport.airport_type else "commercial")
+                at = airport.airport_type
+                airport_type_val = "commercial"
+                if at is not None:
+                    airport_type_val = at.value if hasattr(at, 'value') else str(at)
                 if airport_type_val not in applicable_types:
                     return False
             except (json.JSONDecodeError, TypeError, AttributeError):
@@ -101,8 +105,10 @@ class ComplianceEngine:
                         'large': (1000000, 10000000),
                         'international': (10000000, float('inf'))
                     }
-                    if airport.size and airport.size.value in size_passenger_ranges:
-                        size_min, size_max = size_passenger_ranges[airport.size.value]
+                    sz = airport.size
+                    sz_val = sz.value if hasattr(sz, 'value') else str(sz) if sz else None
+                    if sz_val and sz_val in size_passenger_ranges:
+                        size_min, size_max = size_passenger_ranges[sz_val]
                         # Use the minimum of the range as conservative estimate
                         # If regulation requires more than the max of the range, it doesn't apply
                         if regulation.min_passengers > size_max:
@@ -242,14 +248,16 @@ class ComplianceEngine:
                 self.db.add(record)
                 self.db.commit()
                 self.db.refresh(record)
-            elif record and record.status in [ComplianceStatus.NON_COMPLIANT, ComplianceStatus.PENDING_REVIEW]:
-                # Generate/update action items for non-compliant or pending records
-                if not record.action_items:
-                    action_items = self._generate_action_items(regulation, airport)
-                    if action_items:
-                        record.action_items = json.dumps(action_items)
-                        self.db.commit()
-                        self.db.refresh(record)
+            elif record:
+                rec_st = record.status
+                rec_st_val = rec_st.value if (rec_st and hasattr(rec_st, 'value')) else str(rec_st) if rec_st else "pending_review"
+                if rec_st_val in ["non_compliant", "pending_review"]:
+                    if not record.action_items:
+                        action_items = self._generate_action_items(regulation, airport)
+                        if action_items:
+                            record.action_items = json.dumps(action_items)
+                            self.db.commit()
+                            self.db.refresh(record)
             
             if record:
                 compliance_records.append(record)
@@ -264,7 +272,13 @@ class ComplianceEngine:
         }
         
         for record in compliance_records:
-            status_counts[record.status] = status_counts.get(record.status, 0) + 1
+            st = record.status
+            st_val = st.value if (st and hasattr(st, 'value')) else (str(st) if st else "pending_review")
+            try:
+                st_enum = ComplianceStatus(st_val) if isinstance(st_val, str) else st
+            except (ValueError, TypeError):
+                st_enum = ComplianceStatus.PENDING_REVIEW
+            status_counts[st_enum] = status_counts.get(st_enum, 0) + 1
         
         # Calculate ANAC compliance scores
         compliance_scores = self._calculate_anac_scores(compliance_records, applicable_regulations)
@@ -326,25 +340,35 @@ class ComplianceEngine:
             classification = regulation.requirement_classification
             weight = regulation.weight or 1
             eval_type = regulation.evaluation_type or EvaluationType.BOTH
+            if hasattr(eval_type, 'value'):
+                eval_type = eval_type
+            elif isinstance(eval_type, str):
+                try:
+                    eval_type = EvaluationType(eval_type)
+                except (ValueError, TypeError):
+                    eval_type = EvaluationType.BOTH
             
-            is_compliant = record.status == ComplianceStatus.COMPLIANT
+            rec_st = record.status
+            rec_st_val = rec_st.value if (rec_st and hasattr(rec_st, 'value')) else str(rec_st) if rec_st else "pending_review"
+            is_compliant = rec_st_val == "compliant"
             
-            if classification == RequirementClassification.D:
+            cls_val = classification.value if (classification and hasattr(classification, 'value')) else (str(classification) if classification else None)
+            if cls_val == "D":
                 d_items.append(record)
                 total_d_weight += weight
                 if is_compliant:
                     compliant_d_weight += weight
-            elif classification == RequirementClassification.C:
+            elif cls_val == "C":
                 c_items.append(record)
                 total_c_weight += weight
                 if is_compliant:
                     compliant_c_weight += weight
-            elif classification == RequirementClassification.B:
+            elif cls_val == "B":
                 b_items.append(record)
                 total_b_weight += weight
                 if is_compliant:
                     compliant_b_weight += weight
-            elif classification == RequirementClassification.A:
+            elif cls_val == "A":
                 a_items.append(record)
                 total_a_weight += weight
                 if is_compliant:
@@ -427,12 +451,14 @@ class ComplianceEngine:
                 )
         
         # Size-specific recommendations
-        if airport.size == AirportSize.SMALL:
+        ap_sz = airport.size
+        ap_sz_val = ap_sz.value if (ap_sz and hasattr(ap_sz, 'value')) else (str(ap_sz) if ap_sz else None)
+        if ap_sz_val == "small":
             recommendations.append(
                 "As a small airport, ensure you have basic safety equipment and "
                 "trained personnel as per ANAC minimum requirements."
             )
-        elif airport.size in [AirportSize.LARGE, AirportSize.INTERNATIONAL]:
+        elif ap_sz_val in ["large", "international"]:
             recommendations.append(
                 "As a large/international airport, ensure comprehensive safety management "
                 "systems (SMS) are in place and regularly audited."
@@ -453,16 +479,18 @@ class ComplianceEngine:
         This helps airport teams understand what needs to be done to achieve compliance.
         """
         action_items = []
-        requirements = regulation.requirements.lower()
+        requirements = (regulation.requirements or "").lower()
+        safety_val = regulation.safety_category.value if (regulation.safety_category and hasattr(regulation.safety_category, 'value')) else ""
         
         # Generate action items based on regulation requirements and safety category
-        if regulation.safety_category.value == "operational_safety":
+        if safety_val == "operational_safety":
             if "sms" in requirements or "sistema de gerenciamento" in requirements:
                 action_items.append("Desenvolver e documentar política de segurança operacional")
                 action_items.append("Implementar processo de gestão de riscos operacionais")
                 action_items.append("Estabelecer sistema de garantia de segurança (auditorias internas)")
                 action_items.append("Criar programa de promoção da segurança")
-                if airport.size and airport.size.value in ["large", "international"]:
+                sz_val = airport.size.value if (airport.size and hasattr(airport.size, 'value')) else (str(airport.size) if airport.size else None)
+                if sz_val in ["large", "international"]:
                     action_items.append("Realizar auditoria externa anual do SMS")
             
             if "incidentes" in requirements or "acidentes" in requirements:
@@ -475,12 +503,13 @@ class ComplianceEngine:
                 action_items.append("Estabelecer programa de reciclagem anual")
                 action_items.append("Manter registro de todos os treinamentos realizados")
         
-        elif regulation.safety_category.value == "fire_safety":
+        elif safety_val == "fire_safety":
             if "scir" in requirements or "combate a incêndio" in requirements:
                 action_items.append("Determinar categoria SCIR baseada na maior aeronave operacional")
                 action_items.append("Contratar/treinamento equipe de SCIR adequada à categoria")
                 action_items.append("Garantir tempo de resposta máximo de 3 minutos")
-                if airport.size and airport.size.value in ["medium", "large", "international"]:
+                sz_val = airport.size.value if (airport.size and hasattr(airport.size, 'value')) else (str(airport.size) if airport.size else None)
+                if sz_val in ["medium", "large", "international"]:
                     action_items.append("Adquirir veículos de combate a incêndio certificados")
             
             if "equipamentos" in requirements or "extintores" in requirements:
@@ -493,7 +522,7 @@ class ComplianceEngine:
                 action_items.append("Integrar sistema com central de monitoramento")
                 action_items.append("Realizar testes semanais do sistema de alarme")
         
-        elif regulation.safety_category.value == "security":
+        elif safety_val == "security":
             if "avsec" in requirements or "segurança da aviação" in requirements:
                 action_items.append("Desenvolver programa AVSEC documentado")
                 action_items.append("Treinar pessoal de segurança conforme padrões AVSEC")
@@ -515,7 +544,7 @@ class ComplianceEngine:
                 action_items.append("Implementar sistema de vigilância por câmeras")
                 action_items.append("Estabelecer rotina de patrulhamento")
         
-        elif regulation.safety_category.value == "infrastructure":
+        elif safety_val == "infrastructure":
             if "pistas" in requirements or "pátios" in requirements:
                 action_items.append("Estabelecer rotina de inspeção diária de pistas")
                 action_items.append("Implementar programa de manutenção preventiva de pátios")
@@ -541,7 +570,7 @@ class ComplianceEngine:
                 action_items.append("Adquirir equipamentos de movimentação de carga")
                 action_items.append("Implementar controle de temperatura quando necessário")
         
-        elif regulation.safety_category.value == "emergency_response":
+        elif safety_val == "emergency_response":
             if "plano de emergência" in requirements:
                 action_items.append("Desenvolver plano de emergência aeroportuária documentado")
                 action_items.append("Coordenar com órgãos externos (bombeiros, polícia, saúde)")
@@ -558,7 +587,7 @@ class ComplianceEngine:
                 action_items.append("Adquirir equipamentos de resgate adequados")
                 action_items.append("Estabelecer área médica no terminal")
         
-        elif regulation.safety_category.value == "environmental":
+        elif safety_val == "environmental":
             if "ruído" in requirements:
                 action_items.append("Instalar sistema de monitoramento de ruído")
                 action_items.append("Estabelecer rotina de relatórios trimestrais")
@@ -574,7 +603,7 @@ class ComplianceEngine:
                 action_items.append("Avaliar medidas de redução de emissões")
                 action_items.append("Priorizar uso de equipamentos elétricos quando possível")
         
-        elif regulation.safety_category.value == "wildlife_management":
+        elif safety_val == "wildlife_management":
             action_items.append("Estabelecer programa de gerenciamento de fauna documentado")
             action_items.append("Implementar inspeções diárias antes das primeiras operações")
             action_items.append("Manter registro de todos os avistamentos de fauna")
@@ -583,7 +612,7 @@ class ComplianceEngine:
                 action_items.append("Remover fontes de alimento para fauna")
                 action_items.append("Adquirir equipamentos de dispersão de fauna")
         
-        elif regulation.safety_category.value == "maintenance":
+        elif safety_val == "maintenance":
             if "calibração" in requirements:
                 action_items.append("Identificar todos os equipamentos críticos que requerem calibração")
                 action_items.append("Estabelecer cronograma de calibração anual")
@@ -600,7 +629,7 @@ class ComplianceEngine:
                 action_items.append("Garantir pessoal qualificado e certificado")
                 action_items.append("Implementar controle de ferramentas")
         
-        elif regulation.safety_category.value == "personnel_certification":
+        elif safety_val == "personnel_certification":
             if "supervisores" in requirements:
                 action_items.append("Verificar certificação ANAC de supervisores")
                 action_items.append("Garantir reciclagem a cada 2 anos")
@@ -612,7 +641,7 @@ class ComplianceEngine:
                 action_items.append("Estabelecer programa de reciclagem anual")
                 action_items.append("Manter certificados de conclusão de treinamentos")
         
-        elif regulation.safety_category.value == "air_traffic_services":
+        elif safety_val == "air_traffic_services":
             if "torre" in requirements or "controle" in requirements:
                 action_items.append("Verificar certificação da torre de controle")
                 action_items.append("Garantir pessoal ATC certificado e atualizado")
