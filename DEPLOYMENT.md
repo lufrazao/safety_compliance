@@ -47,12 +47,14 @@ Guia passo a passo para colocar o Sistema de Conformidade ANAC online.
 1. Clique no serviço da **aplicação** (não no PostgreSQL)
 2. Vá em **"Variables"** → **"+ New Variable"** → **"Add Reference"**
 3. Na janela que abrir:
-   - **Nome da variável:** `DATABASE_URL` (digite exatamente isso)
+   - **Nome da variável:** `DATABASE_PUBLIC_URL` (recomendado) ou `DATABASE_URL`
    - **Serviço:** selecione o serviço **PostgreSQL** do seu projeto
-   - **Variável:** selecione **`DATABASE_URL`** (a variável que o PostgreSQL já expõe)
+   - **Variável:** selecione **`DATABASE_PUBLIC_URL`** (preferido) ou **`DATABASE_URL`**
 4. Salve. O Railway injeta automaticamente a URL de conexão na aplicação.
 
-Alternativa: se não houver "Add Reference", copie manualmente o valor de `DATABASE_URL` do PostgreSQL (em Variables do serviço PostgreSQL) e crie a variável `DATABASE_URL` no serviço da aplicação.
+**Por que DATABASE_PUBLIC_URL?** O `DATABASE_URL` do PostgreSQL usa o host `postgres.railway.internal`, que só resolve dentro da rede privada do Railway. Se o app e o banco estiverem em projetos/ambientes diferentes, ou houver falha na rede interna, use `DATABASE_PUBLIC_URL`, que usa o host público e funciona em qualquer cenário.
+
+Alternativa: se não houver "Add Reference", copie manualmente o valor de `DATABASE_PUBLIC_URL` (ou `DATABASE_URL`) do PostgreSQL e crie a variável no serviço da aplicação.
 
 ---
 
@@ -115,9 +117,10 @@ railway run python -m app.seed_data
 
 ## Variáveis de ambiente (opcional)
 
-| Variável       | Descrição                    | Padrão        |
-|----------------|------------------------------|---------------|
-| `DATABASE_URL` | URL do PostgreSQL            | (obrigatório no Railway) |
+| Variável               | Descrição                    | Padrão        |
+|------------------------|------------------------------|---------------|
+| `DATABASE_PUBLIC_URL`  | URL pública do PostgreSQL (recomendado) | (obrigatório no Railway) |
+| `DATABASE_URL`         | URL do PostgreSQL (host interno) | Alternativa |
 | `PORT`         | Porta (Railway define)       | Automático    |
 
 ---
@@ -130,8 +133,13 @@ railway run python -m app.seed_data
 - **Solução:** Passos 2 e 3 – adicione PostgreSQL e vincule `DATABASE_URL` à aplicação
 - Após vincular, os dados passam a persistir no PostgreSQL
 
-**Erro de conexão com o banco**
-- Confirme que `DATABASE_URL` está definida e aponta para o PostgreSQL
+**Erro "could not translate host name postgres.railway.internal"**
+- O host interno do Railway só resolve dentro da rede privada do mesmo projeto
+- **Solução:** Use `DATABASE_PUBLIC_URL` em vez de `DATABASE_URL`. No serviço da app → Variables → Add Reference → PostgreSQL → variável **`DATABASE_PUBLIC_URL`**
+- O app já prioriza `DATABASE_PUBLIC_URL` quando disponível
+
+**Outros erros de conexão com o banco**
+- Confirme que `DATABASE_URL` ou `DATABASE_PUBLIC_URL` está definida e aponta para o PostgreSQL
 - Verifique se o formato é `postgresql://` (o app converte `postgres://` automaticamente)
 
 **Build falha**

@@ -5157,11 +5157,11 @@
                     customFields[fieldName] = fieldValue;
                 }
                 
-                // Save to backend
+                // Save to backend (API espera Dict, não string)
                 const response = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ custom_fields: JSON.stringify(customFields) })
+                    body: JSON.stringify({ custom_fields: customFields })
                 });
                 
                 if (!response.ok) {
@@ -6041,10 +6041,10 @@
                 if (updateResponse.ok) {
                     showToast('Data de vencimento salva com sucesso!', 'success');
                     
-                    // Refresh to show updated date status
+                    // Refresh to show updated date status (preserva posição de scroll)
                     const airportId = document.getElementById('airportSelect').value || window.selectedAirportId;
                     if (airportId) {
-                        await checkCompliance(airportId);
+                        await checkCompliance(airportId, { preserveScroll: true });
                         
                         // Also refresh deadlines tab if it's active
                         const deadlinesTab = document.getElementById('deadlinesTab');
