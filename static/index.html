@@ -5910,12 +5910,14 @@
             
             window._toggleActionItemInProgress.add(recordId);
             const recordElement = document.getElementById(`record-${recordId}`);
-            recordElement?.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
-            const checkboxes = recordElement.querySelectorAll('input[type="checkbox"]');
+            const actionCheckboxes = recordElement?.querySelectorAll(`input[id^="action-${recordId}-"]`);
+            actionCheckboxes?.forEach(cb => cb.disabled = true);
             const completedItems = [];
-            checkboxes.forEach((cb, idx) => {
-                if (cb.checked) completedItems.push(idx);
+            actionCheckboxes?.forEach((cb) => {
+                const match = cb.id.match(new RegExp(`action-${recordId}-(\\d+)`));
+                if (match && cb.checked) completedItems.push(parseInt(match[1], 10));
             });
+            completedItems.sort((a, b) => a - b);
             
             try {
                 // Update completed action items (status will be auto-calculated)
@@ -6031,7 +6033,7 @@
                 showToast('Erro ao atualizar item de ação. Tente novamente.', 'error');
             } finally {
                 window._toggleActionItemInProgress.delete(recordId);
-                document.getElementById(`record-${recordId}`)?.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = false);
+                document.getElementById(`record-${recordId}`)?.querySelectorAll(`input[id^="action-${recordId}-"]`).forEach(cb => cb.disabled = false);
             }
         }
         
