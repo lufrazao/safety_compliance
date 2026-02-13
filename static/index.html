@@ -4225,11 +4225,7 @@
                                         const dueDates = record.action_item_due_dates || {};
                                         const dueDate = dueDates[idx] || null;
                                         
-                                        // Only show as crossed out if status is compliant AND item is checked
-                                        const isCompliantStatus = statusValue === 'compliant';
-                                        const shouldStrikeThrough = isChecked && isCompliantStatus && !dateStatus.includes('EXPIRADO');
-                                        
-                                        // Check if expired or expiring soon
+                                        // Check if expired or expiring soon (declarar antes de usar)
                                         let dateStatus = '';
                                         let dateClass = '';
                                         if (dueDate) {
@@ -4253,6 +4249,10 @@
                                                 dateClass = 'valid';
                                             }
                                         }
+                                        
+                                        // Only show as crossed out if status is compliant AND item is checked
+                                        const isCompliantStatus = statusValue === 'compliant';
+                                        const shouldStrikeThrough = isChecked && isCompliantStatus && !dateStatus.includes('EXPIRADO');
                                         
                                         // Determine background color based on status and checked state
                                         let bgColor = '#f8f9fa';
