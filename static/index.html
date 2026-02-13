@@ -4214,8 +4214,10 @@
                                 <!-- Progress Bar -->
                                 ${(() => {
                                     const completedItems = record.completed_action_items || [];
-                                    const completedCount = Array.isArray(completedItems) ? completedItems.length : 0;
                                     const totalCount = actionItems.length;
+                                    const completedArr = Array.isArray(completedItems) ? completedItems : [];
+                                    const validIndices = new Set(completedArr.map(i => typeof i === 'number' ? i : parseInt(i, 10)).filter(i => !isNaN(i) && i >= 0 && i < totalCount));
+                                    const completedCount = validIndices.size;
                                     const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
                                     return `
                                         <div class="action-items-progress">
@@ -4234,7 +4236,7 @@
                                 <ul style="margin-top: 10px;">
                                     ${actionItems.map((item, idx) => {
                                         const completedItems = record.completed_action_items || [];
-                                        const isChecked = Array.isArray(completedItems) && completedItems.includes(idx);
+                                        const isChecked = Array.isArray(completedItems) && completedItems.some(i => (typeof i === 'number' ? i : parseInt(i, 10)) === idx);
                                         const dueDates = record.action_item_due_dates || {};
                                         const dueDate = dueDates[idx] || null;
                                         
@@ -4510,8 +4512,10 @@
                                 <!-- Progress Bar -->
                                 ${(() => {
                                     const completedItems = record.completed_action_items || [];
-                                    const completedCount = Array.isArray(completedItems) ? completedItems.length : 0;
                                     const totalCount = actionItems.length;
+                                    const completedArr = Array.isArray(completedItems) ? completedItems : [];
+                                    const validIndices = new Set(completedArr.map(i => typeof i === 'number' ? i : parseInt(i, 10)).filter(i => !isNaN(i) && i >= 0 && i < totalCount));
+                                    const completedCount = validIndices.size;
                                     const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
                                     return `
                                         <div class="action-items-progress">
@@ -4530,7 +4534,7 @@
                                 <ul style="margin-top: 10px;">
                                     ${actionItems.map((item, idx) => {
                                         const completedItems = record.completed_action_items || [];
-                                        const isChecked = Array.isArray(completedItems) && completedItems.includes(idx);
+                                        const isChecked = Array.isArray(completedItems) && completedItems.some(i => (typeof i === 'number' ? i : parseInt(i, 10)) === idx);
                                         const dueDates = record.action_item_due_dates || {};
                                         const dueDate = dueDates[idx] || null;
                                         
@@ -6039,6 +6043,20 @@
                         throw new Error(errData.detail || `Erro ao atualizar (${resp.status})`);
                     }
                     completedItems = pendingItems;
+                }
+                
+                // Atualizar barra de progresso do plano de ação com estado final
+                const finalRecord = document.getElementById(`record-${recordId}`);
+                const finalCheckboxes = finalRecord?.querySelectorAll(`input[id^="action-${recordId}-"]`);
+                const totalCount = finalCheckboxes?.length || 0;
+                const completedCount = completedItems.length;
+                const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                const progressText = finalRecord?.querySelector('.action-items-progress .progress-bar-text');
+                const progressFill = finalRecord?.querySelector('.action-items-progress .progress-bar-fill');
+                if (progressText && progressFill) {
+                    progressText.textContent = `Progresso: ${completedCount} de ${totalCount} itens completos (${percentage}%)`;
+                    progressFill.style.width = `${percentage}%`;
+                    progressFill.textContent = percentage > 10 ? percentage + '%' : '';
                 }
                 
                 // Refresh compliance summary (mantém foco no card atualizado)
