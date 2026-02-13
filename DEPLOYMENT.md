@@ -2,6 +2,16 @@
 
 Guia passo a passo para colocar o Sistema de Conformidade ANAC online.
 
+---
+
+## ⚠️ IMPORTANTE: Dados persistentes
+
+**Se os aeroportos cadastrados somem a cada novo deploy**, a variável `DATABASE_URL` não está configurada. Sem ela, o sistema usa SQLite no container, e os dados são perdidos a cada push.
+
+**Solução:** Siga os Passos 2 e 3 abaixo para adicionar PostgreSQL e vincular `DATABASE_URL` ao serviço da aplicação. Depois disso, os dados permanecem entre deploys.
+
+---
+
 ## Pré-requisitos
 
 - Conta no [Railway](https://railway.app)
@@ -32,12 +42,17 @@ Guia passo a passo para colocar o Sistema de Conformidade ANAC online.
 
 ## Passo 3: Vincular o banco à aplicação
 
+**Onde configurar:** no serviço da **aplicação** (o que roda o código), não no serviço do PostgreSQL.
+
 1. Clique no serviço da **aplicação** (não no PostgreSQL)
 2. Vá em **"Variables"** → **"+ New Variable"** → **"Add Reference"**
-3. Selecione o serviço **PostgreSQL** e a variável **`DATABASE_URL`**
-4. Isso injeta automaticamente a URL de conexão na aplicação
+3. Na janela que abrir:
+   - **Nome da variável:** `DATABASE_URL` (digite exatamente isso)
+   - **Serviço:** selecione o serviço **PostgreSQL** do seu projeto
+   - **Variável:** selecione **`DATABASE_URL`** (a variável que o PostgreSQL já expõe)
+4. Salve. O Railway injeta automaticamente a URL de conexão na aplicação.
 
-Alternativa: se não houver "Add Reference", copie manualmente o valor de `DATABASE_URL` do PostgreSQL e crie a variável no serviço da aplicação.
+Alternativa: se não houver "Add Reference", copie manualmente o valor de `DATABASE_URL` do PostgreSQL (em Variables do serviço PostgreSQL) e crie a variável `DATABASE_URL` no serviço da aplicação.
 
 ---
 
@@ -108,6 +123,12 @@ railway run python -m app.seed_data
 ---
 
 ## Troubleshooting
+
+**Aeroportos cadastrados somem a cada deploy**
+- A variável `DATABASE_URL` não está definida no serviço da aplicação
+- O sistema está usando SQLite (arquivo no container = efêmero)
+- **Solução:** Passos 2 e 3 – adicione PostgreSQL e vincule `DATABASE_URL` à aplicação
+- Após vincular, os dados passam a persistir no PostgreSQL
 
 **Erro de conexão com o banco**
 - Confirme que `DATABASE_URL` está definida e aponta para o PostgreSQL
