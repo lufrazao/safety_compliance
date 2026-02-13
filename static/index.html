@@ -1683,7 +1683,7 @@
     </div>
     
     <script>
-        const API_BASE = 'http://localhost:8000/api';
+        const API_BASE = (window.location.origin || 'http://localhost:8000') + '/api';
         let currentEditingId = null;
         
         // Tab switching - make it globally accessible (override the early definition)

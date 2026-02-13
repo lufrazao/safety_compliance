@@ -48,6 +48,21 @@ async def startup_event():
     init_db()
 
 
+@app.post("/api/seed")
+async def run_seed():
+    """
+    Popula o banco com normas RBAC e dados de exemplo (apenas primeira execução).
+    Útil para setup inicial no Railway.
+    """
+    try:
+        from app.seed_data import seed_regulations, seed_sample_airports
+        seed_regulations()
+        seed_sample_airports()
+        return {"message": "Seed concluído com sucesso. Normas e dados iniciais carregados."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/.well-known/appspecific/com.chrome.devtools.json")
 async def chrome_devtools_config():
     """Chrome DevTools auto-requests this; return empty to avoid 404 logs."""
