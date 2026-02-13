@@ -89,6 +89,7 @@ dmypy.json
 
 # Project specific
 *.pdf
+data/  # Cache ANAC (gerado em runtime)
 !requirements.txt
 uploads/
 static/uploads/

@@ -1,20 +1,24 @@
 """
 FastAPI application for airport compliance management.
 """
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 import uvicorn
 import os
 import json
+import shutil
+from pathlib import Path
 
 from app.database import get_db, init_db
 from app import schemas
 from app.compliance_engine import ComplianceEngine
-from app.models import Airport, Regulation, ComplianceRecord
+from app.models import Airport, Regulation, ComplianceRecord, DocumentAttachment, AirportSize
+from app.services.anac_sync import ANACSyncService
 
 app = FastAPI(
     title="ANAC Airport Compliance System",
@@ -43,6 +47,11 @@ async def startup_event():
     """Initialize database on startup."""
     init_db()
 
+
+@app.get("/.well-known/appspecific/com.chrome.devtools.json")
+async def chrome_devtools_config():
+    """Chrome DevTools auto-requests this; return empty to avoid 404 logs."""
+    return {}
 
 @app.get("/")
 async def root():
@@ -74,7 +83,32 @@ async def create_airport(airport: schemas.AirportCreate, db: Session = Depends(g
             detail=f"Airport with code {airport.code} already exists"
         )
     
-    db_airport = Airport(**airport.dict())
+    airport_dict = airport.dict()
+    
+    # Calcular size e annual_passengers automaticamente a partir de usage_class
+    if airport_dict.get('usage_class'):
+        usage_class = airport_dict['usage_class']
+        if usage_class == 'PRIVADO':
+            airport_dict['size'] = AirportSize.SMALL
+            airport_dict['annual_passengers'] = 0  # Privado não tem passageiros comerciais
+        elif usage_class == 'I':
+            airport_dict['size'] = AirportSize.SMALL
+            airport_dict['annual_passengers'] = 100000  # Estimativa média para Classe I
+        elif usage_class == 'II':
+            airport_dict['size'] = AirportSize.MEDIUM
+            airport_dict['annual_passengers'] = 600000  # Estimativa média para Classe II
+        elif usage_class == 'III':
+            airport_dict['size'] = AirportSize.LARGE
+            airport_dict['annual_passengers'] = 3000000  # Estimativa média para Classe III
+        elif usage_class == 'IV':
+            airport_dict['size'] = AirportSize.INTERNATIONAL
+            airport_dict['annual_passengers'] = 10000000  # Estimativa média para Classe IV
+    elif not airport_dict.get('size'):
+        # Fallback: se não houver usage_class, usar size se fornecido
+        if not airport_dict.get('size'):
+            airport_dict['size'] = AirportSize.SMALL  # Default
+    
+    db_airport = Airport(**airport_dict)
     db.add(db_airport)
     db.commit()
     db.refresh(db_airport)
@@ -123,8 +157,29 @@ async def update_airport(
                 detail=f"Airport with code {airport_update.code} already exists"
             )
     
+    airport_dict = airport_update.dict()
+    
+    # Calcular size e annual_passengers automaticamente a partir de usage_class
+    if airport_dict.get('usage_class'):
+        usage_class = airport_dict['usage_class']
+        if usage_class == 'PRIVADO':
+            airport_dict['size'] = AirportSize.SMALL
+            airport_dict['annual_passengers'] = 0  # Privado não tem passageiros comerciais
+        elif usage_class == 'I':
+            airport_dict['size'] = AirportSize.SMALL
+            airport_dict['annual_passengers'] = 100000  # Estimativa média para Classe I
+        elif usage_class == 'II':
+            airport_dict['size'] = AirportSize.MEDIUM
+            airport_dict['annual_passengers'] = 600000  # Estimativa média para Classe II
+        elif usage_class == 'III':
+            airport_dict['size'] = AirportSize.LARGE
+            airport_dict['annual_passengers'] = 3000000  # Estimativa média para Classe III
+        elif usage_class == 'IV':
+            airport_dict['size'] = AirportSize.INTERNATIONAL
+            airport_dict['annual_passengers'] = 10000000  # Estimativa média para Classe IV
+    
     # Update all fields
-    for key, value in airport_update.dict().items():
+    for key, value in airport_dict.items():
         setattr(airport, key, value)
     
     db.commit()
@@ -145,6 +200,242 @@ async def delete_airport(airport_id: int, db: Session = Depends(get_db)):
     db.delete(airport)
     db.commit()
     return None
+
+
+# ANAC Synchronization endpoints
+def _infer_missing_lookup_fields(result: dict, airport: Airport) -> None:
+    """Infere usage_class, avsec, aircraft_size quando ausentes no lookup."""
+    ref = (result.get('reference_code') or getattr(airport, 'reference_code', None) or '').upper()
+    usage = result.get('usage_class') or getattr(airport, 'usage_class', None)
+    avsec = result.get('avsec_classification') or getattr(airport, 'avsec_classification', None)
+    aircraft = result.get('aircraft_size_category') or getattr(airport, 'aircraft_size_category', None)
+    passengers = getattr(airport, 'annual_passengers', None) or 0
+    # Inferir aircraft_size_category a partir de reference_code (ex: 4C -> C)
+    if not aircraft and len(ref) >= 2:
+        letter = ref[-1]
+        if letter in ('A', 'B'):
+            result['aircraft_size_category'] = 'A/B'
+        elif letter == 'C':
+            result['aircraft_size_category'] = 'C'
+        elif letter in ('D', 'E'):
+            result['aircraft_size_category'] = 'D'
+    # Inferir usage_class e avsec a partir de passageiros
+    if not usage or not avsec:
+        if passengers < 200000:
+            result.setdefault('usage_class', 'I')
+            result.setdefault('avsec_classification', 'AP-1')
+        elif passengers < 1000000:
+            result.setdefault('usage_class', 'II')
+            result.setdefault('avsec_classification', 'AP-1')
+        elif passengers < 5000000:
+            result.setdefault('usage_class', 'III')
+            result.setdefault('avsec_classification', 'AP-2')
+        else:
+            result.setdefault('usage_class', 'IV')
+            result.setdefault('avsec_classification', 'AP-3')
+    if not usage and airport.size:
+        size_val = str(airport.size.value) if hasattr(airport.size, 'value') else str(airport.size)
+        if size_val == 'small':
+            result.setdefault('usage_class', 'I')
+        elif size_val == 'medium':
+            result.setdefault('usage_class', 'II')
+        elif size_val == 'large':
+            result.setdefault('usage_class', 'III')
+        elif size_val == 'international':
+            result.setdefault('usage_class', 'IV')
+
+
+@app.get("/api/airports/lookup/{icao_code}")
+async def lookup_airport_from_anac(
+    icao_code: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Busca dados de um aeroporto específico na lista oficial da ANAC.
+    
+    Retorna dados que podem ser usados para preencher o formulário automaticamente.
+    Se a ANAC estiver indisponível, usa dados do banco local (se o aeroporto existir).
+    """
+    try:
+        # Validar formato do código ICAO
+        icao_code = icao_code.upper().strip()
+        if len(icao_code) != 4 or not icao_code.isalpha():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Código ICAO deve ter exatamente 4 letras"
+            )
+        
+        sync_service = ANACSyncService(db=db)
+        
+        # Prioridade: ANAC ao vivo > cache ANAC > banco local
+        anac_data, anac_source = sync_service.get_anac_data(use_cache_if_live_fails=True)
+        
+        if not anac_data:
+            # Fallback: usar dados do banco local se o aeroporto já existir
+            local_airport = db.query(Airport).filter(Airport.code == icao_code).first()
+            if local_airport:
+                at = local_airport.airport_type
+                at_val = at.value if hasattr(at, 'value') else str(at) if at else ''
+                result = {
+                    "name": local_airport.name,
+                    "code": local_airport.code,
+                    "reference_code": local_airport.reference_code,
+                    "usage_class": local_airport.usage_class,
+                    "avsec_classification": local_airport.avsec_classification,
+                    "aircraft_size_category": local_airport.aircraft_size_category,
+                    "airport_type": at_val,
+                    "source": "local",
+                    "lookup_timestamp": datetime.utcnow().isoformat(),
+                    "message": "Dados do cadastro local (ANAC temporariamente indisponível)"
+                }
+                # Inferir campos ausentes a partir de outros dados
+                _infer_missing_lookup_fields(result, local_airport)
+                return result
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Não foi possível baixar dados da ANAC. Tente novamente mais tarde ou preencha os dados manualmente."
+            )
+        
+        # Encontrar aeroporto pelo código ICAO
+        airport_data = None
+        for data in anac_data:
+            if data.get('code', '').upper() == icao_code:
+                airport_data = data
+                break
+        
+        if not airport_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Aeroporto {icao_code} não encontrado na lista oficial da ANAC"
+            )
+        
+        # Calcular campos derivados baseados nos dados da ANAC
+        calculated = {}
+        
+        # Se tiver categoria, podemos inferir algumas coisas
+        if airport_data.get('category'):
+            category_num = airport_data['category'].replace('C', '')
+            if category_num.isdigit():
+                cat_num = int(category_num)
+                # Estimar passageiros anuais baseado na categoria
+                if cat_num <= 2:
+                    calculated['estimated_annual_passengers'] = 100000
+                    calculated['usage_class'] = 'I'
+                elif cat_num <= 4:
+                    calculated['estimated_annual_passengers'] = 600000
+                    calculated['usage_class'] = 'II'
+                elif cat_num <= 6:
+                    calculated['estimated_annual_passengers'] = 3000000
+                    calculated['usage_class'] = 'III'
+                else:
+                    calculated['estimated_annual_passengers'] = 10000000
+                    calculated['usage_class'] = 'IV'
+                
+                # Calcular AVSEC baseado em passageiros estimados
+                if calculated.get('estimated_annual_passengers'):
+                    passengers = calculated['estimated_annual_passengers']
+                    if passengers < 600000:
+                        calculated['avsec_classification'] = 'AP-1'
+                    elif passengers < 5000000:
+                        calculated['avsec_classification'] = 'AP-2'
+                    else:
+                        calculated['avsec_classification'] = 'AP-3'
+        
+        # Se tiver reference_code, inferir aircraft_size_category
+        if airport_data.get('reference_code'):
+            ref_code = airport_data['reference_code'].upper()
+            if len(ref_code) >= 2:
+                size_letter = ref_code[-1]  # Última letra (C, D, E)
+                if size_letter in ['A', 'B']:
+                    calculated['aircraft_size_category'] = 'A/B'
+                elif size_letter == 'C':
+                    calculated['aircraft_size_category'] = 'C'
+                elif size_letter in ['D', 'E']:
+                    calculated['aircraft_size_category'] = 'D'
+        
+        resp = {
+            **airport_data,
+            **calculated,
+            "source": anac_source or "anac",
+            "lookup_timestamp": datetime.utcnow().isoformat()
+        }
+        # ANAC lista aeródromos públicos: default commercial
+        resp.setdefault("airport_type", "commercial")
+        return resp
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao buscar aeroporto: {str(e)}"
+        )
+
+
+@app.post("/api/airports/sync/anac/refresh-cache")
+async def refresh_anac_cache(db: Session = Depends(get_db)):
+    """
+    Atualiza o cache de dados ANAC. Use quando o site da ANAC estiver acessível
+    para que buscas futuras funcionem offline.
+    """
+    sync_service = ANACSyncService(db=db)
+    data = sync_service.download_anac_data()
+    if data:
+        return {
+            "success": True,
+            "airports_count": len(data),
+            "message": "Cache ANAC atualizado com sucesso."
+        }
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Não foi possível baixar dados da ANAC. Tente novamente mais tarde."
+    )
+
+
+@app.post("/api/airports/sync/anac")
+async def sync_airports_with_anac(
+    dry_run: bool = False,
+    db: Session = Depends(get_db)
+):
+    """
+    Synchronize airports with ANAC's official list.
+    
+    Args:
+        dry_run: If True, only show what would be changed without actually updating
+        
+    Returns:
+        Sync results with statistics and changes
+    """
+    try:
+        sync_service = ANACSyncService(db=db)
+        
+        # ANAC ao vivo ou cache
+        anac_data, _ = sync_service.get_anac_data(use_cache_if_live_fails=True)
+        
+        if not anac_data:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Não foi possível obter dados da ANAC. Tente novamente ou use o endpoint /api/airports/sync/anac/refresh-cache para atualizar o cache."
+            )
+        
+        # Perform synchronization
+        results = sync_service.sync_airports(anac_data, dry_run=dry_run)
+        
+        return {
+            "success": True,
+            "dry_run": dry_run,
+            "total_anac_airports": len(anac_data),
+            "results": results,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro durante sincronização: {str(e)}"
+        )
 
 
 # Regulation endpoints
@@ -199,13 +490,55 @@ async def check_compliance(
     db: Session = Depends(get_db)
 ):
     """Perform a compliance check for an airport."""
-    engine = ComplianceEngine(db)
-    result = engine.check_compliance(request.airport_id)
+    try:
+        engine = ComplianceEngine(db)
+        result = engine.check_compliance(request.airport_id)
+    except Exception as e:
+        import traceback
+        error_detail = f"Erro ao verificar conformidade: {str(e)}\n{traceback.format_exc()}"
+        print(f"ERROR in check_compliance: {error_detail}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=error_detail
+        )
     
     # Convert compliance records to response format
     records_response = []
     for record in result["compliance_records"]:
-        regulation = db.query(Regulation).filter(Regulation.id == record.regulation_id).first()
+        # Get regulation - try multiple approaches to ensure we get it
+        regulation = None
+        
+        # Approach 1: Try to access via relationship (if loaded)
+        try:
+            if hasattr(record, 'regulation') and record.regulation:
+                regulation = record.regulation
+        except Exception:
+            pass
+        
+        # Approach 2: Query directly (most reliable)
+        if not regulation:
+            regulation = db.query(Regulation).filter(Regulation.id == record.regulation_id).first()
+        
+        # Approach 3: If still not found, try to merge the record into this session
+        if not regulation and record.regulation_id:
+            try:
+                # Merge the record into this session to ensure we can access relationships
+                record = db.merge(record)
+                db.flush()
+                if hasattr(record, 'regulation') and record.regulation:
+                    regulation = record.regulation
+                else:
+                    regulation = db.query(Regulation).filter(Regulation.id == record.regulation_id).first()
+            except Exception as e:
+                import logging
+                logging.warning(f"Error merging record {record.id}: {e}")
+                # Final fallback: direct query
+                regulation = db.query(Regulation).filter(Regulation.id == record.regulation_id).first()
+        
+        # Debug: Log if regulation is still not found
+        if not regulation and record.regulation_id:
+            import logging
+            logging.error(f"CRITICAL: Regulation not found for record {record.id} with regulation_id {record.regulation_id} after all attempts")
         
         # Parse action_items if it's a JSON string
         action_items = None
@@ -258,27 +591,104 @@ async def check_compliance(
                 except (json.JSONDecodeError, TypeError):
                     applies_to_types = None
             
-            regulation_dict = {
-                "id": regulation.id,
-                "code": regulation.code,
-                "title": regulation.title,
-                "description": regulation.description,
-                "safety_category": regulation.safety_category,
-                "requirement_classification": regulation.requirement_classification,
-                "evaluation_type": regulation.evaluation_type,
-                "weight": regulation.weight,
-                "anac_reference": regulation.anac_reference,
-                "applies_to_sizes": applies_to_sizes,
-                "applies_to_types": applies_to_types,
-                "min_passengers": regulation.min_passengers,
-                "requires_international": regulation.requires_international,
-                "requires_cargo": regulation.requires_cargo,
-                "requires_maintenance": regulation.requires_maintenance,
-                "min_runways": regulation.min_runways,
-                "min_aircraft_weight": regulation.min_aircraft_weight,
-                "requirements": regulation.requirements,
-                "expected_performance": regulation.expected_performance
-            }
+            # Convert enums to strings for JSON serialization (with error handling)
+            try:
+                safety_category_value = regulation.safety_category.value if hasattr(regulation.safety_category, 'value') else str(regulation.safety_category)
+            except Exception as e:
+                import logging
+                logging.warning(f"Error getting safety_category for regulation {regulation.id}: {e}")
+                safety_category_value = str(regulation.safety_category) if regulation.safety_category else None
+                
+            try:
+                requirement_classification_value = regulation.requirement_classification.value if regulation.requirement_classification and hasattr(regulation.requirement_classification, 'value') else (str(regulation.requirement_classification) if regulation.requirement_classification else None)
+            except Exception as e:
+                import logging
+                logging.warning(f"Error getting requirement_classification for regulation {regulation.id}: {e}")
+                requirement_classification_value = str(regulation.requirement_classification) if regulation.requirement_classification else None
+                
+            try:
+                evaluation_type_value = regulation.evaluation_type.value if regulation.evaluation_type and hasattr(regulation.evaluation_type, 'value') else (str(regulation.evaluation_type) if regulation.evaluation_type else None)
+            except Exception as e:
+                import logging
+                logging.warning(f"Error getting evaluation_type for regulation {regulation.id}: {e}")
+                evaluation_type_value = str(regulation.evaluation_type) if regulation.evaluation_type else None
+            
+            try:
+                regulation_dict = {
+                    "id": regulation.id,
+                    "code": regulation.code,
+                    "title": regulation.title,
+                    "description": regulation.description,
+                    "safety_category": safety_category_value,
+                    "requirement_classification": requirement_classification_value,
+                    "evaluation_type": evaluation_type_value,
+                    "weight": regulation.weight,
+                    "anac_reference": regulation.anac_reference,
+                    "applies_to_sizes": applies_to_sizes,
+                    "applies_to_types": applies_to_types,
+                    "min_passengers": regulation.min_passengers,
+                    "requires_international": regulation.requires_international,
+                    "requires_cargo": regulation.requires_cargo,
+                    "requires_maintenance": regulation.requires_maintenance,
+                    "min_runways": regulation.min_runways,
+                    "min_aircraft_weight": regulation.min_aircraft_weight,
+                    "requirements": regulation.requirements,
+                    "expected_performance": regulation.expected_performance
+                }
+            except Exception as e:
+                import logging
+                import traceback
+                logging.error(f"Error creating regulation_dict for regulation {regulation.id}: {e}")
+                logging.error(traceback.format_exc())
+                regulation_dict = None
+        
+        # Parse custom_fields if it's a JSON string
+        custom_fields = None
+        if record.custom_fields:
+            try:
+                if isinstance(record.custom_fields, str):
+                    custom_fields = record.custom_fields  # Keep as string for API response
+                else:
+                    custom_fields = json.dumps(record.custom_fields) if record.custom_fields else None
+            except (json.JSONDecodeError, TypeError):
+                custom_fields = None
+        
+        # Create regulation response, handling errors gracefully
+        regulation_response = None
+        if regulation_dict:
+            try:
+                regulation_response = schemas.RegulationResponse(**regulation_dict)
+            except Exception as e:
+                import logging
+                import traceback
+                logging.error(f"Error creating RegulationResponse for record {record.id}, regulation {record.regulation_id}: {e}")
+                logging.error(traceback.format_exc())
+                # Create a minimal regulation response as fallback
+                try:
+                    regulation_response = schemas.RegulationResponse(
+                        id=regulation_dict.get("id"),
+                        code=regulation_dict.get("code", "N/A"),
+                        title=regulation_dict.get("title", "Norma não encontrada"),
+                        description=regulation_dict.get("description", ""),
+                        safety_category=regulation_dict.get("safety_category", "unknown"),
+                        requirement_classification=regulation_dict.get("requirement_classification"),
+                        evaluation_type=regulation_dict.get("evaluation_type"),
+                        weight=regulation_dict.get("weight"),
+                        anac_reference=regulation_dict.get("anac_reference"),
+                        applies_to_sizes=regulation_dict.get("applies_to_sizes"),
+                        applies_to_types=regulation_dict.get("applies_to_types"),
+                        min_passengers=regulation_dict.get("min_passengers"),
+                        requires_international=regulation_dict.get("requires_international"),
+                        requires_cargo=regulation_dict.get("requires_cargo"),
+                        requires_maintenance=regulation_dict.get("requires_maintenance"),
+                        min_runways=regulation_dict.get("min_runways"),
+                        min_aircraft_weight=regulation_dict.get("min_aircraft_weight"),
+                        requirements=regulation_dict.get("requirements", ""),
+                        expected_performance=regulation_dict.get("expected_performance")
+                    )
+                except Exception as e2:
+                    import logging
+                    logging.error(f"Failed to create minimal RegulationResponse: {e2}")
         
         record_dict = {
             "id": record.id,
@@ -293,9 +703,10 @@ async def check_compliance(
             "action_items": action_items,
             "completed_action_items": completed_action_items,
             "action_item_due_dates": action_item_due_dates,
+            "custom_fields": custom_fields,
             "last_verified": record.last_verified,
             "verified_by": record.verified_by,
-            "regulation": schemas.RegulationResponse(**regulation_dict) if regulation_dict else None
+            "regulation": regulation_response
         }
         records_response.append(schemas.ComplianceRecordResponse(**record_dict))
     
@@ -375,14 +786,19 @@ async def get_airport_compliance(airport_id: int, db: Session = Depends(get_db))
                 except (json.JSONDecodeError, TypeError):
                     applies_to_types = None
             
+            # Convert enums to strings for JSON serialization
+            safety_category_value = regulation.safety_category.value if hasattr(regulation.safety_category, 'value') else str(regulation.safety_category)
+            requirement_classification_value = regulation.requirement_classification.value if regulation.requirement_classification and hasattr(regulation.requirement_classification, 'value') else (str(regulation.requirement_classification) if regulation.requirement_classification else None)
+            evaluation_type_value = regulation.evaluation_type.value if regulation.evaluation_type and hasattr(regulation.evaluation_type, 'value') else (str(regulation.evaluation_type) if regulation.evaluation_type else None)
+            
             regulation_dict = {
                 "id": regulation.id,
                 "code": regulation.code,
                 "title": regulation.title,
                 "description": regulation.description,
-                "safety_category": regulation.safety_category,
-                "requirement_classification": regulation.requirement_classification,
-                "evaluation_type": regulation.evaluation_type,
+                "safety_category": safety_category_value,
+                "requirement_classification": requirement_classification_value,
+                "evaluation_type": evaluation_type_value,
                 "weight": regulation.weight,
                 "anac_reference": regulation.anac_reference,
                 "applies_to_sizes": applies_to_sizes,
@@ -397,6 +813,17 @@ async def get_airport_compliance(airport_id: int, db: Session = Depends(get_db))
                 "expected_performance": regulation.expected_performance
             }
         
+        # Parse custom_fields if it's a JSON string
+        custom_fields = None
+        if record.custom_fields:
+            try:
+                if isinstance(record.custom_fields, str):
+                    custom_fields = record.custom_fields  # Keep as string for API response
+                else:
+                    custom_fields = json.dumps(record.custom_fields) if record.custom_fields else None
+            except (json.JSONDecodeError, TypeError):
+                custom_fields = None
+        
         record_dict = {
             "id": record.id,
             "airport_id": record.airport_id,
@@ -410,6 +837,7 @@ async def get_airport_compliance(airport_id: int, db: Session = Depends(get_db))
             "action_items": action_items,
             "completed_action_items": completed_action_items,
             "action_item_due_dates": action_item_due_dates,
+            "custom_fields": custom_fields,
             "last_verified": record.last_verified,
             "verified_by": record.verified_by,
             "regulation": schemas.RegulationResponse(**regulation_dict) if regulation_dict else None
@@ -417,6 +845,184 @@ async def get_airport_compliance(airport_id: int, db: Session = Depends(get_db))
         records_response.append(schemas.ComplianceRecordResponse(**record_dict))
     
     return records_response
+
+
+@app.get("/api/compliance/records/{record_id}", response_model=schemas.ComplianceRecordResponse)
+async def get_compliance_record(
+    record_id: int,
+    db: Session = Depends(get_db)
+):
+    """Get a specific compliance record by ID."""
+    record = db.query(ComplianceRecord).filter(ComplianceRecord.id == record_id).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Compliance record with id {record_id} not found"
+        )
+    
+    regulation = db.query(Regulation).filter(Regulation.id == record.regulation_id).first()
+    
+    # Parse regulation JSON fields before validation
+    regulation_dict = None
+    if regulation:
+        # Parse JSON strings for applies_to_sizes and applies_to_types
+        applies_to_sizes = None
+        if regulation.applies_to_sizes:
+            try:
+                applies_to_sizes = json.loads(regulation.applies_to_sizes)
+            except (json.JSONDecodeError, TypeError):
+                applies_to_sizes = None
+        
+        applies_to_types = None
+        if regulation.applies_to_types:
+            try:
+                applies_to_types = json.loads(regulation.applies_to_types)
+            except (json.JSONDecodeError, TypeError):
+                applies_to_types = None
+        
+        # Convert enums to strings for JSON serialization
+        safety_category_value = regulation.safety_category.value if hasattr(regulation.safety_category, 'value') else str(regulation.safety_category)
+        requirement_classification_value = regulation.requirement_classification.value if regulation.requirement_classification and hasattr(regulation.requirement_classification, 'value') else (str(regulation.requirement_classification) if regulation.requirement_classification else None)
+        evaluation_type_value = regulation.evaluation_type.value if regulation.evaluation_type and hasattr(regulation.evaluation_type, 'value') else (str(regulation.evaluation_type) if regulation.evaluation_type else None)
+        
+        regulation_dict = {
+            "id": regulation.id,
+            "code": regulation.code,
+            "title": regulation.title,
+            "description": regulation.description,
+            "safety_category": safety_category_value,
+            "requirement_classification": requirement_classification_value,
+            "evaluation_type": evaluation_type_value,
+            "weight": regulation.weight,
+            "anac_reference": regulation.anac_reference,
+            "applies_to_sizes": applies_to_sizes,
+            "applies_to_types": applies_to_types,
+            "min_passengers": regulation.min_passengers,
+            "requires_international": regulation.requires_international,
+            "requires_cargo": regulation.requires_cargo,
+            "requires_maintenance": regulation.requires_maintenance,
+            "min_runways": regulation.min_runways,
+            "min_aircraft_weight": regulation.min_aircraft_weight,
+            "requirements": regulation.requirements,
+            "expected_performance": regulation.expected_performance
+        }
+    
+    # Parse action_items if it's a JSON string
+    action_items = None
+    if record.action_items:
+        try:
+            if isinstance(record.action_items, str):
+                action_items = json.loads(record.action_items)
+            else:
+                action_items = record.action_items
+        except (json.JSONDecodeError, TypeError):
+            action_items = None
+    
+    # Parse completed_action_items if it's a JSON string
+    completed_action_items = None
+    if record.completed_action_items:
+        try:
+            if isinstance(record.completed_action_items, str):
+                completed_action_items = json.loads(record.completed_action_items)
+            else:
+                completed_action_items = record.completed_action_items
+        except (json.JSONDecodeError, TypeError):
+            completed_action_items = None
+    
+    # Parse action_item_due_dates if it's a JSON string
+    action_item_due_dates = None
+    if record.action_item_due_dates:
+        try:
+            if isinstance(record.action_item_due_dates, str):
+                action_item_due_dates = json.loads(record.action_item_due_dates)
+            else:
+                action_item_due_dates = record.action_item_due_dates
+        except (json.JSONDecodeError, TypeError):
+            action_item_due_dates = None
+    
+    # Parse custom_fields if it's a JSON string
+    custom_fields = None
+    if record.custom_fields:
+        try:
+            if isinstance(record.custom_fields, str):
+                # Try to parse as JSON, but keep as string if it fails (for backward compatibility)
+                try:
+                    custom_fields = json.loads(record.custom_fields)
+                except json.JSONDecodeError:
+                    custom_fields = record.custom_fields  # Keep as string if not valid JSON
+            else:
+                custom_fields = record.custom_fields
+        except (json.JSONDecodeError, TypeError):
+            custom_fields = None
+    
+    # Build regulation response safely
+    regulation_response = None
+    if regulation_dict:
+        try:
+            # Ensure all enum values are properly converted
+            if regulation_dict.get("safety_category"):
+                if isinstance(regulation_dict["safety_category"], str):
+                    from app.models import SafetyCategory
+                    regulation_dict["safety_category"] = SafetyCategory(regulation_dict["safety_category"])
+            if regulation_dict.get("requirement_classification"):
+                if isinstance(regulation_dict["requirement_classification"], str):
+                    from app.models import RequirementClassification
+                    regulation_dict["requirement_classification"] = RequirementClassification(regulation_dict["requirement_classification"])
+            if regulation_dict.get("evaluation_type"):
+                if isinstance(regulation_dict["evaluation_type"], str):
+                    from app.models import EvaluationType
+                    regulation_dict["evaluation_type"] = EvaluationType(regulation_dict["evaluation_type"])
+            
+            regulation_response = schemas.RegulationResponse(**regulation_dict)
+        except Exception as e:
+            # Log error but don't fail the request
+            import traceback
+            print(f"⚠️  Erro ao criar RegulationResponse: {e}")
+            print(f"   regulation_dict: {regulation_dict}")
+            traceback.print_exc()
+            regulation_response = None
+    
+    # Ensure status is properly serialized
+    status_value = record.status
+    if hasattr(status_value, 'value'):
+        status_value = status_value.value
+    elif not isinstance(status_value, str):
+        status_value = str(status_value)
+    
+    record_dict = {
+        "id": record.id,
+        "airport_id": record.airport_id,
+        "regulation_id": record.regulation_id,
+        "status": status_value,
+        "notes": record.notes,
+        "docs_score": record.docs_score,
+        "tops_score": record.tops_score,
+        "weighted_score": record.weighted_score,
+        "is_essential_compliant": record.is_essential_compliant,
+        "action_items": action_items,
+        "completed_action_items": completed_action_items,
+        "action_item_due_dates": action_item_due_dates,
+        "custom_fields": custom_fields,
+        "last_verified": record.last_verified,
+        "verified_by": record.verified_by,
+        "regulation": regulation_response
+    }
+    
+    try:
+        return schemas.ComplianceRecordResponse(**record_dict)
+    except Exception as e:
+        # Log the full error for debugging
+        import traceback
+        print(f"❌ Erro ao criar ComplianceRecordResponse: {e}")
+        print(f"   record_dict keys: {list(record_dict.keys())}")
+        print(f"   record.status type: {type(record.status)}")
+        print(f"   record.status value: {record.status}")
+        print(f"   status_value: {status_value}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao processar resposta: {str(e)}"
+        )
 
 
 @app.put("/api/compliance/records/{record_id}", response_model=schemas.ComplianceRecordResponse)
@@ -455,7 +1061,8 @@ async def update_compliance_record(
             action_items=update.action_items,
             completed_action_items=update.completed_action_items,
             action_item_due_dates=update.action_item_due_dates,
-            verified_by=update.verified_by
+            verified_by=update.verified_by,
+            custom_fields=update.custom_fields
         )
     except ValueError as e:
         raise HTTPException(
@@ -489,6 +1096,10 @@ async def update_compliance_record(
             "title": regulation.title,
             "description": regulation.description,
             "safety_category": regulation.safety_category,
+            "requirement_classification": regulation.requirement_classification,
+            "evaluation_type": regulation.evaluation_type,
+            "weight": regulation.weight,
+            "anac_reference": regulation.anac_reference,
             "applies_to_sizes": applies_to_sizes,
             "applies_to_types": applies_to_types,
             "min_passengers": regulation.min_passengers,
@@ -497,7 +1108,8 @@ async def update_compliance_record(
             "requires_maintenance": regulation.requires_maintenance,
             "min_runways": regulation.min_runways,
             "min_aircraft_weight": regulation.min_aircraft_weight,
-            "requirements": regulation.requirements
+            "requirements": regulation.requirements,
+            "expected_performance": regulation.expected_performance
         }
     
     # Parse action_items if it's a JSON string
@@ -511,19 +1123,258 @@ async def update_compliance_record(
         except (json.JSONDecodeError, TypeError):
             action_items = None
     
+    # Parse completed_action_items if it's a JSON string
+    completed_action_items = None
+    if record.completed_action_items:
+        try:
+            if isinstance(record.completed_action_items, str):
+                completed_action_items = json.loads(record.completed_action_items)
+            else:
+                completed_action_items = record.completed_action_items
+        except (json.JSONDecodeError, TypeError):
+            completed_action_items = None
+    
+    # Parse action_item_due_dates if it's a JSON string
+    action_item_due_dates = None
+    if record.action_item_due_dates:
+        try:
+            if isinstance(record.action_item_due_dates, str):
+                action_item_due_dates = json.loads(record.action_item_due_dates)
+            else:
+                action_item_due_dates = record.action_item_due_dates
+        except (json.JSONDecodeError, TypeError):
+            action_item_due_dates = None
+    
+    # Parse custom_fields if it's a JSON string
+    custom_fields = None
+    if record.custom_fields:
+        try:
+            if isinstance(record.custom_fields, str):
+                # Try to parse as JSON, but keep as string if it fails (for backward compatibility)
+                try:
+                    custom_fields = json.loads(record.custom_fields)
+                except json.JSONDecodeError:
+                    custom_fields = record.custom_fields  # Keep as string if not valid JSON
+            else:
+                custom_fields = record.custom_fields
+        except (json.JSONDecodeError, TypeError):
+            custom_fields = None
+    
+    # Build regulation response safely
+    regulation_response = None
+    if regulation_dict:
+        try:
+            # Ensure all enum values are properly converted
+            if regulation_dict.get("safety_category"):
+                if isinstance(regulation_dict["safety_category"], str):
+                    from app.models import SafetyCategory
+                    regulation_dict["safety_category"] = SafetyCategory(regulation_dict["safety_category"])
+            if regulation_dict.get("requirement_classification"):
+                if isinstance(regulation_dict["requirement_classification"], str):
+                    from app.models import RequirementClassification
+                    regulation_dict["requirement_classification"] = RequirementClassification(regulation_dict["requirement_classification"])
+            if regulation_dict.get("evaluation_type"):
+                if isinstance(regulation_dict["evaluation_type"], str):
+                    from app.models import EvaluationType
+                    regulation_dict["evaluation_type"] = EvaluationType(regulation_dict["evaluation_type"])
+            
+            regulation_response = schemas.RegulationResponse(**regulation_dict)
+        except Exception as e:
+            # Log error but don't fail the request
+            import traceback
+            print(f"⚠️  Erro ao criar RegulationResponse: {e}")
+            print(f"   regulation_dict: {regulation_dict}")
+            traceback.print_exc()
+            regulation_response = None
+    
+    # Ensure status is properly serialized
+    status_value = record.status
+    if hasattr(status_value, 'value'):
+        status_value = status_value.value
+    elif not isinstance(status_value, str):
+        status_value = str(status_value)
+    
     record_dict = {
         "id": record.id,
         "airport_id": record.airport_id,
         "regulation_id": record.regulation_id,
-        "status": record.status,
+        "status": status_value,
         "notes": record.notes,
+        "docs_score": record.docs_score,
+        "tops_score": record.tops_score,
+        "weighted_score": record.weighted_score,
+        "is_essential_compliant": record.is_essential_compliant,
         "action_items": action_items,
+        "completed_action_items": completed_action_items,
+        "action_item_due_dates": action_item_due_dates,
+        "custom_fields": custom_fields,
         "last_verified": record.last_verified,
         "verified_by": record.verified_by,
-        "regulation": schemas.RegulationResponse(**regulation_dict) if regulation_dict else None
+        "regulation": regulation_response
     }
     
-    return schemas.ComplianceRecordResponse(**record_dict)
+    try:
+        return schemas.ComplianceRecordResponse(**record_dict)
+    except Exception as e:
+        # Log the full error for debugging
+        import traceback
+        print(f"❌ Erro ao criar ComplianceRecordResponse: {e}")
+        print(f"   record_dict keys: {list(record_dict.keys())}")
+        print(f"   record.status type: {type(record.status)}")
+        print(f"   record.status value: {record.status}")
+        print(f"   status_value: {status_value}")
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao processar resposta: {str(e)}"
+        )
+
+
+# ============================================
+# Document Attachments Endpoints
+# ============================================
+
+# Create uploads directory if it doesn't exist
+UPLOADS_DIR = Path("uploads")
+UPLOADS_DIR.mkdir(exist_ok=True)
+
+@app.post("/api/compliance/records/{record_id}/documents", response_model=schemas.DocumentAttachmentResponse)
+async def upload_document(
+    record_id: int,
+    file: UploadFile = File(...),
+    document_type: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    uploaded_by: Optional[str] = Form(None),
+    db: Session = Depends(get_db)
+):
+    """Upload a document attachment for a compliance record."""
+    try:
+        # Verify compliance record exists
+        record = db.query(ComplianceRecord).filter(ComplianceRecord.id == record_id).first()
+        if not record:
+            raise HTTPException(status_code=404, detail="Compliance record not found")
+        
+        # Validate file size (max 10MB)
+        file_content = await file.read()
+        file_size = len(file_content)
+        if file_size > 10 * 1024 * 1024:  # 10MB
+            raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+        
+        # Validate file type
+        allowed_extensions = {'.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx', '.xls', '.xlsx'}
+        file_ext = Path(file.filename).suffix.lower()
+        if file_ext not in allowed_extensions:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File type not allowed. Allowed types: {', '.join(allowed_extensions)}"
+            )
+        
+        # Create unique filename
+        import uuid
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = UPLOADS_DIR / f"record_{record_id}" / unique_filename
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Save file
+        with open(file_path, "wb") as buffer:
+            buffer.write(file_content)
+        
+        # Create database record
+        db_document = DocumentAttachment(
+            compliance_record_id=record_id,
+            filename=file.filename,
+            file_path=str(file_path),
+            file_size=file_size,
+            file_type=file.content_type,
+            document_type=document_type,
+            uploaded_by=uploaded_by,
+            description=description
+        )
+        db.add(db_document)
+        db.commit()
+        db.refresh(db_document)
+        
+        return schemas.DocumentAttachmentResponse(
+            id=db_document.id,
+            compliance_record_id=db_document.compliance_record_id,
+            filename=db_document.filename,
+            file_path=db_document.file_path,
+            file_size=db_document.file_size,
+            file_type=db_document.file_type,
+            document_type=db_document.document_type,
+            description=db_document.description,
+            uploaded_at=db_document.uploaded_at,
+            uploaded_by=db_document.uploaded_by
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
+
+
+@app.get("/api/compliance/records/{record_id}/documents", response_model=List[schemas.DocumentAttachmentResponse])
+def list_documents(record_id: int, db: Session = Depends(get_db)):
+    """List all documents for a compliance record."""
+    documents = db.query(DocumentAttachment).filter(
+        DocumentAttachment.compliance_record_id == record_id
+    ).all()
+    
+    return [
+        schemas.DocumentAttachmentResponse(
+            id=doc.id,
+            compliance_record_id=doc.compliance_record_id,
+            filename=doc.filename,
+            file_path=doc.file_path,
+            file_size=doc.file_size,
+            file_type=doc.file_type,
+            document_type=doc.document_type,
+            description=doc.description,
+            uploaded_at=doc.uploaded_at,
+            uploaded_by=doc.uploaded_by
+        )
+        for doc in documents
+    ]
+
+
+@app.get("/api/documents/{document_id}/download")
+def download_document(document_id: int, db: Session = Depends(get_db)):
+    """Download a document attachment."""
+    document = db.query(DocumentAttachment).filter(DocumentAttachment.id == document_id).first()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    if not os.path.exists(document.file_path):
+        raise HTTPException(status_code=404, detail="File not found on server")
+    
+    return FileResponse(
+        document.file_path,
+        media_type=document.file_type or "application/octet-stream",
+        filename=document.filename
+    )
+
+
+@app.delete("/api/documents/{document_id}")
+def delete_document(document_id: int, db: Session = Depends(get_db)):
+    """Delete a document attachment."""
+    document = db.query(DocumentAttachment).filter(DocumentAttachment.id == document_id).first()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Delete file from filesystem
+    if os.path.exists(document.file_path):
+        try:
+            os.remove(document.file_path)
+        except Exception as e:
+            print(f"Warning: Could not delete file {document.file_path}: {e}")
+    
+    # Delete database record
+    db.delete(document)
+    db.commit()
+    
+    return {"message": "Document deleted successfully"}
 
 
 if __name__ == "__main__":

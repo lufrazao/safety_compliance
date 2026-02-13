@@ -1,9 +1,10 @@
 """
 Data models for the airport compliance system.
 """
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, Enum as SQLEnum, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from datetime import datetime
 import enum
 
 Base = declarative_base()
@@ -15,6 +16,19 @@ class AirportSize(enum.Enum):
     MEDIUM = "medium"  # Médio - 200k to 1M passengers/year
     LARGE = "large"  # Grande - 1M to 10M passengers/year
     INTERNATIONAL = "international"  # Internacional - over 10M passengers/year
+
+
+class AirportCategory(enum.Enum):
+    """ANAC airport categories based on annual passenger volume"""
+    CAT_1C = "1C"  # Até 50.000 passageiros/ano
+    CAT_2C = "2C"  # 50.001 a 200.000 passageiros/ano
+    CAT_3C = "3C"  # 200.001 a 500.000 passageiros/ano
+    CAT_4C = "4C"  # 500.001 a 1.000.000 passageiros/ano
+    CAT_5C = "5C"  # 1.000.001 a 5.000.000 passageiros/ano
+    CAT_6C = "6C"  # 5.000.001 a 10.000.000 passageiros/ano
+    CAT_7C = "7C"  # 10.000.001 a 20.000.000 passageiros/ano
+    CAT_8C = "8C"  # 20.000.001 a 40.000.000 passageiros/ano
+    CAT_9C = "9C"  # Acima de 40.000.000 passageiros/ano
 
 
 class AirportType(enum.Enum):
@@ -63,6 +77,30 @@ class ComplianceStatus(enum.Enum):
     PENDING_REVIEW = "pending_review"
 
 
+class AirportUsageClass(enum.Enum):
+    """ANAC airport usage classification (RBAC 153)"""
+    I = "I"  # Público: < 200 mil passageiros/ano
+    II = "II"  # Público: 200 mil - 1 milhão passageiros/ano
+    III = "III"  # Público: 1 milhão - 5 milhões passageiros/ano
+    IV = "IV"  # Público: > 5 milhões passageiros/ano
+    PRIVADO = "PRIVADO"  # Uso restrito ao proprietário
+
+
+class AVSECClassification(enum.Enum):
+    """ANAC AVSEC classification (Security against unlawful interference)"""
+    AP_0 = "AP-0"  # Aviação geral/táxi aéreo/fretamento
+    AP_1 = "AP-1"  # Comercial regular/charter, < 600 mil pass./ano
+    AP_2 = "AP-2"  # Comercial regular/charter, 600 mil - 5 milhões pass./ano
+    AP_3 = "AP-3"  # Comercial regular/charter, > 5 milhões pass./ano
+
+
+class AircraftSizeCategory(enum.Enum):
+    """ANAC aircraft size category (Runway evaluation)"""
+    AB = "A/B"  # Aeronaves até 5.700 kg
+    C = "C"  # Aeronaves entre 5.700 kg e 136.000 kg
+    D = "D"  # Aeronaves acima de 136.000 kg
+
+
 class Airport(Base):
     """Airport profile with variables that determine compliance requirements"""
     __tablename__ = "airports"
@@ -72,12 +110,33 @@ class Airport(Base):
     code = Column(String(10), unique=True, nullable=False)  # ICAO code
     size = Column(SQLEnum(AirportSize), nullable=False)
     airport_type = Column(SQLEnum(AirportType), nullable=False)
-    annual_passengers = Column(Integer, nullable=True)
+    annual_passengers = Column(Integer, nullable=True)  # Mantido para compatibilidade e cálculo de categoria
+    category = Column(SQLEnum(AirportCategory), nullable=True)  # Categoria ANAC (1C-9C) baseada em passageiros
+    reference_code = Column(String(10), nullable=True)  # Código de referência das aeronaves (ex: 3C, 4C, 4E) - configuração máxima permitida
+    
+    # Campos de sincronização com ANAC
+    data_sincronizacao_anac = Column(DateTime, nullable=True)  # Última sincronização com ANAC
+    origem_dados = Column(String(20), default="manual")  # "manual" ou "anac"
+    versao_dados_anac = Column(String(50), nullable=True)  # Versão do dataset ANAC
+    
+    # Campos adicionais da ANAC
+    codigo_iata = Column(String(3), nullable=True)  # Código IATA (3 letras)
+    latitude = Column(Float, nullable=True)  # Coordenadas geográficas
+    longitude = Column(Float, nullable=True)
+    cidade = Column(String(100), nullable=True)
+    estado = Column(String(2), nullable=True)  # UF
+    status_operacional = Column(String(50), nullable=True)  # Status oficial ANAC
+    
     has_international_operations = Column(Boolean, default=False)
     has_cargo_operations = Column(Boolean, default=False)
     has_maintenance_facility = Column(Boolean, default=False)
     number_of_runways = Column(Integer, default=1)
     max_aircraft_weight = Column(Integer, nullable=True)  # in tons
+    
+    # Novas classificações ANAC (usando String para compatibilidade com valores existentes no banco)
+    usage_class = Column(String(20), nullable=True)  # Classe por Uso (RBAC 153): I, II, III, IV, PRIVADO
+    avsec_classification = Column(String(10), nullable=True)  # Classificação AVSEC: AP-0, AP-1, AP-2, AP-3
+    aircraft_size_category = Column(String(5), nullable=True)  # Categoria de Porte da Aeronave: A/B, C, D
     
     # Relationships
     compliance_records = relationship("ComplianceRecord", back_populates="airport", cascade="all, delete-orphan")
@@ -140,6 +199,29 @@ class ComplianceRecord(Base):
     completed_action_items = Column(Text, nullable=True)  # JSON array of indices of completed action items
     action_item_due_dates = Column(Text, nullable=True)  # JSON object: {item_index: "YYYY-MM-DD", ...}
     
+    # Custom fields for SESCINC-specific data (JSON)
+    custom_fields = Column(Text, nullable=True)  # JSON object with custom fields based on regulation code
+    
     # Relationships
     airport = relationship("Airport", back_populates="compliance_records")
     regulation = relationship("Regulation", back_populates="compliance_records")
+    documents = relationship("DocumentAttachment", back_populates="compliance_record", cascade="all, delete-orphan")
+
+
+class DocumentAttachment(Base):
+    """Document attachments for compliance records"""
+    __tablename__ = "document_attachments"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    compliance_record_id = Column(Integer, ForeignKey("compliance_records.id"), nullable=False)
+    filename = Column(String(255), nullable=False)
+    file_path = Column(String(500), nullable=False)  # Path to stored file
+    file_size = Column(Integer, nullable=False)  # Size in bytes
+    file_type = Column(String(100), nullable=True)  # MIME type
+    document_type = Column(String(50), nullable=True)  # Certificado, Relatório, Foto, Outro
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    uploaded_by = Column(String(100), nullable=True)
+    description = Column(Text, nullable=True)
+    
+    # Relationships
+    compliance_record = relationship("ComplianceRecord", back_populates="documents")

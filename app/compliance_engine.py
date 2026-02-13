@@ -26,7 +26,33 @@ class ComplianceEngine:
         if regulation.applies_to_sizes:
             try:
                 applicable_sizes = json.loads(regulation.applies_to_sizes)
-                if airport.size.value not in applicable_sizes:
+                # Se size não estiver definido, calcular a partir de usage_class ou annual_passengers
+                airport_size = airport.size
+                if not airport_size:
+                    if airport.usage_class:
+                        # usage_class é string no banco de dados
+                        usage_class_val = str(airport.usage_class)
+                        if usage_class_val in ['PRIVADO', 'I']:
+                            airport_size = AirportSize.SMALL
+                        elif usage_class_val == 'II':
+                            airport_size = AirportSize.MEDIUM
+                        elif usage_class_val == 'III':
+                            airport_size = AirportSize.LARGE
+                        elif usage_class_val == 'IV':
+                            airport_size = AirportSize.INTERNATIONAL
+                    elif airport.annual_passengers:
+                        if airport.annual_passengers < 200000:
+                            airport_size = AirportSize.SMALL
+                        elif airport.annual_passengers < 1000000:
+                            airport_size = AirportSize.MEDIUM
+                        elif airport.annual_passengers < 10000000:
+                            airport_size = AirportSize.LARGE
+                        else:
+                            airport_size = AirportSize.INTERNATIONAL
+                    else:
+                        airport_size = AirportSize.SMALL  # Default
+                
+                if airport_size and airport_size.value not in applicable_sizes:
                     return False
             except (json.JSONDecodeError, TypeError):
                 pass
@@ -48,29 +74,47 @@ class ComplianceEngine:
                 if airport.annual_passengers < regulation.min_passengers:
                     return False
             else:
-                # If annual_passengers is not provided, infer from airport size
+                # If annual_passengers is not provided, infer from usage_class or airport size
                 # This ensures regulations are not incorrectly excluded
-                size_passenger_ranges = {
-                    'small': (0, 200000),
-                    'medium': (200000, 1000000),
-                    'large': (1000000, 10000000),
-                    'international': (10000000, float('inf'))
-                }
-                if airport.size.value in size_passenger_ranges:
-                    size_min, size_max = size_passenger_ranges[airport.size.value]
-                    # Use the minimum of the range as conservative estimate
-                    # If regulation requires more than the max of the range, it doesn't apply
-                    if regulation.min_passengers > size_max:
+                if airport.usage_class:
+                    # Usar usage_class para inferir passageiros (usage_class é string)
+                    usage_class_val = str(airport.usage_class)
+                    if usage_class_val == 'PRIVADO' or usage_class_val == 'I':
+                        inferred_passengers = 100000  # Estimativa conservadora
+                    elif usage_class_val == 'II':
+                        inferred_passengers = 600000
+                    elif usage_class_val == 'III':
+                        inferred_passengers = 3000000
+                    elif usage_class_val == 'IV':
+                        inferred_passengers = 10000000
+                    else:
+                        inferred_passengers = 100000
+                    
+                    if inferred_passengers < regulation.min_passengers:
                         return False
-                    # If regulation requires less than min of range, it might apply
-                    # But be conservative: if it's close to the threshold, don't apply
-                    # Only apply if the regulation threshold is clearly within the size range
-                    if regulation.min_passengers > size_min:
-                        # Regulation requires more than minimum of size range
-                        # Only apply if airport size suggests it could meet the requirement
-                        # For safety, we'll be conservative and not apply if threshold is above size minimum
-                        if regulation.min_passengers > (size_min + (size_max - size_min) * 0.5):
+                elif airport.size:
+                    # Fallback para size se usage_class não estiver disponível
+                    size_passenger_ranges = {
+                        'small': (0, 200000),
+                        'medium': (200000, 1000000),
+                        'large': (1000000, 10000000),
+                        'international': (10000000, float('inf'))
+                    }
+                    if airport.size and airport.size.value in size_passenger_ranges:
+                        size_min, size_max = size_passenger_ranges[airport.size.value]
+                        # Use the minimum of the range as conservative estimate
+                        # If regulation requires more than the max of the range, it doesn't apply
+                        if regulation.min_passengers > size_max:
                             return False
+                        # If regulation requires less than min of range, it might apply
+                        # But be conservative: if it's close to the threshold, don't apply
+                        # Only apply if the regulation threshold is clearly within the size range
+                        if regulation.min_passengers > size_min:
+                            # Regulation requires more than minimum of size range
+                            # Only apply if airport size suggests it could meet the requirement
+                            # For safety, we'll be conservative and not apply if threshold is above size minimum
+                            if regulation.min_passengers > (size_min + (size_max - size_min) * 0.5):
+                                return False
         
         # Check international operations requirement
         if regulation.requires_international and not airport.has_international_operations:
@@ -94,18 +138,36 @@ class ComplianceEngine:
                 if airport.max_aircraft_weight < regulation.min_aircraft_weight:
                     return False
             else:
-                # If weight not provided, infer from airport size
+                # If weight not provided, infer from usage_class or airport size
                 # Large/international airports typically handle larger aircraft
-                size_weight_ranges = {
-                    'small': (0, 50),
-                    'medium': (50, 150),
-                    'large': (150, 300),
-                    'international': (300, float('inf'))
-                }
-                if airport.size.value in size_weight_ranges:
-                    size_min_weight, size_max_weight = size_weight_ranges[airport.size.value]
-                    if regulation.min_aircraft_weight > size_max_weight:
+                if airport.usage_class:
+                    # Usar usage_class para inferir peso (usage_class é string)
+                    usage_class_val = str(airport.usage_class)
+                    if usage_class_val == 'PRIVADO' or usage_class_val == 'I':
+                        inferred_weight = 20  # Estimativa conservadora em toneladas
+                    elif usage_class_val == 'II':
+                        inferred_weight = 100
+                    elif usage_class_val == 'III':
+                        inferred_weight = 250
+                    elif usage_class_val == 'IV':
+                        inferred_weight = 400
+                    else:
+                        inferred_weight = 20
+                    
+                    if inferred_weight < regulation.min_aircraft_weight:
                         return False
+                elif airport.size:
+                    # Fallback para size se usage_class não estiver disponível
+                    size_weight_ranges = {
+                        'small': (0, 50),
+                        'medium': (50, 150),
+                        'large': (150, 300),
+                        'international': (300, float('inf'))
+                    }
+                    if airport.size and airport.size.value in size_weight_ranges:
+                        size_min_weight, size_max_weight = size_weight_ranges[airport.size.value]
+                        if regulation.min_aircraft_weight > size_max_weight:
+                            return False
         
         return True
     
@@ -128,6 +190,34 @@ class ComplianceEngine:
         airport = self.db.query(Airport).filter(Airport.id == airport_id).first()
         if not airport:
             raise ValueError(f"Airport with id {airport_id} not found")
+        
+        # Garantir que size e annual_passengers estejam calculados se não estiverem definidos
+        if not airport.size or (airport.annual_passengers is None):
+            if airport.usage_class:
+                # usage_class é string no banco de dados
+                usage_class = str(airport.usage_class)
+                if usage_class == 'PRIVADO':
+                    airport.size = AirportSize.SMALL
+                    airport.annual_passengers = 0
+                elif usage_class == 'I':
+                    airport.size = AirportSize.SMALL
+                    airport.annual_passengers = 100000
+                elif usage_class == 'II':
+                    airport.size = AirportSize.MEDIUM
+                    airport.annual_passengers = 600000
+                elif usage_class == 'III':
+                    airport.size = AirportSize.LARGE
+                    airport.annual_passengers = 3000000
+                elif usage_class == 'IV':
+                    airport.size = AirportSize.INTERNATIONAL
+                    airport.annual_passengers = 10000000
+                # Salvar no banco se foi calculado
+                self.db.commit()
+            elif not airport.size:
+                # Fallback: se não houver usage_class, usar default
+                airport.size = AirportSize.SMALL
+                airport.annual_passengers = 100000
+                self.db.commit()
         
         applicable_regulations = self.get_applicable_regulations(airport)
         
@@ -363,7 +453,7 @@ class ComplianceEngine:
                 action_items.append("Implementar processo de gestão de riscos operacionais")
                 action_items.append("Estabelecer sistema de garantia de segurança (auditorias internas)")
                 action_items.append("Criar programa de promoção da segurança")
-                if airport.size.value in ["large", "international"]:
+                if airport.size and airport.size.value in ["large", "international"]:
                     action_items.append("Realizar auditoria externa anual do SMS")
             
             if "incidentes" in requirements or "acidentes" in requirements:
@@ -381,7 +471,7 @@ class ComplianceEngine:
                 action_items.append("Determinar categoria SCIR baseada na maior aeronave operacional")
                 action_items.append("Contratar/treinamento equipe de SCIR adequada à categoria")
                 action_items.append("Garantir tempo de resposta máximo de 3 minutos")
-                if airport.size.value in ["medium", "large", "international"]:
+                if airport.size and airport.size.value in ["medium", "large", "international"]:
                     action_items.append("Adquirir veículos de combate a incêndio certificados")
             
             if "equipamentos" in requirements or "extintores" in requirements:
@@ -546,7 +636,8 @@ class ComplianceEngine:
         action_items: Optional[List[str]] = None,
         completed_action_items: Optional[List[int]] = None,
         action_item_due_dates: Optional[Dict[int, str]] = None,
-        verified_by: Optional[str] = None
+        verified_by: Optional[str] = None,
+        custom_fields: Optional[Dict] = None
     ) -> ComplianceRecord:
         """Update the compliance status of a record."""
         record = self.db.query(ComplianceRecord).filter(ComplianceRecord.id == record_id).first()
@@ -636,6 +727,14 @@ class ComplianceEngine:
             record.status = status
         if notes is not None:
             record.notes = notes
+        if custom_fields is not None:
+            # Convert dict to JSON string if needed
+            if isinstance(custom_fields, dict):
+                record.custom_fields = json.dumps(custom_fields) if custom_fields else None
+            elif isinstance(custom_fields, str):
+                record.custom_fields = custom_fields
+            else:
+                record.custom_fields = None
         if action_items is not None:
             record.action_items = json.dumps(action_items) if action_items else None
         if verified_by is not None:
