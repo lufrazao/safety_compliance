@@ -3262,7 +3262,7 @@
                 }
                 
                 // Mostrar status de sucesso
-                const sourceLabel = data.source === 'local' ? 'Cadastro local' : (data.source === 'anac_cache' ? 'ANAC (cache)' : 'ANAC');
+                const sourceLabel = data.source === 'local' ? 'Cadastro local' : (data.source === 'anac_db' ? 'ANAC (banco)' : (data.source === 'anac_cache' ? 'ANAC (cache)' : 'ANAC'));
                 statusDiv.innerHTML = `<span style="color: var(--anac-success);">✅ Dados da ${sourceLabel} - ${data.name || code}</span>`;
                 statusDiv.style.display = 'block';
                 
@@ -3270,9 +3270,12 @@
                 
             } catch (error) {
                 console.error('Erro ao buscar da ANAC:', error);
-                statusDiv.innerHTML = `<span style="color: var(--anac-error);">❌ ${error.message}</span>`;
+                const friendlyMsg = (error.message && (error.message.includes('ANAC') || error.message.includes('indisponível')))
+                    ? 'Base ANAC temporariamente indisponível. Preencha os dados manualmente ou cadastre o aeroporto primeiro.'
+                    : error.message;
+                statusDiv.innerHTML = `<span style="color: var(--anac-error);">❌ ${friendlyMsg}</span>`;
                 statusDiv.style.display = 'block';
-                showToast(`Erro: ${error.message}`, 'error');
+                showToast(friendlyMsg, 'error', 6000);
             } finally {
                 if (lookupBtn) {
                     updateLookupButton(); // Re-habilitar se código ainda válido

@@ -4,7 +4,7 @@ FastAPI application for airport compliance management.
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -17,7 +17,7 @@ from pathlib import Path
 from app.database import get_db, init_db
 from app import schemas
 from app.compliance_engine import ComplianceEngine
-from app.models import Airport, Regulation, ComplianceRecord, DocumentAttachment, AirportSize
+from app.models import Airport, ANACAirport, Regulation, ComplianceRecord, DocumentAttachment, AirportSize
 from app.services.anac_sync import ANACSyncService
 
 app = FastAPI(
@@ -51,17 +51,23 @@ async def startup_event():
 @app.post("/api/seed")
 async def run_seed():
     """
-    Popula o banco com normas RBAC e dados de exemplo (apenas primeira execução).
+    Popula o banco com normas RBAC, dados de exemplo e bootstrap anac_airports.
     Útil para setup inicial no Railway.
     """
     try:
-        from app.seed_data import seed_regulations, seed_sample_airports
+        from app.seed_data import seed_regulations, seed_sample_airports, seed_anac_airports_bootstrap
         seed_regulations()
         seed_sample_airports()
-        return {"message": "Seed concluído com sucesso. Normas e dados iniciais carregados."}
+        seed_anac_airports_bootstrap()
+        return {"message": "Seed concluído. Normas, aeroportos de exemplo e lista ANAC (15 principais) carregados."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Evita 404 no favicon - retorna 204 (sem conteúdo)."""
+    return Response(status_code=204)
 
 @app.get("/.well-known/appspecific/com.chrome.devtools.json")
 async def chrome_devtools_config():
@@ -282,11 +288,26 @@ async def lookup_airport_from_anac(
         
         sync_service = ANACSyncService(db=db)
         
-        # Prioridade: ANAC ao vivo > cache ANAC > banco local
-        anac_data, anac_source = sync_service.get_anac_data(use_cache_if_live_fails=True)
-        
-        if not anac_data:
-            # Fallback: usar dados do banco local se o aeroporto já existir
+        # 1. Prioridade: tabela anac_airports (cache local da lista ANAC)
+        airport_data = sync_service.get_from_anac_airports_table(icao_code)
+        if airport_data:
+            anac_source = "anac_db"
+        else:
+            # 2. Tentar ANAC ao vivo ou cache em arquivo
+            anac_data, anac_source = sync_service.get_anac_data(use_cache_if_live_fails=True)
+            if anac_data:
+                airport_data = next((d for d in anac_data if d.get('code', '').upper() == icao_code), None)
+                if airport_data:
+                    anac_source = anac_source or "anac"
+                elif anac_data:
+                    # Lista ANAC carregada mas aeroporto não encontrado
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Aeroporto {icao_code} não encontrado na lista oficial da ANAC"
+                    )
+            
+        if not airport_data:
+            # 3. Fallback: cadastro do usuário (tabela airports)
             local_airport = db.query(Airport).filter(Airport.code == icao_code).first()
             if local_airport:
                 at = local_airport.airport_type
@@ -311,20 +332,7 @@ async def lookup_airport_from_anac(
                 detail="Não foi possível baixar dados da ANAC. Tente novamente mais tarde ou preencha os dados manualmente."
             )
         
-        # Encontrar aeroporto pelo código ICAO
-        airport_data = None
-        for data in anac_data:
-            if data.get('code', '').upper() == icao_code:
-                airport_data = data
-                break
-        
-        if not airport_data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Aeroporto {icao_code} não encontrado na lista oficial da ANAC"
-            )
-        
-        # Calcular campos derivados baseados nos dados da ANAC
+        # Aeroporto encontrado em anac_airports ou via ANAC - calcular campos derivados
         calculated = {}
         
         # Se tiver categoria, podemos inferir algumas coisas

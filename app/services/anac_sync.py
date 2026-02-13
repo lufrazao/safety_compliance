@@ -13,7 +13,7 @@ from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
 from sqlalchemy.orm import Session
-from app.models import Airport, AirportCategory
+from app.models import Airport, AirportCategory, ANACAirport
 from app.database import SessionLocal
 
 
@@ -93,6 +93,7 @@ class ANACSyncService:
                         airports = [a for a in airports if a]
                         if len(airports) >= 10:
                             self._save_cache(airports)
+                            self._save_to_anac_airports_table(airports)
                             return airports
                     except Exception:
                         continue
@@ -101,6 +102,58 @@ class ANACSyncService:
             except Exception as e:
                 print(f"Erro ao processar ANAC: {e}")
         return None
+
+    def _save_to_anac_airports_table(self, airports: List[Dict]) -> int:
+        """Salva/atualiza aeroportos na tabela anac_airports."""
+        count = 0
+        try:
+            for data in airports:
+                code = (data.get('code') or '').upper()
+                if not code or len(code) != 4:
+                    continue
+                existing = self.db.query(ANACAirport).filter(ANACAirport.code == code).first()
+                row = {
+                    'code': code,
+                    'name': data.get('name') or '',
+                    'reference_code': data.get('reference_code'),
+                    'category': data.get('category'),
+                    'city': data.get('city'),
+                    'state': data.get('state'),
+                    'latitude': data.get('latitude'),
+                    'longitude': data.get('longitude'),
+                    'iata_code': data.get('iata_code'),
+                    'status': data.get('status'),
+                }
+                if existing:
+                    for k, v in row.items():
+                        setattr(existing, k, v)
+                    existing.updated_at = datetime.utcnow()
+                else:
+                    self.db.add(ANACAirport(**row))
+                count += 1
+            self.db.commit()
+        except Exception as e:
+            self.db.rollback()
+            print(f"Erro ao salvar em anac_airports: {e}")
+        return count
+
+    def get_from_anac_airports_table(self, icao_code: str) -> Optional[Dict]:
+        """Busca aeroporto na tabela anac_airports (cache local)."""
+        row = self.db.query(ANACAirport).filter(ANACAirport.code == icao_code.upper()).first()
+        if not row:
+            return None
+        return {
+            'code': row.code,
+            'name': row.name,
+            'reference_code': row.reference_code,
+            'category': row.category,
+            'city': row.city,
+            'state': row.state,
+            'latitude': row.latitude,
+            'longitude': row.longitude,
+            'iata_code': row.iata_code,
+            'status': row.status,
+        }
 
     def get_anac_data(self, use_cache_if_live_fails: bool = True) -> Tuple[Optional[List[Dict]], str]:
         """

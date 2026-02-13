@@ -101,6 +101,28 @@ class AircraftSizeCategory(enum.Enum):
     D = "D"  # Aeronaves acima de 136.000 kg
 
 
+class ANACAirport(Base):
+    """
+    Cache da lista oficial de aeródromos da ANAC.
+    Usado para lookup rápido sem depender do site da ANAC.
+    Atualizado quando sincronização com ANAC tem sucesso.
+    """
+    __tablename__ = "anac_airports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(10), unique=True, nullable=False, index=True)  # ICAO
+    name = Column(String(200), nullable=False)
+    reference_code = Column(String(10), nullable=True)  # Ex: 3C, 4C, 4E
+    category = Column(String(10), nullable=True)  # 1C-9C
+    city = Column(String(100), nullable=True)
+    state = Column(String(2), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    iata_code = Column(String(3), nullable=True)
+    status = Column(String(50), nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class Airport(Base):
     """Airport profile with variables that determine compliance requirements"""
     __tablename__ = "airports"

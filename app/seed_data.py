@@ -4,10 +4,42 @@ Based on ANAC RBAC standards and safety requirements.
 """
 from app.database import SessionLocal, init_db
 from app.models import (
-    Airport, Regulation, AirportSize, AirportType, SafetyCategory,
+    Airport, ANACAirport, Regulation, AirportSize, AirportType, SafetyCategory,
     RequirementClassification, EvaluationType
 )
 import json
+
+# Bootstrap: principais aeroportos brasileiros para lookup imediato (dados oficiais ANAC)
+ANAC_AIRPORTS_BOOTSTRAP = [
+    {"code": "SBGR", "name": "Aeroporto Internacional de São Paulo/Guarulhos", "reference_code": "4E", "category": "9C", "city": "Guarulhos", "state": "SP"},
+    {"code": "SBRJ", "name": "Aeroporto Santos Dumont", "reference_code": "4C", "category": "6C", "city": "Rio de Janeiro", "state": "RJ"},
+    {"code": "SBGL", "name": "Aeroporto Internacional do Rio de Janeiro/Galeão", "reference_code": "4E", "category": "8C", "city": "Rio de Janeiro", "state": "RJ"},
+    {"code": "SBCF", "name": "Aeroporto Internacional de Belo Horizonte/Confins", "reference_code": "4E", "category": "7C", "city": "Confins", "state": "MG"},
+    {"code": "SBBR", "name": "Aeroporto Internacional de Brasília", "reference_code": "4E", "category": "8C", "city": "Brasília", "state": "DF"},
+    {"code": "SBSP", "name": "Aeroporto de São Paulo/Congonhas", "reference_code": "4C", "category": "7C", "city": "São Paulo", "state": "SP"},
+    {"code": "SBPA", "name": "Aeroporto Internacional Salgado Filho", "reference_code": "4E", "category": "6C", "city": "Porto Alegre", "state": "RS"},
+    {"code": "SBSV", "name": "Aeroporto Internacional de Salvador", "reference_code": "4E", "category": "6C", "city": "Salvador", "state": "BA"},
+    {"code": "SBFZ", "name": "Aeroporto Internacional Pinto Martins", "reference_code": "4C", "category": "5C", "city": "Fortaleza", "state": "CE"},
+    {"code": "SBCG", "name": "Aeroporto Internacional de Campo Grande", "reference_code": "4C", "category": "4C", "city": "Campo Grande", "state": "MS"},
+    {"code": "SBCT", "name": "Aeroporto Internacional Afonso Pena", "reference_code": "4E", "category": "6C", "city": "São José dos Pinhais", "state": "PR"},
+    {"code": "SBFL", "name": "Aeroporto Internacional Hercílio Luz", "reference_code": "4C", "category": "5C", "city": "Florianópolis", "state": "SC"},
+    {"code": "SBNT", "name": "Aeroporto Internacional Augusto Severo", "reference_code": "4C", "category": "5C", "city": "Natal", "state": "RN"},
+    {"code": "SBKP", "name": "Aeroporto Internacional de Campinas/Viracopos", "reference_code": "4E", "category": "7C", "city": "Campinas", "state": "SP"},
+    {"code": "SBEG", "name": "Aeroporto Internacional de Manaus", "reference_code": "4E", "category": "5C", "city": "Manaus", "state": "AM"},
+    # Aeroportos adicionais
+    {"code": "SBRF", "name": "Aeroporto Internacional dos Guararapes", "reference_code": "4E", "category": "6C", "city": "Recife", "state": "PE"},
+    {"code": "SBPV", "name": "Aeroporto Eurico de Aguiar Salles", "reference_code": "4C", "category": "5C", "city": "Vitória", "state": "ES"},
+    {"code": "SBAR", "name": "Aeroporto Internacional Santa Maria", "reference_code": "4C", "category": "5C", "city": "Aracaju", "state": "SE"},
+    {"code": "SBMO", "name": "Aeroporto Internacional Zumbi dos Palmares", "reference_code": "4C", "category": "5C", "city": "Maceió", "state": "AL"},
+    {"code": "SBCY", "name": "Aeroporto Internacional de Cuiabá", "reference_code": "4E", "category": "5C", "city": "Cuiabá", "state": "MT"},
+    {"code": "SBLO", "name": "Aeroporto Governador José Richa", "reference_code": "4C", "category": "5C", "city": "Londrina", "state": "PR"},
+    {"code": "SBRP", "name": "Aeroporto Leite Lopes", "reference_code": "4C", "category": "4C", "city": "Ribeirão Preto", "state": "SP"},
+    {"code": "SBMA", "name": "Aeroporto de Marabá", "reference_code": "4C", "category": "4C", "city": "Marabá", "state": "PA"},
+    {"code": "SBBE", "name": "Aeroporto Internacional de Belém", "reference_code": "4E", "category": "6C", "city": "Belém", "state": "PA"},
+    {"code": "SBPB", "name": "Aeroporto Internacional Presidente Castro Pinto", "reference_code": "4C", "category": "5C", "city": "João Pessoa", "state": "PB"},
+    {"code": "SBUL", "name": "Aeroporto de Uberlândia", "reference_code": "4C", "category": "4C", "city": "Uberlândia", "state": "MG"},
+    {"code": "SBCN", "name": "Aeroporto de Corumbá", "reference_code": "3C", "category": "3C", "city": "Corumbá", "state": "MS"},
+]
 
 
 def seed_regulations():
@@ -656,10 +688,7 @@ def seed_sample_airports():
     db = SessionLocal()
     
     try:
-        if db.query(Airport).count() > 0:
-            print("Sample airports already exist. Skipping...")
-            return
-        
+        existing_codes = {r.code for r in db.query(Airport.code).all()}
         airports = [
             {
                 "name": "Aeroporto Internacional de São Paulo - Guarulhos",
@@ -674,7 +703,19 @@ def seed_sample_airports():
                 "max_aircraft_weight": 400
             },
             {
-                "name": "Aeroporto Regional de Belo Horizonte",
+                "name": "Aeroporto Santos Dumont",
+                "code": "SBRJ",
+                "size": AirportSize.MEDIUM,
+                "airport_type": AirportType.COMMERCIAL,
+                "annual_passengers": 3000000,
+                "has_international_operations": False,
+                "has_cargo_operations": False,
+                "has_maintenance_facility": False,
+                "number_of_runways": 2,
+                "max_aircraft_weight": 150
+            },
+            {
+                "name": "Aeroporto Internacional de Belo Horizonte/Confins",
                 "code": "SBCF",
                 "size": AirportSize.MEDIUM,
                 "airport_type": AirportType.COMMERCIAL,
@@ -684,6 +725,42 @@ def seed_sample_airports():
                 "has_maintenance_facility": False,
                 "number_of_runways": 1,
                 "max_aircraft_weight": 150
+            },
+            {
+                "name": "Aeroporto Internacional de Brasília",
+                "code": "SBBR",
+                "size": AirportSize.INTERNATIONAL,
+                "airport_type": AirportType.COMMERCIAL,
+                "annual_passengers": 15000000,
+                "has_international_operations": True,
+                "has_cargo_operations": True,
+                "has_maintenance_facility": True,
+                "number_of_runways": 2,
+                "max_aircraft_weight": 400
+            },
+            {
+                "name": "Aeroporto Internacional Salgado Filho",
+                "code": "SBPA",
+                "size": AirportSize.MEDIUM,
+                "airport_type": AirportType.COMMERCIAL,
+                "annual_passengers": 5000000,
+                "has_international_operations": True,
+                "has_cargo_operations": True,
+                "has_maintenance_facility": False,
+                "number_of_runways": 1,
+                "max_aircraft_weight": 200
+            },
+            {
+                "name": "Aeroporto Internacional de Recife",
+                "code": "SBRF",
+                "size": AirportSize.MEDIUM,
+                "airport_type": AirportType.COMMERCIAL,
+                "annual_passengers": 3500000,
+                "has_international_operations": True,
+                "has_cargo_operations": True,
+                "has_maintenance_facility": False,
+                "number_of_runways": 1,
+                "max_aircraft_weight": 200
             },
             {
                 "name": "Aeroporto Municipal de Uberlândia",
@@ -698,18 +775,40 @@ def seed_sample_airports():
                 "max_aircraft_weight": 50
             }
         ]
-        
-        for airport_data in airports:
+        to_add = [a for a in airports if a["code"] not in existing_codes]
+        if not to_add:
+            print("Sample airports já existem. Nenhum novo a adicionar.")
+            return
+        for airport_data in to_add:
             airport = Airport(**airport_data)
             db.add(airport)
-        
         db.commit()
-        print(f"Seeded {len(airports)} sample airports successfully!")
+        print(f"Seeded {len(to_add)} sample airports successfully!")
         
     except Exception as e:
         db.rollback()
         print(f"Error seeding airports: {e}")
         raise
+    finally:
+        db.close()
+
+
+def seed_anac_airports_bootstrap():
+    """Popula anac_airports com principais aeroportos para lookup imediato (upsert por código)."""
+    db = SessionLocal()
+    try:
+        existing_codes = {r.code for r in db.query(ANACAirport.code).all()}
+        to_add = [a for a in ANAC_AIRPORTS_BOOTSTRAP if a["code"] not in existing_codes]
+        if not to_add:
+            print("anac_airports já contém todos os aeroportos do bootstrap.")
+            return
+        for a in to_add:
+            db.add(ANACAirport(**a))
+        db.commit()
+        print(f"Bootstrap: {len(to_add)} aeroportos adicionados a anac_airports")
+    except Exception as e:
+        db.rollback()
+        print(f"Erro no bootstrap anac_airports: {e}")
     finally:
         db.close()
 
@@ -723,5 +822,8 @@ if __name__ == "__main__":
     
     print("Seeding sample airports...")
     seed_sample_airports()
+    
+    print("Seeding anac_airports bootstrap...")
+    seed_anac_airports_bootstrap()
     
     print("Seed completed successfully!")
