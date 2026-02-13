@@ -24,9 +24,11 @@ CACHE_MAX_AGE_DAYS = 7
 class ANACSyncService:
     """Service for synchronizing airport data with ANAC (fonte oficial preferida)"""
 
-    # URLs of download direto (sistemas.anac.gov.br funciona; www.anac.gov.br retorna HTML)
+    # URLs de download direto (sistemas.anac.gov.br)
+    ANAC_LISTA_URL = "https://sistemas.anac.gov.br/dadosabertos/Aerodromos/Aer%C3%B3dromos%20P%C3%BAblicos/Lista%20de%20aer%C3%B3dromos%20p%C3%BAblicos/AerodromosPublicos.csv"
+    ANAC_CARAC_GERAIS_URL = "https://sistemas.anac.gov.br/dadosabertos/Aerodromos/Aer%C3%B3dromos%20P%C3%BAblicos/Caracter%C3%ADsticas%20Gerais/pda_aerodromos_publicos_caracteristicas_gerais.csv"
     ANAC_URLS = [
-        "https://sistemas.anac.gov.br/dadosabertos/Aerodromos/Aer%C3%B3dromos%20P%C3%BAblicos/Lista%20de%20aer%C3%B3dromos%20p%C3%BAblicos/AerodromosPublicos.csv",
+        ANAC_LISTA_URL,
         "https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/aerodromos/lista-de-aerodromos-publicos-v2/lista-de-aerodromos-publicos-v2-formato-csv-json",
         "https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/aerodromos/lista-de-aerodromos-publicos-v2",
     ]
@@ -75,17 +77,49 @@ class ANACSyncService:
         except Exception as e:
             print(f"Aviso: não foi possível salvar cache ANAC: {e}")
 
+    def _download_caracteristicas_gerais(self) -> Dict[str, Dict]:
+        """Baixa Características Gerais e retorna dict por Código OACI."""
+        try:
+            r = requests.get(self.ANAC_CARAC_GERAIS_URL, headers=self.HEADERS, timeout=60)
+            r.raise_for_status()
+            content = r.content.decode('latin-1')
+            reader = csv.DictReader(io.StringIO(content))
+            out = {}
+            for row in reader:
+                code = (row.get('Código OACI') or '').strip().upper()
+                if not code or len(code) != 4:
+                    continue
+                # Classe RBAC 153: 1->I, 2->II, 3->III, 4->IV
+                rbac153 = row.get('Classe RBAC 153', '').strip()
+                usage = {'1': 'I', '2': 'II', '3': 'III', '4': 'IV'}.get(rbac153)
+                # Classe RBAC 107 = AVSEC (AP-0, AP-1, AP-2, AP-3)
+                avsec = (row.get('Classe RBAC 107') or '').strip()
+                if avsec and avsec.startswith('AP-'):
+                    pass
+                else:
+                    avsec = None
+                # Número de pistas: Pista 2 preenchida = 2, senão 1
+                p2 = (row.get('Designação (Pista 2)') or '').strip()
+                runways = 2 if p2 and len(p2) > 2 else 1
+                out[code] = {
+                    'usage_class': usage,
+                    'avsec_classification': avsec or None,
+                    'number_of_runways': runways,
+                }
+            return out
+        except Exception as e:
+            print(f"Aviso: Características Gerais indisponível: {e}")
+            return {}
+
     def download_anac_data(self) -> Optional[List[Dict]]:
         """
         Baixa e parseia dados da ANAC (fonte oficial).
-        Prioridade: sistemas.anac.gov.br (CSV direto) > www.anac.gov.br (páginas).
-        Se conseguir, salva em cache.
+        Enriquece com Características Gerais (Classe RBAC 153/107, pistas) e bootstrap.
         """
         for url in self.ANAC_URLS:
             try:
                 response = requests.get(url, headers=self.HEADERS, timeout=30)
                 response.raise_for_status()
-                # sistemas.anac.gov.br usa Latin-1; www retorna UTF-8 ou HTML
                 for enc in ('latin-1', 'utf-8-sig', 'utf-8'):
                     try:
                         content = response.content.decode(enc)
@@ -94,7 +128,6 @@ class ANACSyncService:
                         continue
                 if content.strip().startswith('<!') or '<html' in content.lower()[:200]:
                     continue
-                # sistemas.anac.gov.br: primeira linha é "Atualizado em: ...", pular
                 lines = content.strip().split('\n')
                 if lines and 'Atualizado em' in lines[0]:
                     content = '\n'.join(lines[1:])
@@ -104,6 +137,35 @@ class ANACSyncService:
                         airports = [self._normalize_anac_data(row) for row in csv_reader]
                         airports = [a for a in airports if a]
                         if len(airports) >= 10:
+                            # Enriquecer com Características Gerais
+                            carac = self._download_caracteristicas_gerais()
+                            from app.seed_data import ANAC_AIRPORTS_BOOTSTRAP
+                            bootstrap_by_code = {a['code']: a for a in ANAC_AIRPORTS_BOOTSTRAP}
+                            for a in airports:
+                                code = a['code']
+                                a.setdefault('number_of_runways', 1)
+                                if code in carac:
+                                    a.setdefault('usage_class', carac[code]['usage_class'])
+                                    a.setdefault('avsec_classification', carac[code]['avsec_classification'])
+                                    a['number_of_runways'] = carac[code]['number_of_runways']
+                                if code in bootstrap_by_code:
+                                    b = bootstrap_by_code[code]
+                                    if not a.get('reference_code') and b.get('reference_code'):
+                                        a['reference_code'] = b['reference_code']
+                                    if not a.get('category') and b.get('category'):
+                                        a['category'] = b['category']
+                                    if not a.get('usage_class') and b.get('usage_class'):
+                                        a['usage_class'] = b['usage_class']
+                                    if not a.get('avsec_classification') and b.get('avsec_classification'):
+                                        a['avsec_classification'] = b['avsec_classification']
+                                    if (not a.get('number_of_runways') or a.get('number_of_runways') == 1) and b.get('number_of_runways'):
+                                        a['number_of_runways'] = b['number_of_runways']
+                                # Inferir aircraft_size_category de reference_code
+                                if a.get('reference_code') and not a.get('aircraft_size_category'):
+                                    ref = a['reference_code'].upper()
+                                    if len(ref) >= 2:
+                                        lt = ref[-1]
+                                        a['aircraft_size_category'] = 'A/B' if lt in ('A','B') else 'C' if lt == 'C' else 'D'
                             self._save_cache(airports)
                             if self.db:
                                 self._save_to_anac_airports_table(airports)
@@ -136,6 +198,10 @@ class ANACSyncService:
                     'longitude': data.get('longitude'),
                     'iata_code': data.get('iata_code'),
                     'status': data.get('status'),
+                    'usage_class': data.get('usage_class'),
+                    'avsec_classification': data.get('avsec_classification'),
+                    'aircraft_size_category': data.get('aircraft_size_category'),
+                    'number_of_runways': data.get('number_of_runways', 1),
                 }
                 if existing:
                     for k, v in row.items():
@@ -166,6 +232,10 @@ class ANACSyncService:
             'longitude': row.longitude,
             'iata_code': row.iata_code,
             'status': row.status,
+            'usage_class': getattr(row, 'usage_class', None),
+            'avsec_classification': getattr(row, 'avsec_classification', None),
+            'aircraft_size_category': getattr(row, 'aircraft_size_category', None),
+            'number_of_runways': getattr(row, 'number_of_runways', None) or 1,
         }
 
     def get_anac_data(self, use_cache_if_live_fails: bool = True) -> Tuple[Optional[List[Dict]], str]:

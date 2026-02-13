@@ -3255,6 +3255,7 @@
                 if (data.avsec_classification) document.getElementById('avsec_classification').value = data.avsec_classification;
                 if (data.aircraft_size_category) document.getElementById('aircraft_size_category').value = data.aircraft_size_category;
                 if (data.airport_type) document.getElementById('airport_type').value = data.airport_type;
+                if (data.number_of_runways != null) document.getElementById('number_of_runways').value = data.number_of_runways;
                 
                 // Calcular campos derivados (avsec, aircraft_size) a partir de usage_class/max_weight
                 if (typeof calculateANACClassifications === 'function') {

@@ -42,10 +42,30 @@ if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
+def _run_anac_enrichment_migration():
+    """Adiciona colunas de enriquecimento em anac_airports se não existirem."""
+    try:
+        from sqlalchemy import text
+        from app.database import engine
+        cols = [("usage_class", "VARCHAR(20)"), ("avsec_classification", "VARCHAR(10)"),
+                ("aircraft_size_category", "VARCHAR(5)"), ("number_of_runways", "INTEGER DEFAULT 1")]
+        with engine.connect() as conn:
+            for col_name, col_type in cols:
+                try:
+                    conn.execute(text(f"ALTER TABLE anac_airports ADD COLUMN {col_name} {col_type}"))
+                    conn.commit()
+                except Exception as e:
+                    if "duplicate" not in str(e).lower() and "already exists" not in str(e).lower():
+                        raise
+    except Exception:
+        pass
+
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize database on startup."""
     init_db()
+    _run_anac_enrichment_migration()
 
 
 @app.post("/api/seed")
@@ -328,49 +348,32 @@ async def lookup_airport_from_anac(
                 detail="Aeroporto não encontrado na base interna. Execute POST /api/seed para popular os dados iniciais ou preencha manualmente."
             )
         
-        # Aeroporto encontrado em anac_airports ou via ANAC - calcular campos derivados
+        # Aeroporto encontrado - priorizar dados da ANAC; inferir só o que faltar
         calculated = {}
-        
-        # Se tiver categoria, podemos inferir algumas coisas
         if airport_data.get('category'):
             category_num = airport_data['category'].replace('C', '')
             if category_num.isdigit():
                 cat_num = int(category_num)
-                # Estimar passageiros anuais baseado na categoria
                 if cat_num <= 2:
                     calculated['estimated_annual_passengers'] = 100000
-                    calculated['usage_class'] = 'I'
                 elif cat_num <= 4:
                     calculated['estimated_annual_passengers'] = 600000
-                    calculated['usage_class'] = 'II'
                 elif cat_num <= 6:
                     calculated['estimated_annual_passengers'] = 3000000
-                    calculated['usage_class'] = 'III'
                 else:
                     calculated['estimated_annual_passengers'] = 10000000
-                    calculated['usage_class'] = 'IV'
-                
-                # Calcular AVSEC baseado em passageiros estimados
-                if calculated.get('estimated_annual_passengers'):
-                    passengers = calculated['estimated_annual_passengers']
-                    if passengers < 600000:
-                        calculated['avsec_classification'] = 'AP-1'
-                    elif passengers < 5000000:
-                        calculated['avsec_classification'] = 'AP-2'
-                    else:
-                        calculated['avsec_classification'] = 'AP-3'
-        
-        # Se tiver reference_code, inferir aircraft_size_category
-        if airport_data.get('reference_code'):
-            ref_code = airport_data['reference_code'].upper()
-            if len(ref_code) >= 2:
-                size_letter = ref_code[-1]  # Última letra (C, D, E)
-                if size_letter in ['A', 'B']:
-                    calculated['aircraft_size_category'] = 'A/B'
-                elif size_letter == 'C':
-                    calculated['aircraft_size_category'] = 'C'
-                elif size_letter in ['D', 'E']:
-                    calculated['aircraft_size_category'] = 'D'
+        # Só inferir usage_class e avsec quando ausentes (dados Características Gerais têm prioridade)
+        if not airport_data.get('usage_class') and calculated.get('estimated_annual_passengers'):
+            p = calculated['estimated_annual_passengers']
+            calculated['usage_class'] = 'I' if p <= 200000 else 'II' if p <= 1000000 else 'III' if p <= 5000000 else 'IV'
+        if not airport_data.get('avsec_classification') and calculated.get('estimated_annual_passengers'):
+            p = calculated['estimated_annual_passengers']
+            calculated['avsec_classification'] = 'AP-1' if p < 600000 else 'AP-2' if p < 5000000 else 'AP-3'
+        if not airport_data.get('aircraft_size_category') and airport_data.get('reference_code'):
+            ref = airport_data['reference_code'].upper()
+            if len(ref) >= 2:
+                lt = ref[-1]
+                calculated['aircraft_size_category'] = 'A/B' if lt in ('A','B') else 'C' if lt == 'C' else 'D'
         
         resp = {
             **airport_data,

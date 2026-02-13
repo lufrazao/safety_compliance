@@ -120,6 +120,10 @@ class ANACAirport(Base):
     longitude = Column(Float, nullable=True)
     iata_code = Column(String(3), nullable=True)
     status = Column(String(50), nullable=True)
+    usage_class = Column(String(20), nullable=True)  # I, II, III, IV (RBAC 153)
+    avsec_classification = Column(String(10), nullable=True)  # AP-0, AP-1, AP-2, AP-3
+    aircraft_size_category = Column(String(5), nullable=True)  # A/B, C, D
+    number_of_runways = Column(Integer, default=1, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 

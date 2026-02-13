@@ -9,36 +9,36 @@ from app.models import (
 )
 import json
 
-# Bootstrap: principais aeroportos brasileiros para lookup imediato (dados oficiais ANAC)
+# Bootstrap: principais aeroportos brasileiros para lookup imediato (reference_code, category, usage_class, avsec, pistas)
 ANAC_AIRPORTS_BOOTSTRAP = [
-    {"code": "SBGR", "name": "Aeroporto Internacional de São Paulo/Guarulhos", "reference_code": "4E", "category": "9C", "city": "Guarulhos", "state": "SP"},
-    {"code": "SBRJ", "name": "Aeroporto Santos Dumont", "reference_code": "4C", "category": "6C", "city": "Rio de Janeiro", "state": "RJ"},
-    {"code": "SBGL", "name": "Aeroporto Internacional do Rio de Janeiro/Galeão", "reference_code": "4E", "category": "8C", "city": "Rio de Janeiro", "state": "RJ"},
-    {"code": "SBCF", "name": "Aeroporto Internacional de Belo Horizonte/Confins", "reference_code": "4E", "category": "7C", "city": "Confins", "state": "MG"},
-    {"code": "SBBR", "name": "Aeroporto Internacional de Brasília", "reference_code": "4E", "category": "8C", "city": "Brasília", "state": "DF"},
-    {"code": "SBSP", "name": "Aeroporto de São Paulo/Congonhas", "reference_code": "4C", "category": "7C", "city": "São Paulo", "state": "SP"},
-    {"code": "SBPA", "name": "Aeroporto Internacional Salgado Filho", "reference_code": "4E", "category": "6C", "city": "Porto Alegre", "state": "RS"},
-    {"code": "SBSV", "name": "Aeroporto Internacional de Salvador", "reference_code": "4E", "category": "6C", "city": "Salvador", "state": "BA"},
-    {"code": "SBFZ", "name": "Aeroporto Internacional Pinto Martins", "reference_code": "4C", "category": "5C", "city": "Fortaleza", "state": "CE"},
-    {"code": "SBCG", "name": "Aeroporto Internacional de Campo Grande", "reference_code": "4C", "category": "4C", "city": "Campo Grande", "state": "MS"},
-    {"code": "SBCT", "name": "Aeroporto Internacional Afonso Pena", "reference_code": "4E", "category": "6C", "city": "São José dos Pinhais", "state": "PR"},
-    {"code": "SBFL", "name": "Aeroporto Internacional Hercílio Luz", "reference_code": "4C", "category": "5C", "city": "Florianópolis", "state": "SC"},
-    {"code": "SBNT", "name": "Aeroporto Internacional Augusto Severo", "reference_code": "4C", "category": "5C", "city": "Natal", "state": "RN"},
-    {"code": "SBKP", "name": "Aeroporto Internacional de Campinas/Viracopos", "reference_code": "4E", "category": "7C", "city": "Campinas", "state": "SP"},
-    {"code": "SBEG", "name": "Aeroporto Internacional de Manaus", "reference_code": "4E", "category": "5C", "city": "Manaus", "state": "AM"},
+    {"code": "SBGR", "name": "Aeroporto Internacional de São Paulo/Guarulhos", "reference_code": "4E", "category": "9C", "city": "Guarulhos", "state": "SP", "usage_class": "IV", "avsec_classification": "AP-3", "number_of_runways": 2},
+    {"code": "SBRJ", "name": "Aeroporto Santos Dumont", "reference_code": "4C", "category": "6C", "city": "Rio de Janeiro", "state": "RJ", "usage_class": "IV", "avsec_classification": "AP-3", "number_of_runways": 2},
+    {"code": "SBGL", "name": "Aeroporto Internacional do Rio de Janeiro/Galeão", "reference_code": "4E", "category": "8C", "city": "Rio de Janeiro", "state": "RJ", "usage_class": "IV", "avsec_classification": "AP-3", "number_of_runways": 2},
+    {"code": "SBCF", "name": "Aeroporto Internacional de Belo Horizonte/Confins", "reference_code": "4E", "category": "7C", "city": "Confins", "state": "MG", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBBR", "name": "Aeroporto Internacional de Brasília", "reference_code": "4E", "category": "8C", "city": "Brasília", "state": "DF", "usage_class": "IV", "avsec_classification": "AP-3", "number_of_runways": 2},
+    {"code": "SBSP", "name": "Aeroporto de São Paulo/Congonhas", "reference_code": "4C", "category": "7C", "city": "São Paulo", "state": "SP", "usage_class": "IV", "avsec_classification": "AP-3", "number_of_runways": 2},
+    {"code": "SBPA", "name": "Aeroporto Internacional Salgado Filho", "reference_code": "4E", "category": "6C", "city": "Porto Alegre", "state": "RS", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBSV", "name": "Aeroporto Internacional de Salvador", "reference_code": "4E", "category": "6C", "city": "Salvador", "state": "BA", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBFZ", "name": "Aeroporto Internacional Pinto Martins", "reference_code": "4C", "category": "5C", "city": "Fortaleza", "state": "CE", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBCG", "name": "Aeroporto Internacional de Campo Grande", "reference_code": "4C", "category": "4C", "city": "Campo Grande", "state": "MS", "usage_class": "II", "avsec_classification": "AP-1", "number_of_runways": 1},
+    {"code": "SBCT", "name": "Aeroporto Internacional Afonso Pena", "reference_code": "4E", "category": "6C", "city": "São José dos Pinhais", "state": "PR", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBFL", "name": "Aeroporto Internacional Hercílio Luz", "reference_code": "4C", "category": "5C", "city": "Florianópolis", "state": "SC", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBNT", "name": "Aeroporto Internacional Augusto Severo", "reference_code": "4C", "category": "5C", "city": "Natal", "state": "RN", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBKP", "name": "Aeroporto Internacional de Campinas/Viracopos", "reference_code": "4E", "category": "7C", "city": "Campinas", "state": "SP", "usage_class": "IV", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBEG", "name": "Aeroporto Internacional de Manaus", "reference_code": "4E", "category": "5C", "city": "Manaus", "state": "AM", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
     # Aeroportos adicionais
-    {"code": "SBRF", "name": "Aeroporto Internacional dos Guararapes", "reference_code": "4E", "category": "6C", "city": "Recife", "state": "PE"},
-    {"code": "SBPV", "name": "Aeroporto Eurico de Aguiar Salles", "reference_code": "4C", "category": "5C", "city": "Vitória", "state": "ES"},
-    {"code": "SBAR", "name": "Aeroporto Internacional Santa Maria", "reference_code": "4C", "category": "5C", "city": "Aracaju", "state": "SE"},
-    {"code": "SBMO", "name": "Aeroporto Internacional Zumbi dos Palmares", "reference_code": "4C", "category": "5C", "city": "Maceió", "state": "AL"},
-    {"code": "SBCY", "name": "Aeroporto Internacional de Cuiabá", "reference_code": "4E", "category": "5C", "city": "Cuiabá", "state": "MT"},
-    {"code": "SBLO", "name": "Aeroporto Governador José Richa", "reference_code": "4C", "category": "5C", "city": "Londrina", "state": "PR"},
-    {"code": "SBRP", "name": "Aeroporto Leite Lopes", "reference_code": "4C", "category": "4C", "city": "Ribeirão Preto", "state": "SP"},
-    {"code": "SBMA", "name": "Aeroporto de Marabá", "reference_code": "4C", "category": "4C", "city": "Marabá", "state": "PA"},
-    {"code": "SBBE", "name": "Aeroporto Internacional de Belém", "reference_code": "4E", "category": "6C", "city": "Belém", "state": "PA"},
-    {"code": "SBPB", "name": "Aeroporto Internacional Presidente Castro Pinto", "reference_code": "4C", "category": "5C", "city": "João Pessoa", "state": "PB"},
-    {"code": "SBUL", "name": "Aeroporto de Uberlândia", "reference_code": "4C", "category": "4C", "city": "Uberlândia", "state": "MG"},
-    {"code": "SBCN", "name": "Aeroporto de Corumbá", "reference_code": "3C", "category": "3C", "city": "Corumbá", "state": "MS"},
+    {"code": "SBRF", "name": "Aeroporto Internacional dos Guararapes", "reference_code": "4E", "category": "6C", "city": "Recife", "state": "PE", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBPV", "name": "Aeroporto Eurico de Aguiar Salles", "reference_code": "4C", "category": "5C", "city": "Vitória", "state": "ES", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBAR", "name": "Aeroporto Internacional Santa Maria", "reference_code": "4C", "category": "5C", "city": "Aracaju", "state": "SE", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBMO", "name": "Aeroporto Internacional Zumbi dos Palmares", "reference_code": "4C", "category": "5C", "city": "Maceió", "state": "AL", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBCY", "name": "Aeroporto Internacional de Cuiabá", "reference_code": "4E", "category": "5C", "city": "Cuiabá", "state": "MT", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBLO", "name": "Aeroporto Governador José Richa", "reference_code": "4C", "category": "5C", "city": "Londrina", "state": "PR", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBRP", "name": "Aeroporto Leite Lopes", "reference_code": "4C", "category": "4C", "city": "Ribeirão Preto", "state": "SP", "usage_class": "II", "avsec_classification": "AP-1", "number_of_runways": 1},
+    {"code": "SBMA", "name": "Aeroporto de Marabá", "reference_code": "4C", "category": "4C", "city": "Marabá", "state": "PA", "usage_class": "II", "avsec_classification": "AP-1", "number_of_runways": 1},
+    {"code": "SBBE", "name": "Aeroporto Internacional de Belém", "reference_code": "4E", "category": "6C", "city": "Belém", "state": "PA", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBPB", "name": "Aeroporto Internacional Presidente Castro Pinto", "reference_code": "4C", "category": "5C", "city": "João Pessoa", "state": "PB", "usage_class": "III", "avsec_classification": "AP-2", "number_of_runways": 1},
+    {"code": "SBUL", "name": "Aeroporto de Uberlândia", "reference_code": "4C", "category": "4C", "city": "Uberlândia", "state": "MG", "usage_class": "II", "avsec_classification": "AP-1", "number_of_runways": 1},
+    {"code": "SBCN", "name": "Aeroporto de Corumbá", "reference_code": "3C", "category": "3C", "city": "Corumbá", "state": "MS", "usage_class": "I", "avsec_classification": "AP-1", "number_of_runways": 1},
 ]
 
 
@@ -816,6 +816,19 @@ def seed_anac_airports_bootstrap():
 if __name__ == "__main__":
     print("Initializing database...")
     init_db()
+    try:
+        from sqlalchemy import text
+        from app.database import engine
+        for col_name, col_type in [("usage_class", "VARCHAR(20)"), ("avsec_classification", "VARCHAR(10)"),
+                                   ("aircraft_size_category", "VARCHAR(5)"), ("number_of_runways", "INTEGER DEFAULT 1")]:
+            try:
+                with engine.connect() as c:
+                    c.execute(text(f"ALTER TABLE anac_airports ADD COLUMN {col_name} {col_type}"))
+                    c.commit()
+            except Exception:
+                pass
+    except Exception:
+        pass
     
     print("Seeding regulations...")
     seed_regulations()
