@@ -24,8 +24,9 @@ CACHE_MAX_AGE_DAYS = 7
 class ANACSyncService:
     """Service for synchronizing airport data with ANAC (fonte oficial preferida)"""
 
-    # URLs oficiais ANAC - lista de aeródromos públicos (formato CSV/JSON)
+    # URLs of download direto (sistemas.anac.gov.br funciona; www.anac.gov.br retorna HTML)
     ANAC_URLS = [
+        "https://sistemas.anac.gov.br/dadosabertos/Aerodromos/Aer%C3%B3dromos%20P%C3%BAblicos/Lista%20de%20aer%C3%B3dromos%20p%C3%BAblicos/AerodromosPublicos.csv",
         "https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/aerodromos/lista-de-aerodromos-publicos-v2/lista-de-aerodromos-publicos-v2-formato-csv-json",
         "https://www.anac.gov.br/acesso-a-informacao/dados-abertos/areas-de-atuacao/aerodromos/lista-de-aerodromos-publicos-v2",
     ]
@@ -77,15 +78,26 @@ class ANACSyncService:
     def download_anac_data(self) -> Optional[List[Dict]]:
         """
         Baixa e parseia dados da ANAC (fonte oficial).
+        Prioridade: sistemas.anac.gov.br (CSV direto) > www.anac.gov.br (páginas).
         Se conseguir, salva em cache.
         """
         for url in self.ANAC_URLS:
             try:
                 response = requests.get(url, headers=self.HEADERS, timeout=30)
                 response.raise_for_status()
-                content = response.content.decode('utf-8-sig')
+                # sistemas.anac.gov.br usa Latin-1; www retorna UTF-8 ou HTML
+                for enc in ('latin-1', 'utf-8-sig', 'utf-8'):
+                    try:
+                        content = response.content.decode(enc)
+                        break
+                    except UnicodeDecodeError:
+                        continue
                 if content.strip().startswith('<!') or '<html' in content.lower()[:200]:
                     continue
+                # sistemas.anac.gov.br: primeira linha é "Atualizado em: ...", pular
+                lines = content.strip().split('\n')
+                if lines and 'Atualizado em' in lines[0]:
+                    content = '\n'.join(lines[1:])
                 for delim in (';', ','):
                     try:
                         csv_reader = csv.DictReader(io.StringIO(content), delimiter=delim)
@@ -93,12 +105,13 @@ class ANACSyncService:
                         airports = [a for a in airports if a]
                         if len(airports) >= 10:
                             self._save_cache(airports)
-                            self._save_to_anac_airports_table(airports)
+                            if self.db:
+                                self._save_to_anac_airports_table(airports)
                             return airports
                     except Exception:
                         continue
             except requests.RequestException as e:
-                print(f"Erro ao baixar ANAC ({url}): {e}")
+                print(f"Erro ao baixar ANAC ({url[:60]}...): {e}")
             except Exception as e:
                 print(f"Erro ao processar ANAC: {e}")
         return None
@@ -184,7 +197,7 @@ class ANACSyncService:
         """
         try:
             name = self._get_row_val(row, 'Nome', 'NOME', 'Aeródromo', 'Nome do Aeródromo', 'nome')
-            code = self._get_row_val(row, 'ICAO', 'Código ICAO', 'CÓDIGO OACI', 'codigo_oaci', 'ICAO Code').upper()
+            code = self._get_row_val(row, 'ICAO', 'Código ICAO', 'CÓDIGO OACI', 'Código OACI', 'codigo_oaci', 'ICAO Code').upper()
             reference_code = self._get_row_val(row, 'Código de Referência', 'Código Referência', 'REFERÊNCIA', 'codigo_referencia') or None
             if not reference_code:
                 # Categoria 1C-9C pode ser usada como referência para pista (ex: 4C)
@@ -200,8 +213,8 @@ class ANACSyncService:
                 'reference_code': reference_code,
                 'city': self._get_row_val(row, 'Cidade', 'Município', 'MUNICÍPIO', 'Município Atendido') or None,
                 'state': self._get_row_val(row, 'Estado', 'UF', 'uf').upper() or None,
-                'latitude': self._parse_float(self._get_row_val(row, 'Latitude', 'LATITUDE', 'latitude', 'Coordenada')),
-                'longitude': self._parse_float(self._get_row_val(row, 'Longitude', 'LONGITUDE', 'longitude')),
+                'latitude': self._parse_float(self._get_row_val(row, 'LATGEOPOINT', 'Latitude', 'LATITUDE', 'latitude', 'Coordenada')),
+                'longitude': self._parse_float(self._get_row_val(row, 'LONGEOPOINT', 'Longitude', 'LONGITUDE', 'longitude')),
                 'status': self._get_row_val(row, 'Status', 'Situação', 'OPERAÇÃO', 'Operação') or None,
             }
             

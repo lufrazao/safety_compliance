@@ -288,26 +288,11 @@ async def lookup_airport_from_anac(
         
         sync_service = ANACSyncService(db=db)
         
-        # 1. Prioridade: tabela anac_airports (cache local da lista ANAC)
+        # 1. Base interna primeiro (não chama ANAC externa)
         airport_data = sync_service.get_from_anac_airports_table(icao_code)
         if airport_data:
             anac_source = "anac_db"
         else:
-            # 2. Tentar ANAC ao vivo ou cache em arquivo
-            anac_data, anac_source = sync_service.get_anac_data(use_cache_if_live_fails=True)
-            if anac_data:
-                airport_data = next((d for d in anac_data if d.get('code', '').upper() == icao_code), None)
-                if airport_data:
-                    anac_source = anac_source or "anac"
-                elif anac_data:
-                    # Lista ANAC carregada mas aeroporto não encontrado
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"Aeroporto {icao_code} não encontrado na lista oficial da ANAC"
-                    )
-            
-        if not airport_data:
-            # 3. Fallback: cadastro do usuário (tabela airports)
             local_airport = db.query(Airport).filter(Airport.code == icao_code).first()
             if local_airport:
                 at = local_airport.airport_type
@@ -322,14 +307,25 @@ async def lookup_airport_from_anac(
                     "airport_type": at_val,
                     "source": "local",
                     "lookup_timestamp": datetime.utcnow().isoformat(),
-                    "message": "Dados do cadastro local (ANAC temporariamente indisponível)"
                 }
-                # Inferir campos ausentes a partir de outros dados
                 _infer_missing_lookup_fields(result, local_airport)
                 return result
+            # 2. Só então tentar ANAC (ao vivo ou cache)
+            anac_data, anac_source = sync_service.get_anac_data(use_cache_if_live_fails=True)
+            if anac_data:
+                airport_data = next((d for d in anac_data if d.get('code', '').upper() == icao_code), None)
+                if airport_data:
+                    anac_source = anac_source or "anac"
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Aeroporto {icao_code} não encontrado na lista oficial da ANAC"
+                    )
+        
+        if not airport_data:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Não foi possível baixar dados da ANAC. Tente novamente mais tarde ou preencha os dados manualmente."
+                detail="Aeroporto não encontrado na base interna. Execute POST /api/seed para popular os dados iniciais ou preencha manualmente."
             )
         
         # Aeroporto encontrado em anac_airports ou via ANAC - calcular campos derivados

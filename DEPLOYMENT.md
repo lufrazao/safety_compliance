@@ -122,5 +122,5 @@ railway run python -m app.seed_data
 - Verifique se as requisições para `/api/*` retornam 200
 
 **ANAC lookup retorna 503**
-- Normal quando o site da ANAC está indisponível
-- O sistema usa cache ou cadastro local como fallback
+- Execute `POST /api/seed` para popular anac_airports (27 aeroportos) e airports (7 de exemplo)
+- O sistema busca primeiro na base interna (anac_airports + airports); só chama a ANAC externa se não encontrar
