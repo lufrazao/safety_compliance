@@ -5182,6 +5182,7 @@
                 const pending = window._saveCustomFieldPending[recordId];
                 delete window._saveCustomFieldPending[recordId];
                 if (pending) {
+                    window._saveCustomFieldInProgress.delete(recordId);
                     await saveCustomField(recordId, pending.fieldName, pending.fieldValue);
                 }
             } catch (error) {
@@ -5884,12 +5885,14 @@
         async function toggleActionItem(recordId, itemIndex, totalItems) {
             const checkbox = document.getElementById(`action-${recordId}-${itemIndex}`);
             if (!checkbox) return;
-            if (window._toggleActionItemInProgress.has(recordId)) return;
+            if (window._toggleActionItemInProgress.has(recordId)) {
+                checkbox.checked = !checkbox.checked;
+                return;
+            }
             
             window._toggleActionItemInProgress.add(recordId);
-            checkbox.disabled = true;
-            
             const recordElement = document.getElementById(`record-${recordId}`);
+            recordElement?.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
             const checkboxes = recordElement.querySelectorAll('input[type="checkbox"]');
             const completedItems = [];
             checkboxes.forEach((cb, idx) => {
@@ -6010,7 +6013,7 @@
                 showToast('Erro ao atualizar item de ação. Tente novamente.', 'error');
             } finally {
                 window._toggleActionItemInProgress.delete(recordId);
-                checkbox.disabled = false;
+                document.getElementById(`record-${recordId}`)?.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = false);
             }
         }
         

@@ -1,10 +1,10 @@
 """
 FastAPI application for airport compliance management.
 """
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, JSONResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -12,6 +12,7 @@ import uvicorn
 import os
 import json
 import shutil
+import base64
 from pathlib import Path
 
 from app.database import get_db, init_db
@@ -34,6 +35,48 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Autenticação por senha (HTTP Basic). Se APP_PASSWORD estiver definido, exige login.
+APP_PASSWORD = os.getenv("APP_PASSWORD")
+AUTH_REALM = "Sistema de Conformidade ANAC"
+
+
+def _verify_auth(request: Request) -> bool:
+    """Verifica credenciais Basic Auth. Username pode ser qualquer; senha deve ser APP_PASSWORD."""
+    if not APP_PASSWORD:
+        return True
+    auth = request.headers.get("Authorization")
+    if not auth or not auth.startswith("Basic "):
+        return False
+    try:
+        decoded = base64.b64decode(auth[6:]).decode("utf-8")
+        _, password = decoded.split(":", 1)
+        return password == APP_PASSWORD
+    except Exception:
+        return False
+
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    """Exige senha quando APP_PASSWORD está definido."""
+    if not APP_PASSWORD:
+        return await call_next(request)
+    if _verify_auth(request):
+        return await call_next(request)
+    # 401 com WWW-Authenticate para o navegador exibir popup de login
+    if request.url.path in ("/", "/index.html") or request.url.path.startswith("/static"):
+        return Response(
+            status_code=401,
+            headers={"WWW-Authenticate": f'Basic realm="{AUTH_REALM}"'},
+            content="Autenticação necessária",
+            media_type="text/plain",
+        )
+    return JSONResponse(
+        status_code=401,
+        content={"detail": "Autenticação necessária. Informe a senha de acesso."},
+        headers={"WWW-Authenticate": f'Basic realm="{AUTH_REALM}"'},
+    )
 
 
 # Mount static files

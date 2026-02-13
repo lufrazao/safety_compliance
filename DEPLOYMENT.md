@@ -58,7 +58,20 @@ Alternativa: se não houver "Add Reference", copie manualmente o valor de `DATAB
 
 ---
 
-## Passo 4: Configurar o comando de start
+## Passo 4: Senha de acesso (opcional)
+
+Para proteger a plataforma com senha:
+
+1. No serviço da aplicação → **Variables** → **+ New Variable**
+2. **Nome:** `APP_PASSWORD`
+3. **Valor:** sua senha de acesso
+4. Salve. O navegador exibirá um popup de login (usuário: qualquer, ex: `admin`; senha: a definida)
+
+Se `APP_PASSWORD` não estiver definida, o acesso permanece livre.
+
+---
+
+## Passo 5: Configurar o comando de start
 
 Railway usa o `Procfile` automaticamente. O comando é:
 
@@ -70,7 +83,7 @@ O `$PORT` é definido pelo Railway. Não é necessário alterar nada.
 
 ---
 
-## Passo 5: Deploy
+## Passo 6: Deploy
 
 1. Faça push das alterações para o GitHub (se ainda não fez)
 2. Railway fará o deploy automaticamente a cada push na branch `main`
@@ -79,7 +92,7 @@ O `$PORT` é definido pelo Railway. Não é necessário alterar nada.
 
 ---
 
-## Passo 6: Popular dados iniciais (obrigatório)
+## Passo 7: Popular dados iniciais (obrigatório)
 
 **Sem o seed, a verificação de conformidade mostrará 0 normas.** Após o primeiro deploy, carregue as normas RBAC-153 e RBAC-154:
 
@@ -107,7 +120,7 @@ railway run python -m app.seed_data
 
 ---
 
-## Passo 7: Verificar
+## Passo 8: Verificar
 
 1. Acesse a URL gerada (ex: `https://safety-compliance-production.up.railway.app`)
 2. Cadastre um aeroporto de teste
@@ -119,9 +132,10 @@ railway run python -m app.seed_data
 
 | Variável               | Descrição                    | Padrão        |
 |------------------------|------------------------------|---------------|
+| `APP_PASSWORD`         | Senha de acesso à plataforma (HTTP Basic). Se definida, exige login. Usuário: qualquer (ex: admin) | Sem senha (acesso livre) |
 | `DATABASE_PUBLIC_URL`  | URL pública do PostgreSQL (recomendado) | (obrigatório no Railway) |
 | `DATABASE_URL`         | URL do PostgreSQL (host interno) | Alternativa |
-| `PORT`         | Porta (Railway define)       | Automático    |
+| `PORT`                 | Porta (Railway define)       | Automático    |
 
 ---
 
