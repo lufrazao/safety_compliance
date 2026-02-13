@@ -2415,11 +2415,6 @@
                             if (window.selectedAirportId) {
                                 areasAirportSelect.value = window.selectedAirportId;
                             } else if (airports.length > 0) {
-                                // Auto-select first airport
-                                areasAirportSelect.value = airports[0].id;
-                                window.selectedAirportId = airports[0].id;
-                            } else if (airports.length > 0) {
-                                // Auto-select first airport
                                 areasAirportSelect.value = airports[0].id;
                                 window.selectedAirportId = airports[0].id;
                             }
@@ -5900,24 +5895,31 @@
         
         // Toggle action item and update status automatically
         window._toggleActionItemInProgress = window._toggleActionItemInProgress || new Set();
+        window._pendingToggleActionItem = window._pendingToggleActionItem || {};
         async function toggleActionItem(recordId, itemIndex, totalItems) {
             const checkbox = document.getElementById(`action-${recordId}-${itemIndex}`);
             if (!checkbox) return;
+            const recordElement = document.getElementById(`record-${recordId}`);
+            const actionCheckboxes = recordElement?.querySelectorAll(`input[id^="action-${recordId}-"]`);
+            
+            function captureCompletedItems() {
+                const items = [];
+                actionCheckboxes?.forEach((cb) => {
+                    const match = cb.id.match(new RegExp(`action-${recordId}-(\\d+)`));
+                    if (match && cb.checked) items.push(parseInt(match[1], 10));
+                });
+                items.sort((a, b) => a - b);
+                return items;
+            }
+            
             if (window._toggleActionItemInProgress.has(recordId)) {
-                checkbox.checked = !checkbox.checked;
+                // Request em andamento: enfileira o estado atual (não reverte o checkbox)
+                window._pendingToggleActionItem[recordId] = { completedItems: captureCompletedItems() };
                 return;
             }
             
             window._toggleActionItemInProgress.add(recordId);
-            const recordElement = document.getElementById(`record-${recordId}`);
-            const actionCheckboxes = recordElement?.querySelectorAll(`input[id^="action-${recordId}-"]`);
-            actionCheckboxes?.forEach(cb => cb.disabled = true);
-            const completedItems = [];
-            actionCheckboxes?.forEach((cb) => {
-                const match = cb.id.match(new RegExp(`action-${recordId}-(\\d+)`));
-                if (match && cb.checked) completedItems.push(parseInt(match[1], 10));
-            });
-            completedItems.sort((a, b) => a - b);
+            let completedItems = captureCompletedItems();
             
             try {
                 // Update completed action items (status will be auto-calculated)
@@ -6022,6 +6024,23 @@
                     });
                 }
                 
+                // Se houve clique(s) durante a requisição, processar estado pendente
+                while (window._pendingToggleActionItem && window._pendingToggleActionItem[recordId]) {
+                    const pending = window._pendingToggleActionItem[recordId];
+                    delete window._pendingToggleActionItem[recordId];
+                    const pendingItems = pending.completedItems;
+                    const resp = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ completed_action_items: pendingItems })
+                    });
+                    if (!resp.ok) {
+                        const errData = await resp.json().catch(() => ({ detail: 'Erro desconhecido' }));
+                        throw new Error(errData.detail || `Erro ao atualizar (${resp.status})`);
+                    }
+                    completedItems = pendingItems;
+                }
+                
                 // Refresh compliance summary (mantém foco no card atualizado)
                 const airportId = document.getElementById('airportSelect').value;
                 if (airportId) {
@@ -6033,7 +6052,6 @@
                 showToast('Erro ao atualizar item de ação. Tente novamente.', 'error');
             } finally {
                 window._toggleActionItemInProgress.delete(recordId);
-                document.getElementById(`record-${recordId}`)?.querySelectorAll(`input[id^="action-${recordId}-"]`).forEach(cb => cb.disabled = false);
             }
         }
         
