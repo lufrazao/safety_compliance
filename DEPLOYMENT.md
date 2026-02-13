@@ -65,7 +65,7 @@ Para proteger a plataforma com senha:
 1. No serviço da aplicação → **Variables** → **+ New Variable**
 2. **Nome:** `APP_PASSWORD`
 3. **Valor:** sua senha de acesso
-4. Salve. O navegador exibirá um popup de login (usuário: qualquer, ex: `admin`; senha: a definida)
+4. Salve. Ao acessar a plataforma, será exibida uma tela de login com **apenas o campo de senha** (sem usuário).
 
 Se `APP_PASSWORD` não estiver definida, o acesso permanece livre.
 

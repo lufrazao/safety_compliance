@@ -13,6 +13,7 @@ import os
 import json
 import shutil
 import base64
+import hashlib
 from pathlib import Path
 
 from app.database import get_db, init_db
@@ -37,45 +38,112 @@ app.add_middleware(
 )
 
 
-# Autenticação por senha (HTTP Basic). Se APP_PASSWORD estiver definido, exige login.
+# Autenticação por senha. Se APP_PASSWORD estiver definido, exige login (apenas senha).
 APP_PASSWORD = os.getenv("APP_PASSWORD")
-AUTH_REALM = "Sistema de Conformidade ANAC"
+AUTH_COOKIE = "anac_auth"
+AUTH_COOKIE_SALT = "anac_compliance_salt"
+
+
+def _auth_token():
+    """Token válido para cookie (derivado da senha)."""
+    if not APP_PASSWORD:
+        return None
+    return hashlib.sha256((APP_PASSWORD + AUTH_COOKIE_SALT).encode()).hexdigest()
 
 
 def _verify_auth(request: Request) -> bool:
-    """Verifica credenciais Basic Auth. Username pode ser qualquer; senha deve ser APP_PASSWORD."""
+    """Verifica cookie de autenticação ou Basic Auth (fallback)."""
     if not APP_PASSWORD:
         return True
+    # Cookie (login com apenas senha)
+    token = request.cookies.get(AUTH_COOKIE)
+    if token == _auth_token():
+        return True
+    # Fallback: Basic Auth (username pode ser qualquer)
     auth = request.headers.get("Authorization")
-    if not auth or not auth.startswith("Basic "):
-        return False
-    try:
-        decoded = base64.b64decode(auth[6:]).decode("utf-8")
-        _, password = decoded.split(":", 1)
-        return password == APP_PASSWORD
-    except Exception:
-        return False
+    if auth and auth.startswith("Basic "):
+        try:
+            decoded = base64.b64decode(auth[6:]).decode("utf-8")
+            _, password = decoded.split(":", 1)
+            return password == APP_PASSWORD
+        except Exception:
+            pass
+    return False
+
+
+def _login_page_html() -> str:
+    """Página de login com apenas campo de senha."""
+    return """<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Conformidade ANAC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #F8F9FA; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,51,102,0.1); border: 1px solid #E4E7EB; max-width: 360px; width: 100%; }
+        .login-box h1 { color: #003366; font-size: 22px; margin-bottom: 8px; }
+        .login-box p { color: #64748B; font-size: 14px; margin-bottom: 24px; }
+        .login-box label { display: block; font-weight: 500; color: #475569; margin-bottom: 6px; font-size: 14px; }
+        .login-box input { width: 100%; padding: 12px 14px; border: 2px solid #E4E7EB; border-radius: 8px; font-size: 16px; }
+        .login-box input:focus { outline: none; border-color: #003366; }
+        .login-box button { width: 100%; padding: 12px; background: #003366; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; }
+        .login-box button:hover { background: #002244; }
+        .login-box .error { color: #DC2626; font-size: 13px; margin-top: 8px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>Sistema de Conformidade ANAC</h1>
+        <p>Entre com a senha de acesso</p>
+        <form id="loginForm">
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" placeholder="Digite a senha" required autofocus>
+            <div class="error" id="error">Senha incorreta. Tente novamente.</div>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const errEl = document.getElementById('error');
+            errEl.style.display = 'none';
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: password }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                window.location.href = '/';
+            } else {
+                errEl.style.display = 'block';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        };
+    </script>
+</body>
+</html>"""
 
 
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    """Exige senha quando APP_PASSWORD está definido."""
+    """Exige senha quando APP_PASSWORD está definido. Login via cookie (apenas senha)."""
     if not APP_PASSWORD:
+        return await call_next(request)
+    if request.url.path == "/api/login":
         return await call_next(request)
     if _verify_auth(request):
         return await call_next(request)
-    # 401 com WWW-Authenticate para o navegador exibir popup de login
     if request.url.path in ("/", "/index.html") or request.url.path.startswith("/static"):
-        return Response(
-            status_code=401,
-            headers={"WWW-Authenticate": f'Basic realm="{AUTH_REALM}"'},
-            content="Autenticação necessária",
-            media_type="text/plain",
-        )
+        return Response(content=_login_page_html(), media_type="text/html")
     return JSONResponse(
         status_code=401,
-        content={"detail": "Autenticação necessária. Informe a senha de acesso."},
-        headers={"WWW-Authenticate": f'Basic realm="{AUTH_REALM}"'},
+        content={"detail": "Autenticação necessária. Acesse a página inicial e informe a senha."},
     )
 
 
@@ -109,6 +177,35 @@ async def startup_event():
     """Initialize database on startup."""
     init_db()
     _run_anac_enrichment_migration()
+
+
+@app.post("/api/login")
+async def login(request: Request):
+    """Valida senha e define cookie de autenticação. Aceita {password} no body."""
+    if not APP_PASSWORD:
+        return {"ok": True}
+    try:
+        body = await request.json()
+        password = body.get("password", "")
+        if password != APP_PASSWORD:
+            raise HTTPException(status_code=401, detail="Senha incorreta")
+        response = JSONResponse(content={"ok": True})
+        token = _auth_token()
+        secure = request.url.scheme == "https"
+        response.set_cookie(
+            key=AUTH_COOKIE,
+            value=token,
+            httponly=True,
+            samesite="lax",
+            secure=secure,
+            path="/",
+            max_age=60 * 60 * 24 * 7,  # 7 dias
+        )
+        return response
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="Requisição inválida")
 
 
 @app.post("/api/seed")
