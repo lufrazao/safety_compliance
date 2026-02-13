@@ -61,9 +61,10 @@ class ComplianceEngine:
         if regulation.applies_to_types:
             try:
                 applicable_types = json.loads(regulation.applies_to_types)
-                if airport.airport_type.value not in applicable_types:
+                airport_type_val = (airport.airport_type.value if airport.airport_type else "commercial")
+                if airport_type_val not in applicable_types:
                     return False
-            except (json.JSONDecodeError, TypeError):
+            except (json.JSONDecodeError, TypeError, AttributeError):
                 pass
         
         # Check passenger threshold
@@ -270,6 +271,14 @@ class ComplianceEngine:
         
         # Generate recommendations
         recommendations = self._generate_recommendations(airport, compliance_records, compliance_scores)
+        
+        # Se nenhuma norma aplicável, verificar se o banco tem normas
+        if len(applicable_regulations) == 0:
+            total_in_db = self.db.query(Regulation).count()
+            if total_in_db == 0:
+                recommendations.insert(0, "Nenhuma norma cadastrada. Execute POST /api/seed para carregar as normas RBAC-153 e RBAC-154.")
+            else:
+                recommendations.insert(0, "Nenhuma norma se aplica a este aeroporto com as características atuais. Verifique classe por uso, tipo e tamanho.")
         
         return {
             "airport_id": airport_id,

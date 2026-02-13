@@ -62,9 +62,9 @@ O `$PORT` é definido pelo Railway. Não é necessário alterar nada.
 
 ---
 
-## Passo 6: Popular dados iniciais (primeira vez)
+## Passo 6: Popular dados iniciais (obrigatório)
 
-Após o primeiro deploy, carregue as normas RBAC-153 e RBAC-154:
+**Sem o seed, a verificação de conformidade mostrará 0 normas.** Após o primeiro deploy, carregue as normas RBAC-153 e RBAC-154:
 
 **Opção recomendada – Endpoint de seed**
 
