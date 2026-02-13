@@ -3521,11 +3521,13 @@
             }
         }
         
-        // Check compliance
-        async function checkCompliance(airportId) {
+        // Check compliance. Options: { preserveScroll: bool, scrollToRecordId: number }
+        async function checkCompliance(airportId, options = {}) {
             const contentDiv = document.getElementById('complianceContent');
             const checkBtn = document.getElementById('checkComplianceBtn');
             const checkBtnText = document.getElementById('checkComplianceBtnText');
+            const savedScrollY = (options.preserveScroll || options.scrollToRecordId) ? window.scrollY : null;
+            const scrollToRecordId = options.scrollToRecordId;
             
             contentDiv.innerHTML = '<div class="loading">Verificando conformidade...</div>';
             
@@ -3552,6 +3554,16 @@
                 
                 const data = await response.json();
                 displayCompliance(data);
+                
+                // Restore scroll position para não perder o lugar ao atualizar status
+                if (scrollToRecordId) {
+                    requestAnimationFrame(() => {
+                        const el = document.getElementById(`record-${scrollToRecordId}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    });
+                } else if (savedScrollY !== null) {
+                    requestAnimationFrame(() => { window.scrollTo(0, savedScrollY); });
+                }
                 
                 // Store selected airport ID for other tabs
                 window.selectedAirportId = airportId;
@@ -5822,10 +5834,10 @@
                     });
                 }
                 
-                // Refresh compliance summary
+                // Refresh compliance summary (mantém foco no card atualizado)
                 const airportId = document.getElementById('airportSelect').value;
                 if (airportId) {
-                    await checkCompliance(airportId);
+                    await checkCompliance(airportId, { scrollToRecordId: recordId });
                 }
             } catch (error) {
                 console.error('Error updating status:', error);
@@ -5971,10 +5983,10 @@
                     });
                 }
                 
-                // Refresh compliance summary
+                // Refresh compliance summary (mantém foco no card atualizado)
                 const airportId = document.getElementById('airportSelect').value;
                 if (airportId) {
-                    await checkCompliance(airportId);
+                    await checkCompliance(airportId, { scrollToRecordId: recordId });
                 }
             } catch (error) {
                 console.error('Error toggling action item:', error);
@@ -6426,10 +6438,11 @@
                 await Promise.all(updates);
                 showToast(`${selectedRecords.size} norma(s) atualizada(s) com sucesso!`, 'success');
                 
-                // Refresh compliance
+                // Refresh compliance (preserva posição de scroll)
                 const airportId = document.getElementById('airportSelect').value;
+                const firstRecordId = selectedRecords.size > 0 ? Array.from(selectedRecords)[0] : null;
                 if (airportId) {
-                    await checkCompliance(airportId);
+                    await checkCompliance(airportId, firstRecordId ? { scrollToRecordId: firstRecordId } : { preserveScroll: true });
                 }
                 
                 toggleBatchEdit();
