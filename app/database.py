@@ -8,8 +8,16 @@ import os
 
 # Database URL - SQLite localmente, PostgreSQL no Railway (obrigatório para persistir dados)
 # Preferir DATABASE_PUBLIC_URL: postgres.railway.internal só resolve dentro da rede privada do Railway.
-# Se app e DB estão em projetos diferentes ou a rede interna falha, DATABASE_PUBLIC_URL funciona.
 _raw_url = os.getenv("DATABASE_PUBLIC_URL") or os.getenv("DATABASE_URL") or "sqlite:///./compliance.db"
+if "railway.internal" in _raw_url:
+    public = os.getenv("DATABASE_PUBLIC_URL")
+    if not public:
+        raise RuntimeError(
+            "DATABASE_URL usa postgres.railway.internal (host interno) que não resolve neste ambiente. "
+            "Adicione a variável DATABASE_PUBLIC_URL: Railway → serviço app → Variables → "
+            "Add Reference → PostgreSQL → DATABASE_PUBLIC_URL"
+        )
+    _raw_url = public
 DATABASE_URL = _raw_url
 
 # Aviso: SQLite em produção (Railway) = dados perdidos a cada deploy

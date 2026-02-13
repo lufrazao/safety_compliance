@@ -3522,6 +3522,7 @@
         }
         
         // Check compliance. Options: { preserveScroll: bool, scrollToRecordId: number }
+        window._checkComplianceAbort = null;
         async function checkCompliance(airportId, options = {}) {
             const contentDiv = document.getElementById('complianceContent');
             const checkBtn = document.getElementById('checkComplianceBtn');
@@ -3529,18 +3530,21 @@
             const savedScrollY = (options.preserveScroll || options.scrollToRecordId) ? window.scrollY : null;
             const scrollToRecordId = options.scrollToRecordId;
             
+            if (window._checkComplianceAbort) window._checkComplianceAbort.abort();
+            window._checkComplianceAbort = new AbortController();
+            const signal = window._checkComplianceAbort.signal;
+            
             contentDiv.innerHTML = '<div class="loading">Verificando conformidade...</div>';
             
-            // Show loading state on button
             if (checkBtn && checkBtnText) {
                 checkBtn.disabled = true;
                 checkBtn.classList.add('btn-loading');
-                const originalText = checkBtnText.textContent;
                 checkBtnText.textContent = 'Verificando...';
             }
             
             try {
                 const response = await fetch(`${API_BASE}/compliance/check`, {
+                    signal,
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -3581,10 +3585,12 @@
                 
                 showToast(`Conformidade verificada: ${data.total_regulations} normas aplicáveis`, 'success', 3000);
             } catch (error) {
+                if (error.name === 'AbortError') return;
+                const apiUrl = (window.location.origin || 'http://localhost:8000') + '/api';
                 contentDiv.innerHTML = `
                     <div class="error" role="alert">
                         <strong>Erro:</strong> ${error.message}
-                        <br>Certifique-se de que o servidor está rodando em http://localhost:8000
+                        <br>Verifique a conexão com o servidor (${apiUrl.replace('/api', '')})
                     </div>
                 `;
                 showToast('Erro ao verificar conformidade', 'error');
@@ -4889,7 +4895,7 @@
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                                 <div>
                                     <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #555;">CAT do Aeródromo:</label>
-                                    <select id="custom-cat-${recordId}" class="form-input" autocomplete="off" autocomplete="off" onchange="saveCustomField(${recordId}, 'fire_category', this.value)">
+                                    <select id="custom-cat-${recordId}" class="form-input" autocomplete="off" onchange="saveCustomField(${recordId}, 'fire_category', this.value)">
                                         <option value="">Selecione...</option>
                                         ${[1,2,3,4,5,6,7,8,9].map(cat => 
                                             `<option value="${cat}" ${customFields.fire_category == cat ? 'selected' : ''}>CAT ${cat}</option>`
@@ -5129,53 +5135,60 @@
             return html;
         }
         
-        // Save custom field
+        // Save custom field (guarda contra chamadas concorrentes no mesmo record)
+        window._saveCustomFieldPending = window._saveCustomFieldPending || {};
+        window._saveCustomFieldInProgress = window._saveCustomFieldInProgress || new Set();
         async function saveCustomField(recordId, fieldName, fieldValue) {
-            try {
-                // Get current custom_fields
-                const recordElement = document.getElementById(`record-${recordId}`);
-                if (!recordElement) return;
-                
-                // Get existing custom_fields from the record data
+            const recordElement = document.getElementById(`record-${recordId}`);
+            if (!recordElement) return;
+            
+            const runSave = async () => {
                 const recordData = window.allComplianceRecords?.find(r => r.id == recordId);
                 let customFields = {};
-                
                 if (recordData && recordData.custom_fields) {
                     try {
                         customFields = typeof recordData.custom_fields === 'string' 
                             ? JSON.parse(recordData.custom_fields) 
-                            : recordData.custom_fields;
+                            : { ...recordData.custom_fields };
                     } catch (e) {
                         customFields = {};
                     }
                 }
                 
-                // Update the field
                 if (fieldValue === '' || fieldValue === null || fieldValue === undefined) {
                     delete customFields[fieldName];
                 } else {
                     customFields[fieldName] = fieldValue;
                 }
                 
-                // Save to backend (API espera Dict, não string)
                 const response = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ custom_fields: customFields })
                 });
                 
-                if (!response.ok) {
-                    throw new Error('Erro ao salvar campo customizado');
+                if (!response.ok) throw new Error('Erro ao salvar campo customizado');
+                if (recordData) recordData.custom_fields = customFields;
+            };
+            
+            if (window._saveCustomFieldInProgress.has(recordId)) {
+                window._saveCustomFieldPending[recordId] = { fieldName, fieldValue };
+                return;
+            }
+            window._saveCustomFieldInProgress.add(recordId);
+            
+            try {
+                await runSave();
+                const pending = window._saveCustomFieldPending[recordId];
+                delete window._saveCustomFieldPending[recordId];
+                if (pending) {
+                    await saveCustomField(recordId, pending.fieldName, pending.fieldValue);
                 }
-                
-                // Update local data
-                if (recordData) {
-                    recordData.custom_fields = JSON.stringify(customFields);
-                }
-                
             } catch (error) {
                 console.error('Error saving custom field:', error);
                 showToast('Erro ao salvar campo. Tente novamente.', 'error');
+            } finally {
+                window._saveCustomFieldInProgress.delete(recordId);
             }
         }
         
@@ -5847,7 +5860,9 @@
         
         // Save notes
         async function saveNotes(recordId) {
-            const notes = document.getElementById(`notes-${recordId}`).value;
+            const notesEl = document.getElementById(`notes-${recordId}`);
+            if (!notesEl) return;
+            const notes = notesEl.value;
             try {
                 const response = await fetch(`${API_BASE}/compliance/records/${recordId}`, {
                     method: 'PUT',
@@ -5860,24 +5875,25 @@
                 }
             } catch (error) {
                 console.error('Error saving notes:', error);
+                showToast('Erro ao salvar notas. Tente novamente.', 'error');
             }
         }
         
         // Toggle action item and update status automatically
+        window._toggleActionItemInProgress = window._toggleActionItemInProgress || new Set();
         async function toggleActionItem(recordId, itemIndex, totalItems) {
             const checkbox = document.getElementById(`action-${recordId}-${itemIndex}`);
             if (!checkbox) return;
+            if (window._toggleActionItemInProgress.has(recordId)) return;
             
-            // Get all checkboxes for this record
+            window._toggleActionItemInProgress.add(recordId);
+            checkbox.disabled = true;
+            
             const recordElement = document.getElementById(`record-${recordId}`);
             const checkboxes = recordElement.querySelectorAll('input[type="checkbox"]');
-            
-            // Build list of completed items
             const completedItems = [];
             checkboxes.forEach((cb, idx) => {
-                if (cb.checked) {
-                    completedItems.push(idx);
-                }
+                if (cb.checked) completedItems.push(idx);
             });
             
             try {
@@ -5990,9 +6006,11 @@
                 }
             } catch (error) {
                 console.error('Error toggling action item:', error);
-                // Revert checkbox if error
                 checkbox.checked = !checkbox.checked;
                 showToast('Erro ao atualizar item de ação. Tente novamente.', 'error');
+            } finally {
+                window._toggleActionItemInProgress.delete(recordId);
+                checkbox.disabled = false;
             }
         }
         
@@ -6005,21 +6023,11 @@
             }
             
             try {
-                // Get current due dates
-                const response = await fetch(`${API_BASE}/compliance/check`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        airport_id: parseInt(document.getElementById('airportSelect').value)
-                    })
-                });
-                
+                // GET record (mais leve que compliance check completo)
+                const response = await fetch(`${API_BASE}/compliance/records/${recordId}`);
                 if (!response.ok) return;
                 
-                const data = await response.json();
-                const record = data.compliance_records.find(r => r.id === recordId);
-                if (!record) return;
-                
+                const record = await response.json();
                 const currentDueDates = record.action_item_due_dates || {};
                 const updatedDueDates = { ...currentDueDates };
                 
@@ -6059,6 +6067,7 @@
                 }
             } catch (error) {
                 console.error('Error saving due date:', error);
+                showToast('Erro ao salvar data. Tente novamente.', 'error');
             }
         }
         
