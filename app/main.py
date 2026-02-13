@@ -19,7 +19,7 @@ from pathlib import Path
 from app.database import get_db, init_db
 from app import schemas
 from app.compliance_engine import ComplianceEngine
-from app.models import Airport, ANACAirport, Regulation, ComplianceRecord, DocumentAttachment, AirportSize
+from app.models import Airport, ANACAirport, Regulation, ComplianceRecord, DocumentAttachment, AirportSize, AirportType
 from app.services.anac_sync import ANACSyncService
 
 app = FastAPI(
@@ -31,7 +31,7 @@ app = FastAPI(
 # CORS middleware for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -338,7 +338,10 @@ async def update_airport(
                 detail=f"Airport with code {airport_update.code} already exists"
             )
     
-    airport_dict = airport_update.dict()
+    try:
+        airport_dict = airport_update.model_dump() if hasattr(airport_update, 'model_dump') else airport_update.dict()
+    except Exception:
+        airport_dict = airport_update.dict()
     
     # Calcular size e annual_passengers automaticamente a partir de usage_class
     if airport_dict.get('usage_class'):
@@ -359,12 +362,24 @@ async def update_airport(
             airport_dict['size'] = AirportSize.INTERNATIONAL
             airport_dict['annual_passengers'] = 10000000  # Estimativa média para Classe IV
     
-    # Update all fields
-    for key, value in airport_dict.items():
-        setattr(airport, key, value)
+    # Converter enums se vierem como string (compatibilidade)
+    if isinstance(airport_dict.get('size'), str):
+        airport_dict['size'] = AirportSize(airport_dict['size'])
+    if isinstance(airport_dict.get('airport_type'), str):
+        airport_dict['airport_type'] = AirportType(airport_dict['airport_type'])
     
-    db.commit()
-    db.refresh(airport)
+    # Update all fields (apenas colunas que existem no modelo)
+    model_keys = {c.key for c in Airport.__table__.columns}
+    for key, value in airport_dict.items():
+        if key in model_keys:
+            setattr(airport, key, value)
+    
+    try:
+        db.commit()
+        db.refresh(airport)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     return airport
 
 

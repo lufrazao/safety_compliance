@@ -1369,7 +1369,7 @@
             </button>
             <button class="tab" onclick="switchTab('areas')" role="tab" aria-selected="false" aria-controls="areasTab" id="areasTabBtn">
                 <span style="display: inline-flex; align-items: center; gap: 6px;">
-                    <span>🚒</span> Áreas SESCINC
+                    <span>🚒</span> Áreas
                 </span>
             </button>
             <button class="tab" onclick="switchTab('deadlines')" role="tab" aria-selected="false" aria-controls="deadlinesTab" id="deadlinesTabBtn">
@@ -1424,7 +1424,7 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                         <div>
-                            <h2 style="margin: 0;">🚒 Gestão por Áreas Funcionais SESCINC</h2>
+                            <h2 style="margin: 0;">🚒 Gestão por Áreas Funcionais</h2>
                             <p style="color: #666; margin: 5px 0 0 0;">
                                 Visualize e gerencie as conformidades organizadas por área funcional conforme a estrutura do SESCINC.
                             </p>
@@ -1686,6 +1686,13 @@
         const API_BASE = (window.location.origin || 'http://localhost:8000') + '/api';
         let currentEditingId = null;
         
+        // Garante que cookies (sessão) sejam enviados em todas as requisições à API
+        const _fetch = window.fetch;
+        window.fetch = function(url, opts = {}) {
+            const isApi = typeof url === 'string' && (url.includes('/api') || url.startsWith(window.location?.origin + '/api'));
+            return _fetch(url, isApi ? { ...opts, credentials: 'include' } : opts);
+        };
+        
         // Tab switching - make it globally accessible (override the early definition)
         window.switchTab = function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => {
@@ -1751,7 +1758,7 @@
             
             const labels = {
                 'manage': 'Gerenciar Aeroportos',
-                'areas': 'Áreas SESCINC',
+                'areas': 'Áreas',
                 'deadlines': 'Prazos e Vencimentos',
                 'compliance': 'Verificar Conformidade'
             };
@@ -3057,12 +3064,14 @@
             
             const submitBtn = document.getElementById('submitBtn');
             const submitBtnText = document.getElementById('submitBtnText');
-            const originalText = submitBtnText.textContent;
+            const textEl = submitBtnText || submitBtn;
+            const originalText = textEl?.textContent || 'Salvar';
             
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.classList.add('btn-loading');
-            submitBtnText.textContent = 'Salvando...';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('btn-loading');
+            }
+            if (textEl) textEl.textContent = 'Salvando...';
             
             try {
                 let response;
@@ -3081,8 +3090,9 @@
                 }
                 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Erro ao salvar aeroporto');
+                    const error = await response.json().catch(() => ({}));
+                    const msg = Array.isArray(error.detail) ? error.detail[0]?.msg : error.detail;
+                    throw new Error(msg || `Erro ao salvar aeroporto (${response.status})`);
                 }
                 
                 const airport = await response.json();
@@ -3092,10 +3102,11 @@
             } catch (error) {
                 showToast(`Erro: ${error.message}`, 'error');
             } finally {
-                // Reset button state
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('btn-loading');
-                submitBtnText.textContent = originalText;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('btn-loading');
+                }
+                if (textEl) textEl.textContent = originalText;
             }
         });
         
@@ -3128,7 +3139,8 @@
                 document.getElementById('has_maintenance_facility').checked = airport.has_maintenance_facility;
                 
                 document.getElementById('formTitle').textContent = 'Editar Aeroporto';
-                document.getElementById('submitBtn').textContent = 'Atualizar Aeroporto';
+                const btnText = document.getElementById('submitBtnText');
+                if (btnText) btnText.textContent = 'Atualizar Aeroporto';
                 document.getElementById('cancelBtn').style.display = 'block';
                 
                 document.getElementById('airportForm').scrollIntoView({ behavior: 'smooth' });
@@ -3324,7 +3336,8 @@
             currentEditingId = null;
             document.getElementById('airportId').value = '';
             document.getElementById('formTitle').textContent = 'Cadastrar Novo Aeroporto';
-            document.getElementById('submitBtn').textContent = 'Salvar Aeroporto';
+            const btnText = document.getElementById('submitBtnText');
+            if (btnText) btnText.textContent = 'Salvar Aeroporto';
             document.getElementById('cancelBtn').style.display = 'none';
             document.getElementById('formMessage').innerHTML = '';
             // Reset ANAC lookup status
@@ -3553,6 +3566,9 @@
                 });
                 
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
+                    }
                     throw new Error('Erro ao verificar conformidade');
                 }
                 
