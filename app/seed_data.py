@@ -47,10 +47,7 @@ def seed_regulations():
     db = SessionLocal()
     
     try:
-        # Check if regulations already exist
-        if db.query(Regulation).count() > 0:
-            print("Regulations already seeded. Skipping...")
-            return
+        existing_codes = {r.code for r in db.query(Regulation.code).all()}
         
         regulations = [
             # Operational Safety - applies to all airports
@@ -60,7 +57,7 @@ def seed_regulations():
                 "description": "Estabelece requisitos para implementação de Sistema de Gerenciamento de Segurança Operacional",
                 "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "min_passengers": 200000,
                 "requirements": "Implementar SMS completo com política de segurança, gestão de riscos, garantia de segurança e promoção da segurança. Realizar auditorias anuais.",
                 "requirement_classification": RequirementClassification.C,
@@ -467,7 +464,7 @@ def seed_regulations():
                 "description": "Requisitos para determinação da categoria contraincêndio baseada na maior aeronave que opera regularmente",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Determinar a CAT do aeródromo baseada na maior aeronave que opera regularmente. Categorias de 1 a 9 conforme RBAC-153. Documentar e notificar à ANAC.",
                 "requirement_classification": RequirementClassification.D,
                 "weight": 10,
@@ -481,7 +478,7 @@ def seed_regulations():
                 "description": "Requisitos para veículos de combate a incêndio conforme categoria do aeródromo",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Manter CCI adequado à categoria do aeródromo. Especificações técnicas conforme RBAC-153: capacidade de água e espuma conforme categoria (ex: CAT 1-2: mínimo 500L água + 50L espuma; CAT 3-4: mínimo 2000L água + 200L espuma; CAT 5-7: mínimo 6000L água + 600L espuma; CAT 8-9: mínimo 12000L água + 1200L espuma), velocidade mínima de 80 km/h, capacidade de bombeamento, certificação e manutenção regular conforme cronograma.",
                 "requirement_classification": RequirementClassification.D,
                 "weight": 10,
@@ -495,7 +492,7 @@ def seed_regulations():
                 "description": "Requisitos para composição e disponibilidade da equipe de serviço do SESCINC",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Manter equipe de serviço do SESCINC com composição mínima conforme categoria. Composição por CAT: CAT 1-2: mínimo 2 BA; CAT 3-4: mínimo 3 BA; CAT 5-6: mínimo 4 BA; CAT 7-8: mínimo 5 BA; CAT 9: mínimo 6 BA. Funções obrigatórias: BA-CE (Chefe de Equipe), BA-LR (Líder de Resgate), BA-MC (Motorista/Operador de CCI), BA-RE (Resgatista). Disponibilidade 24/7 para aeroportos comerciais com equipe completa e pronta para resposta imediata.",
                 "requirement_classification": RequirementClassification.D,
                 "weight": 10,
@@ -509,7 +506,7 @@ def seed_regulations():
                 "description": "Requisitos para tempo de resposta do serviço de combate a incêndio",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Tempo de resposta máximo de 3 minutos para aeroportos comerciais, medido do ponto crítico mais distante (ACT - Área Crítica Teórica). Para aeroportos com operações noturnas, o tempo deve ser medido considerando condições noturnas. Realizar aferições semestrais no mínimo, documentar resultados, manter registro histórico e notificar à ANAC quando houver não conformidade.",
                 "requirement_classification": RequirementClassification.D,
                 "weight": 10,
@@ -523,7 +520,7 @@ def seed_regulations():
                 "description": "Requisitos obrigatórios de capacitação para bombeiros de aeródromo",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Todo bombeiro de aeródromo deve possuir capacitação obrigatória: CBA-1 (Curso de Habilitação de Bombeiro de Aeródromo 1), CBA-2, CBA-AT (Atualização), e especializações conforme função (CBA-CE, CBA-MC). Manter registro de certificações.",
                 "requirement_classification": RequirementClassification.D,
                 "weight": 9,
@@ -537,7 +534,7 @@ def seed_regulations():
                 "description": "Requisitos para elaboração e manutenção do PCINC",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Elaborar e manter PCINC documentado conforme RBAC-153. Conteúdo mínimo: organização do serviço, recursos disponíveis, procedimentos operacionais, coordenação com outros serviços, exercícios simulados. Atualizar periodicamente.",
                 "requirement_classification": RequirementClassification.D,
                 "weight": 9,
@@ -553,7 +550,7 @@ def seed_regulations():
                 "description": "Requisitos para operações de aeronaves compatíveis com a categoria contraincêndio",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "min_passengers": 200000,
                 "requirements": "Estabelecer procedimentos para operações de aeronaves compatíveis com a CAT. Notificar à ANAC quando aeronave maior que a CAT operar. Implementar medidas compensatórias quando necessário.",
                 "requirement_classification": RequirementClassification.C,
@@ -568,7 +565,7 @@ def seed_regulations():
                 "description": "Requisitos para agentes extintores (espuma, pó químico, CO2)",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "min_passengers": 200000,
                 "requirements": "Manter estoque adequado de agentes extintores conforme categoria: espuma AFFF (Aqueous Film Forming Foam) classe 3% ou 6%, pó químico (PQ) classe ABC, gás carbônico (CO2). Quantidades mínimas por categoria: CAT 1-2: mínimo 200L espuma; CAT 3-4: mínimo 500L espuma; CAT 5-7: mínimo 1000L espuma; CAT 8-9: mínimo 2000L espuma. Agentes devem estar certificados, com validade em dia e armazenados adequadamente.",
                 "requirement_classification": RequirementClassification.C,
@@ -583,7 +580,7 @@ def seed_regulations():
                 "description": "Requisitos para veículos de apoio (CACE, CRS)",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "min_passengers": 200000,
                 "requirements": "Manter veículos de apoio conforme necessidade: CACE (Carro de Apoio ao Chefe de Equipe), CRS (Carro de Resgate e Salvamento). Equipamentos e certificação adequados.",
                 "requirement_classification": RequirementClassification.C,
@@ -598,7 +595,7 @@ def seed_regulations():
                 "description": "Requisitos para EPI, EPR, trajes de proteção e equipamentos de resgate",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Manter equipamentos adequados: EPI (Equipamento de Proteção Individual), EPR (Equipamento de Proteção Respiratória), TP (Traje de Proteção), ferramentas de resgate, equipamentos médicos básicos. Manutenção e inspeção regular.",
                 "requirement_classification": RequirementClassification.C,
                 "weight": 6,
@@ -612,7 +609,7 @@ def seed_regulations():
                 "description": "Requisitos para programa de treinamento recorrente",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Implementar PTR-BA com treinamento teórico e prático. Frequência mínima anual. Conteúdo: combate a incêndio, resgate, uso de equipamentos, procedimentos operacionais. Registrar treinamentos e avaliar desempenho.",
                 "requirement_classification": RequirementClassification.C,
                 "weight": 7,
@@ -626,7 +623,7 @@ def seed_regulations():
                 "description": "Requisitos para infraestrutura da seção contraincêndio",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "min_passengers": 200000,
                 "requirements": "Manter SCI com localização estratégica, dimensões mínimas conforme RBAC-153 (área mínima variável por categoria), equipamentos e facilidades adequadas: garagem para CCI e veículos de apoio, sala de comando, vestiários, depósito de agentes extintores, área de manutenção. Acesso rápido às pistas e áreas críticas (ACT) com tempo de resposta adequado. Localização deve permitir acesso a todas as áreas críticas do aeródromo.",
                 "requirement_classification": RequirementClassification.C,
@@ -641,7 +638,7 @@ def seed_regulations():
                 "description": "Requisitos para comunicação com a ANAC sobre SESCINC",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "requirements": "Notificar à ANAC sobre mudanças na CAT, atualizações do PCINC, resultados de exercícios simulados, registro de incidentes. Manter comunicação regular através do SEI! ANAC.",
                 "requirement_classification": RequirementClassification.C,
                 "weight": 6,
@@ -657,7 +654,7 @@ def seed_regulations():
                 "description": "Requisitos para postos avançados em aeroportos grandes",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
                 "applies_to_sizes": json.dumps(["large", "international"]),
-                "applies_to_types": json.dumps(["commercial", "mixed"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "min_passengers": 1000000,
                 "requirements": "Estabelecer PACI em pontos estratégicos do aeródromo para aeroportos grandes/internacionais. Localização adequada, equipamentos básicos, comunicação com SCI.",
                 "requirement_classification": RequirementClassification.B,
@@ -666,14 +663,67 @@ def seed_regulations():
                 "evaluation_type": EvaluationType.BOTH,
                 "expected_performance": "PACI estabelecido em pontos estratégicos, equipamentos disponíveis"
             },
+            
+            # ============================================
+            # RBAC-153: SME, COE, PCM (Classe II, III, IV - CEF 153.309, 153.301, 153.313)
+            # ============================================
+            {
+                "code": "RBAC-153-15",
+                "title": "Ambulâncias (Serviço Médico de Emergência - SME)",
+                "description": "Requisitos para ambulâncias conforme RBAC 153.309 - quantidade mínima, tripulação ANVISA/MS",
+                "safety_category": SafetyCategory.EMERGENCY_RESPONSE,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Prover quantidade mínima de ambulâncias fixada em normativo, devidamente tripuladas conforme ANVISA e Ministério da Saúde, com motorista habilitado. Classe II/III: mínimo 1 ambulância; Classe IV: mínimo 2 (sendo uma tipo D). Características técnicas e operacionais conforme MS e ANVISA.",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.309",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Ambulâncias disponíveis, tripuladas e certificadas conforme normativo"
+            },
+            {
+                "code": "RBAC-153-16",
+                "title": "Centro de Operações de Emergências (COE)",
+                "description": "Requisitos para COE - existência, ativação, composição e coordenação conforme RBAC 153.301",
+                "safety_category": SafetyCategory.EMERGENCY_RESPONSE,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Estabelecer e manter operacional Centro de Operações de Emergências (COE) adequado ao SREA. Garantir que todos os elementos do SREA tenham acesso às informações, procedimentos e responsabilidades. Composição conforme planejamento do SREA, testes MGI, PRAI, PLEM.",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.301",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "COE estabelecido, ativável e integrado ao SREA"
+            },
+            {
+                "code": "RBAC-153-17",
+                "title": "Posto de Comando Móvel (PCM)",
+                "description": "Requisitos para PCM - locomoção, comunicação com COE, iluminação conforme RBAC 153.313",
+                "safety_category": SafetyCategory.EMERGENCY_RESPONSE,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Manter PCM interno ao aeródromo, em local de fácil acesso e rápida locomoção até o local da emergência. Sistema de comunicação imediata e segura com o COE e recursos envolvidos. Iluminação para suporte às atividades. Definir responsável pela operação no planejamento do SREA.",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.313",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "PCM disponível, comunicável com COE e operacional"
+            },
         ]
         
-        for reg_data in regulations:
+        to_add = [r for r in regulations if r["code"] not in existing_codes]
+        for reg_data in to_add:
             regulation = Regulation(**reg_data)
             db.add(regulation)
         
-        db.commit()
-        print(f"Seeded {len(regulations)} regulations successfully!")
+        if to_add:
+            db.commit()
+            print(f"Seeded {len(to_add)} new regulation(s) successfully! (Total: {len(existing_codes) + len(to_add)})")
+        else:
+            print(f"All {len(regulations)} regulations already exist. Nothing to add.")
         
     except Exception as e:
         db.rollback()
@@ -801,14 +851,40 @@ def seed_anac_airports_bootstrap():
         to_add = [a for a in ANAC_AIRPORTS_BOOTSTRAP if a["code"] not in existing_codes]
         if not to_add:
             print("anac_airports já contém todos os aeroportos do bootstrap.")
-            return
+            return db.query(ANACAirport).count()
         for a in to_add:
             db.add(ANACAirport(**a))
         db.commit()
         print(f"Bootstrap: {len(to_add)} aeroportos adicionados a anac_airports")
+        return db.query(ANACAirport).count()
     except Exception as e:
         db.rollback()
         print(f"Erro no bootstrap anac_airports: {e}")
+        return 0
+    finally:
+        db.close()
+
+
+def seed_anac_airports_full() -> int:
+    """
+    Popula anac_airports com a lista COMPLETA da ANAC (Características Gerais ~6800 aeródromos).
+    Quando a pessoa selecionar o aeroporto para cadastro, todos os dados já estarão no banco.
+    Se ANAC indisponível, usa bootstrap (27 principais).
+    """
+    from app.services.anac_sync import ANACSyncService
+    db = SessionLocal()
+    try:
+        sync = ANACSyncService(db=db)
+        data = sync.download_anac_data()
+        if data:
+            count = len(data)
+            print(f"anac_airports: {count} aeródromos carregados da ANAC (Características Gerais)")
+            return count
+        print("ANAC indisponível. Usando bootstrap...")
+        return seed_anac_airports_bootstrap()
+    except Exception as e:
+        print(f"Erro ao carregar anac_airports: {e}")
+        return seed_anac_airports_bootstrap()
     finally:
         db.close()
 

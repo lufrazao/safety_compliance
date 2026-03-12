@@ -1424,9 +1424,9 @@
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                         <div>
-                            <h2 style="margin: 0;">🚒 Gestão por Áreas Funcionais</h2>
+                            <h2 style="margin: 0;">📋 Áreas REA (Resposta a Emergência Aeroportuária)</h2>
                             <p style="color: #666; margin: 5px 0 0 0;">
-                                Visualize e gerencie as conformidades organizadas por área funcional conforme a estrutura do SESCINC.
+                                Gerencie cada área conforme o aeroporto: SESCINC, SME, COE, PCM, SIMULADOS e PLANOS.
                             </p>
                         </div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -1436,6 +1436,9 @@
                                     <option value="">Selecione um aeroporto...</option>
                                 </select>
                             </div>
+                            <button id="refreshAllComplianceBtn" onclick="refreshAllCompliance()" style="padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; align-self: flex-end;" title="Cria registros de SME, COE, PCM e demais normas para todos os aeroportos aplicáveis">
+                                🔄 Atualizar Conformidades
+                            </button>
                             <button onclick="switchTab('deadlines')" style="padding: 10px 20px; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; align-self: flex-end;">
                                 📅 Prazos e Vencimentos
                             </button>
@@ -1515,11 +1518,11 @@
                                         onclick="lookupAirportFromANAC()"
                                         style="padding: 10px 16px; background: var(--anac-primary); color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; font-size: 14px;"
                                         disabled
-                                        title="Buscar dados do aeroporto na lista oficial da ANAC">
-                                    🔍 Buscar da ANAC
+                                        title="Buscar dados do aeródromo no eAIS (AISWEB/DECEA)">
+                                    🔍 Buscar no eAIS
                                 </button>
                             </div>
-                            <div class="help-text" id="code-help">Código ICAO de 4 letras (ex: SBGR, SBCF). O sistema busca na base oficial da ANAC. Se indisponível, usa cache ou cadastro local. <a href="#" onclick="refreshAnacCache(); return false;" style="font-size: 12px; color: var(--anac-primary);">Atualizar cache ANAC</a></div>
+                            <div class="help-text" id="code-help">Código ICAO de 4 letras (ex: SBGR, SBCF). Ao clicar, o sistema extrai dados exclusivamente do <a href="https://aisweb.decea.mil.br/eaip/" target="_blank" rel="noopener noreferrer" style="color: var(--anac-primary);">eAIS (AERÓDROMOS)</a> — nome, coordenadas, RCD, CAT CIVIL, pistas e parâmetros de segurança para verificação de conformidade.</div>
                             <span class="error-message" id="code-error" style="display: none;"></span>
                             <div id="anac-lookup-status" style="margin-top: 8px; font-size: 13px; display: none;"></div>
                         </div>
@@ -1533,6 +1536,32 @@
                                    onblur="validateField('name', this.value)">
                             <div class="help-text" id="name-help">Nome completo do aeroporto (ex: Aeroporto Internacional de São Paulo - Guarulhos)</div>
                             <span class="error-message" id="name-error" style="display: none;"></span>
+                        </div>
+                        
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 80px; gap: 12px;">
+                            <div class="form-group">
+                                <label for="city">Cidade</label>
+                                <input type="text" id="city" maxlength="100" autocomplete="address-level2" placeholder="Ex: Guarulhos">
+                                <div class="help-text">Preenchido automaticamente pelo eAIS</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="state">UF</label>
+                                <input type="text" id="state" maxlength="2" autocomplete="address-level1" placeholder="Ex: SP" style="text-transform: uppercase;">
+                                <div class="help-text">Estado (2 letras)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-group">
+                                <label for="latitude">Latitude</label>
+                                <input type="number" id="latitude" step="any" autocomplete="off" placeholder="Ex: -23.4356">
+                                <div class="help-text">Coordenada geográfica (eAIS)</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="longitude">Longitude</label>
+                                <input type="number" id="longitude" step="any" autocomplete="off" placeholder="Ex: -46.4731">
+                                <div class="help-text">Coordenada geográfica (eAIS)</div>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -1557,7 +1586,7 @@
                                 <option value="IV">Classe IV - Público: &gt; 5 milhões passageiros/ano</option>
                                 <option value="PRIVADO">Privado - Uso restrito ao proprietário</option>
                             </select>
-                            <div class="help-text">Classificação por uso conforme RBAC 153 (Público: Classes I-IV baseadas em passageiros, ou Privado).</div>
+                            <div class="help-text">Preenchido automaticamente pelo eAIS (inferido da CAT CIVIL). Classes I-IV baseadas em passageiros ou Privado.</div>
                         </div>
                         
                         <div class="form-group">
@@ -1569,7 +1598,7 @@
                                 <option value="AP-2">AP-2 - Comercial regular/charter, 600 mil - 5 milhões pass./ano</option>
                                 <option value="AP-3">AP-3 - Comercial regular/charter, &gt; 5 milhões pass./ano</option>
                             </select>
-                            <div class="help-text">Classificação AVSEC (Segurança contra Atos de Interferência Ilícita) conforme ANAC.</div>
+                            <div class="help-text">Preenchido automaticamente pelo eAIS (inferido da CAT CIVIL). AP-0 a AP-3 conforme volume de passageiros.</div>
                         </div>
                         
                         <div class="form-group">
@@ -1583,22 +1612,28 @@
                             <div class="help-text">Categoria baseada no peso máximo de decolagem (MTOW - Maximum Take-Off Weight) da maior aeronave que opera regularmente no aeródromo. Conforme classificação ANAC/ICAO.</div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="reference_code">Código de Referência das Aeronaves *</label>
+                        <div class="form-group" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--anac-gray-200);">
+                            <label for="reference_code">Código de Referência das Aeronaves (RCD) *</label>
                             <input type="text" id="reference_code" maxlength="10" pattern="[1-4][A-E]" placeholder="Ex: 3C, 4C, 4E" required autocomplete="off">
-                            <div class="help-text">Código alfanumérico (ex: 3C, 4C, 4E) que indica a configuração máxima de aeronave permitida no aeroporto. Número (1-4): comprimento de pista necessário. Letra (A-E): envergadura/distância entre rodas. Exemplos: A318-100 (3C), A320 (4C), A330 (4E).</div>
+                            <div class="help-text">Código alfanumérico (ex: 3C, 4C, 4E) que indica a configuração máxima de aeronave permitida no aeroporto. Número (1-4): comprimento de pista necessário. Letra (A-E): envergadura/distância entre rodas. Exemplos: A318-100 (3C), A320 (4C), A330 (4E). <strong>Fonte oficial:</strong> eAIS — seção "CARACTERÍSTICAS FÍSICAS DA PISTA" (RCD) em cada aeródromo.</div>
                         </div>
                         
                         <div class="form-group">
                             <label for="number_of_runways">Número de Pistas *</label>
                             <input type="number" id="number_of_runways" min="1" value="1" required autocomplete="off">
-                            <div class="help-text">Número de pistas de pouso e decolagem</div>
+                            <div class="help-text">Número de pistas de pouso e decolagem. Extraído do eAIS.</div>
                         </div>
                         
                         <div class="form-group">
+                            <label for="fire_category">CAT CIVIL (Categoria Contraincêndio)</label>
+                            <input type="number" id="fire_category" min="1" max="10" placeholder="1-10" autocomplete="off">
+                            <div class="help-text">Categoria SESCINC (1-10) do eAIS — define requisitos de CCI, equipe e tempo-resposta para RBAC-153.</div>
+                        </div>
+
+                        <div class="form-group">
                             <label for="max_aircraft_weight">Peso Máximo de Aeronaves (toneladas)</label>
                             <input type="number" id="max_aircraft_weight" min="0" autocomplete="off">
-                            <div class="help-text">Peso máximo de decolagem (MTOW) da maior aeronave que opera regularmente</div>
+                            <div class="help-text">Preenchido automaticamente pelo eAIS (PRAI — peso da maior aeronave removível). MTOW da maior aeronave que opera regularmente.</div>
                         </div>
                         
                         <div class="form-group">
@@ -1606,23 +1641,23 @@
                                 <input type="checkbox" id="has_international_operations">
                                 <label for="has_international_operations" style="margin: 0;">Operações Internacionais</label>
                             </div>
-                            <div class="help-text">Selecione se o aeroporto recebe voos internacionais. Requer normas adicionais de segurança e alfândega.</div>
+                            <div class="help-text">Preenchido automaticamente pelo eAIS (AD INTL / AD DOM).</div>
                         </div>
-                        
+
                         <div class="form-group">
                             <div class="checkbox-group">
                                 <input type="checkbox" id="has_cargo_operations">
                                 <label for="has_cargo_operations" style="margin: 0;">Operações de Carga</label>
                             </div>
-                            <div class="help-text">Selecione se o aeroporto realiza operações de carga. Requer infraestrutura específica.</div>
+                            <div class="help-text">Preenchido automaticamente pelo eAIS (voos de carga).</div>
                         </div>
-                        
+
                         <div class="form-group">
                             <div class="checkbox-group">
                                 <input type="checkbox" id="has_maintenance_facility">
                                 <label for="has_maintenance_facility" style="margin: 0;">Facilidades de Manutenção Aeronáutica</label>
                             </div>
-                            <div class="help-text">Selecione se o aeroporto possui hangares e facilidades para manutenção de aeronaves.</div>
+                            <div class="help-text">Preenchido automaticamente pelo eAIS (hangares).</div>
                         </div>
                         
                         <div class="button-group">
@@ -1640,7 +1675,8 @@
                     <h2>Aeroportos Cadastrados</h2>
                     <div class="info-box">
                         <h4>ℹ️ Como usar</h4>
-                        <p>Cadastre seu aeroporto informando todas as características acima. O sistema usará essas informações para determinar quais normas ANAC (RBAC-153 e RBAC-154) se aplicam e gerar um plano de ação personalizado.</p>
+                        <p>Informe o código ICAO e clique em <strong>Buscar no eAIS</strong> para preencher automaticamente os dados do aeródromo (nome, RCD, CAT CIVIL, pistas, classificações). O sistema usa essas informações para verificar conformidade com as normas ANAC (RBAC-153 e RBAC-154).</p>
+                        <p><strong>Fonte:</strong> <a href="https://aisweb.decea.mil.br/eaip/" target="_blank" rel="noopener noreferrer" style="color: var(--anac-primary);">eAIS (eAIP)</a> — seção AERÓDROMOS.</p>
                     </div>
                     <div id="airportList" class="airport-list">
                         <div class="loading">Carregando aeroportos...</div>
@@ -1832,22 +1868,17 @@
             function getFunctionalArea(code) {
                 if (!code) return null;
                 
-                // RBAC-153 areas
-                if (code.startsWith('RBAC-153')) {
-                    const areaMap = {
-                        'RBAC-153-01': 'Gestão da CAT', 'RBAC-153-02': 'Gestão da CAT',
-                        'RBAC-153-03': 'Gestão de Equipamentos', 'RBAC-153-04': 'Gestão de Equipamentos',
-                        'RBAC-153-05': 'Gestão de Equipamentos', 'RBAC-153-09': 'Gestão de Equipamentos',
-                        'RBAC-153-06': 'Gestão de Recursos Humanos', 'RBAC-153-08': 'Gestão de Recursos Humanos',
-                        'RBAC-153-10': 'Gestão de Recursos Humanos',
-                        'RBAC-153-07': 'Gestão Operacional', 'RBAC-153-11': 'Gestão Operacional',
-                        'RBAC-153-12': 'Gestão de Infraestrutura', 'RBAC-153-13': 'Gestão de Infraestrutura',
-                        'RBAC-153-14': 'Gestão de Documentação'
-                    };
-                    return areaMap[code] || null;
-                }
+                // RBAC-153 e RBAC-154 - Áreas REA
+                const areaMap = {
+                    'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                    'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                    'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                    'RBAC-153-14': 'SESCINC', 'RBAC-153-11': 'PLANOS', 'RBAC-154-40': 'PLANOS', 'RBAC-154-43': 'SIMULADOS',
+                    'RBAC-153-15': 'SME', 'RBAC-153-16': 'COE', 'RBAC-153-17': 'PCM'
+                };
+                if (areaMap[code]) return areaMap[code];
                 
-                // RBAC-154 areas (general compliance)
+                // RBAC-154 demais (categorias de segurança)
                 if (code.startsWith('RBAC-154')) {
                     // Find the record to get safety category
                     const record = data.compliance_records.find(r => {
@@ -1875,12 +1906,12 @@
             
             function getAreaInfo(areaName) {
                 const areaInfoMap = {
-                    'Gestão da CAT': { icon: '📋', color: '#3b82f6' },
-                    'Gestão de Equipamentos': { icon: '🚛', color: '#8b5cf6' },
-                    'Gestão de Recursos Humanos': { icon: '👥', color: '#10b981' },
-                    'Gestão Operacional': { icon: '⚙️', color: '#f59e0b' },
-                    'Gestão de Infraestrutura': { icon: '🏗️', color: '#ef4444' },
-                    'Gestão de Documentação': { icon: '📄', color: '#6b7280' },
+                    'SESCINC': { icon: '🚒', color: '#ef4444' },
+                    'SME': { icon: '🏥', color: '#10b981' },
+                    'COE': { icon: '📡', color: '#3b82f6' },
+                    'PCM': { icon: '🚐', color: '#8b5cf6' },
+                    'SIMULADOS': { icon: '🎯', color: '#f59e0b' },
+                    'PLANOS': { icon: '📋', color: '#6b7280' },
                     'Segurança Contra Incêndio': { icon: '🚒', color: '#ef4444' },
                     'Segurança Operacional': { icon: '⚙️', color: '#3b82f6' },
                     'Segurança da Aviação (AVSEC)': { icon: '🛡️', color: '#10b981' },
@@ -2097,12 +2128,7 @@
             let html = '<div style="display: grid; gap: 20px;">';
             
             const areaOrder = [
-                'Gestão da CAT',
-                'Gestão de Equipamentos',
-                'Gestão de Recursos Humanos',
-                'Gestão Operacional',
-                'Gestão de Infraestrutura',
-                'Gestão de Documentação',
+                'SESCINC', 'SME', 'COE', 'PCM', 'SIMULADOS', 'PLANOS',
                 'Segurança Contra Incêndio',
                 'Segurança Operacional',
                 'Segurança da Aviação (AVSEC)',
@@ -2387,6 +2413,25 @@
             }
         }
         
+        // Atualiza conformidade de todos os aeroportos (cria registros SME, COE, PCM etc.)
+        async function refreshAllCompliance() {
+            const btn = document.getElementById('refreshAllComplianceBtn');
+            if (btn) btn.disabled = true;
+            try {
+                showToast('Atualizando conformidades de todos os aeroportos...', 'info');
+                const res = await fetch(`${API_BASE}/compliance/refresh-all`, { method: 'POST' });
+                if (!res.ok) throw new Error('Erro ao atualizar');
+                const data = await res.json();
+                showToast(data.message || 'Conformidades atualizadas!', 'success');
+                const areasAirportSelect = document.getElementById('areasAirportSelect');
+                if (areasAirportSelect && areasAirportSelect.value) loadAreas();
+            } catch (e) {
+                showToast('Erro ao atualizar conformidades: ' + (e.message || e), 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
         // Load Areas SESCINC
         async function loadAreas() {
             const areasContent = document.getElementById('areasContent');
@@ -2503,39 +2548,32 @@
             console.log('displayAreasFunctional - Received data:', data);
             console.log('displayAreasFunctional - Compliance records count:', data.compliance_records?.length || 0);
             
-            // Helper function to get functional area for RBAC-153 regulations
+            // Áreas REA (Resposta a Emergência Aeroportuária) conforme Sistema.xlsx
             function getFunctionalArea(code) {
-                if (!code || !code.startsWith('RBAC-153')) return null;
-                
+                if (!code) return null;
                 const areaMap = {
-                    'RBAC-153-01': 'Gestão da CAT',
-                    'RBAC-153-02': 'Gestão da CAT',
-                    'RBAC-153-03': 'Gestão de Equipamentos',
-                    'RBAC-153-04': 'Gestão de Equipamentos',
-                    'RBAC-153-05': 'Gestão de Equipamentos',
-                    'RBAC-153-09': 'Gestão de Equipamentos',
-                    'RBAC-153-06': 'Gestão de Recursos Humanos',
-                    'RBAC-153-08': 'Gestão de Recursos Humanos',
-                    'RBAC-153-10': 'Gestão de Recursos Humanos',
-                    'RBAC-153-07': 'Gestão Operacional',
-                    'RBAC-153-11': 'Gestão Operacional',
-                    'RBAC-153-12': 'Gestão de Infraestrutura',
-                    'RBAC-153-13': 'Gestão de Infraestrutura',
-                    'RBAC-153-14': 'Gestão de Documentação'
+                    'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                    'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                    'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                    'RBAC-153-14': 'SESCINC',
+                    'RBAC-153-11': 'PLANOS',
+                    'RBAC-154-40': 'PLANOS',
+                    'RBAC-154-43': 'SIMULADOS',
+                    'RBAC-153-15': 'SME',
+                    'RBAC-153-16': 'COE',
+                    'RBAC-153-17': 'PCM'
                 };
-                
                 return areaMap[code] || null;
             }
             
-            // Helper function to get area info
             function getAreaInfo(areaName) {
                 const areaInfoMap = {
-                    'Gestão da CAT': { icon: '📋', desc: 'Categoria Contraincêndio e Operações Compatíveis', color: '#3b82f6' },
-                    'Gestão de Equipamentos': { icon: '🚛', desc: 'CCI, Veículos de Apoio, Agentes Extintores e Equipamentos', color: '#8b5cf6' },
-                    'Gestão de Recursos Humanos': { icon: '👥', desc: 'Equipe, Capacitação e Treinamento Recorrente', color: '#10b981' },
-                    'Gestão Operacional': { icon: '⚙️', desc: 'Tempo-Resposta e Plano Contraincêndio (PCINC)', color: '#f59e0b' },
-                    'Gestão de Infraestrutura': { icon: '🏗️', desc: 'SCI e Posto Avançado (PACI)', color: '#ef4444' },
-                    'Gestão de Documentação': { icon: '📄', desc: 'Comunicação e Notificações à ANAC', color: '#6b7280' }
+                    'SESCINC': { icon: '🚒', desc: 'Serviço de Salvamento e Combate a Incêndio — Aferição tempo-resposta, CCI, equipe, agentes extintores, capacitação', color: '#ef4444' },
+                    'SME': { icon: '🏥', desc: 'Serviço Médico de Emergência — Ambulâncias, efetivo, certificados, escala, tempo-resposta', color: '#10b981' },
+                    'COE': { icon: '📡', desc: 'Centro de Operações de Emergências — Existência/ativação, composição, testes MGI, PRAI, PLEM, câmeras', color: '#3b82f6' },
+                    'PCM': { icon: '🚐', desc: 'Posto de Comando Móvel — Existência, locomoção, comunicação, iluminação, responsável', color: '#8b5cf6' },
+                    'SIMULADOS': { icon: '🎯', desc: 'Exercícios Simulados de Emergência (ESEA) — Ciclo 3 anos, 12 módulos, 4 módulos/ano, variação local/horário', color: '#f59e0b' },
+                    'PLANOS': { icon: '📄', desc: 'Planos — PLEM, PCINC, disponibilização aos envolvidos, atualização de fluxogramas e listas', color: '#6b7280' }
                 };
                 return areaInfoMap[areaName] || { icon: '📁', desc: '', color: '#6b7280' };
             }
@@ -2544,22 +2582,12 @@
             const areasData = {};
             let rbac153Count = 0;
             
-            if (!data.compliance_records || data.compliance_records.length === 0) {
-                areasContent.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--anac-gray-600);">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
-                        <p>Nenhum registro de conformidade encontrado para este aeroporto.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            data.compliance_records.forEach(record => {
+            (data.compliance_records || []).forEach(record => {
                 const regulation = record.regulation || {};
                 const code = regulation.code || '';
                 const areaName = getFunctionalArea(code);
                 
-                if (!areaName) return; // Skip non-RBAC-153 records
+                if (!areaName) return; // Skip records not mapped to REA areas
                 
                 rbac153Count++;
                 
@@ -2585,25 +2613,16 @@
                 else areasData[areaName].pending++;
             });
             
-            // Sort areas by priority
-            const areaOrder = [
-                'Gestão da CAT',
-                'Gestão de Equipamentos',
-                'Gestão de Recursos Humanos',
-                'Gestão Operacional',
-                'Gestão de Infraestrutura',
-                'Gestão de Documentação'
-            ];
+            // Ordem das áreas REA conforme Sistema.xlsx (Organização Setores)
+            const areaOrder = ['SESCINC', 'SME', 'COE', 'PCM', 'SIMULADOS', 'PLANOS'];
             
             let html = '<div style="display: grid; gap: 20px;">';
             
             areaOrder.forEach(areaName => {
-                const areaData = areasData[areaName];
-                if (!areaData || areaData.records.length === 0) return;
-                
+                const areaData = areasData[areaName] || { records: [], compliant: 0, partial: 0, nonCompliant: 0, pending: 0 };
                 const areaInfo = getAreaInfo(areaName);
                 const total = areaData.records.length;
-                const compliantPercentage = Math.round((areaData.compliant / total) * 100);
+                const compliantPercentage = total > 0 ? Math.round((areaData.compliant / total) * 100) : 0;
                 
                 html += `
                     <div style="background: white; border: 2px solid ${areaInfo.color}40; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -2618,55 +2637,45 @@
                             <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                                 <div style="text-align: center; padding: 10px 15px; background: #f8f9fa; border-radius: 8px;">
                                     <div style="font-size: 28px; font-weight: bold; color: var(--anac-primary);">${total}</div>
-                                    <div style="font-size: 11px; color: #666; margin-top: 4px;">norma${total > 1 ? 's' : ''}</div>
+                                    <div style="font-size: 11px; color: #666; margin-top: 4px;">norma${total !== 1 ? 's' : ''}</div>
                                 </div>
-                                <div style="text-align: center; padding: 10px 15px; background: #d4edda; border-radius: 8px;">
-                                    <div style="font-size: 28px; font-weight: bold; color: #10b981;">${compliantPercentage}%</div>
-                                    <div style="font-size: 11px; color: #666; margin-top: 4px;">conforme</div>
-                                </div>
-                                ${areaData.nonCompliant > 0 ? `
-                                    <div style="text-align: center; padding: 10px 15px; background: #f8d7da; border-radius: 8px;">
-                                        <div style="font-size: 24px; font-weight: bold; color: #ef4444;">${areaData.nonCompliant}</div>
-                                        <div style="font-size: 11px; color: #666; margin-top: 4px;">não conforme</div>
+                                ${total > 0 ? `
+                                    <div style="text-align: center; padding: 10px 15px; background: #d4edda; border-radius: 8px;">
+                                        <div style="font-size: 28px; font-weight: bold; color: #10b981;">${compliantPercentage}%</div>
+                                        <div style="font-size: 11px; color: #666; margin-top: 4px;">conforme</div>
                                     </div>
-                                ` : ''}
+                                    ${areaData.nonCompliant > 0 ? `
+                                        <div style="text-align: center; padding: 10px 15px; background: #f8d7da; border-radius: 8px;">
+                                            <div style="font-size: 24px; font-weight: bold; color: #ef4444;">${areaData.nonCompliant}</div>
+                                            <div style="font-size: 11px; color: #666; margin-top: 4px;">não conforme</div>
+                                        </div>
+                                    ` : ''}
+                                ` : `
+                                    <div style="font-size: 13px; color: #999; padding: 8px 12px;">Nenhum item de conformidade mapeado</div>
+                                `}
                             </div>
                         </div>
                         
                         <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button onclick="viewAreaDetails('${areaName}')" style="padding: 10px 20px; background: ${areaInfo.color}; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                                Ver Detalhes
-                            </button>
-                            <button onclick="exportAreaReport('${areaName}')" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                                📥 Exportar Excel
-                            </button>
-                            <button onclick="generateAreaReport('${areaName}')" style="padding: 10px 20px; background: var(--anac-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                                📄 Gerar Relatório PDF
-                            </button>
+                            ${total > 0 ? `
+                                <button onclick="viewAreaDetails('${areaName}')" style="padding: 10px 20px; background: ${areaInfo.color}; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                                    Ver Detalhes
+                                </button>
+                                <button onclick="exportAreaReport('${areaName}')" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                                    📥 Exportar Excel
+                                </button>
+                                <button onclick="generateAreaReport('${areaName}')" style="padding: 10px 20px; background: var(--anac-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                                    📄 Gerar Relatório PDF
+                                </button>
+                            ` : `
+                                <span style="font-size: 13px; color: #999;">Gestão desta área conforme checklist ANAC/operador do aeródromo.</span>
+                            `}
                         </div>
                     </div>
                 `;
             });
             
             html += '</div>';
-            
-            // If no areas found, show message
-            if (Object.keys(areasData).length === 0) {
-                html = `
-                    <div style="text-align: center; padding: 40px; color: var(--anac-gray-600);">
-                        <div style="font-size: 48px; margin-bottom: 16px;">🚒</div>
-                        <p style="margin-bottom: 10px; font-size: 16px; font-weight: 600;">Nenhuma área funcional SESCINC encontrada</p>
-                        <p style="font-size: 13px; color: #999; margin-bottom: 5px;">Total de registros RBAC-153 processados: ${rbac153Count}</p>
-                        <p style="font-size: 13px; color: #999; margin-bottom: 15px;">Total de registros recebidos: ${data.compliance_records?.length || 0}</p>
-                        <p style="font-size: 12px; color: #999; margin-top: 15px;">
-                            Certifique-se de que o aeroporto selecionado possui normas RBAC-153 aplicáveis.
-                        </p>
-                        <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                            Se você acabou de cadastrar um aeroporto, vá para a aba "Verificar Conformidade" para gerar os registros de conformidade.
-                        </p>
-                    </div>
-                `;
-            }
             
             areasContent.innerHTML = html;
             console.log('displayAreasFunctional - Areas found:', Object.keys(areasData).length, 'RBAC-153 records:', rbac153Count);
@@ -2707,18 +2716,14 @@
             const contentDiv = document.getElementById('complianceContent');
             if (!contentDiv || !window.currentComplianceData) return;
             
-            // Helper functions
             function getFunctionalArea(code) {
-                if (!code || !code.startsWith('RBAC-153')) return null;
+                if (!code) return null;
                 const areaMap = {
-                    'RBAC-153-01': 'Gestão da CAT', 'RBAC-153-02': 'Gestão da CAT',
-                    'RBAC-153-03': 'Gestão de Equipamentos', 'RBAC-153-04': 'Gestão de Equipamentos',
-                    'RBAC-153-05': 'Gestão de Equipamentos', 'RBAC-153-09': 'Gestão de Equipamentos',
-                    'RBAC-153-06': 'Gestão de Recursos Humanos', 'RBAC-153-08': 'Gestão de Recursos Humanos',
-                    'RBAC-153-10': 'Gestão de Recursos Humanos',
-                    'RBAC-153-07': 'Gestão Operacional', 'RBAC-153-11': 'Gestão Operacional',
-                    'RBAC-153-12': 'Gestão de Infraestrutura', 'RBAC-153-13': 'Gestão de Infraestrutura',
-                    'RBAC-153-14': 'Gestão de Documentação'
+                    'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                    'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                    'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                    'RBAC-153-14': 'SESCINC', 'RBAC-153-11': 'PLANOS', 'RBAC-154-40': 'PLANOS', 'RBAC-154-43': 'SIMULADOS',
+                    'RBAC-153-15': 'SME', 'RBAC-153-16': 'COE', 'RBAC-153-17': 'PCM'
                 };
                 return areaMap[code] || null;
             }
@@ -3040,12 +3045,17 @@
                 avsec_classification: document.getElementById('avsec_classification').value || null,
                 aircraft_size_category: document.getElementById('aircraft_size_category').value || null,
                 reference_code: document.getElementById('reference_code').value || null,
+                fire_category: document.getElementById('fire_category').value ? parseInt(document.getElementById('fire_category').value) : null,
                 annual_passengers: calculatedPassengers, // Calculado automaticamente a partir de usage_class
                 number_of_runways: parseInt(document.getElementById('number_of_runways').value),
                 max_aircraft_weight: document.getElementById('max_aircraft_weight').value ? parseInt(document.getElementById('max_aircraft_weight').value) : null,
                 has_international_operations: document.getElementById('has_international_operations').checked,
                 has_cargo_operations: document.getElementById('has_cargo_operations').checked,
-                has_maintenance_facility: document.getElementById('has_maintenance_facility').checked
+                has_maintenance_facility: document.getElementById('has_maintenance_facility').checked,
+                city: document.getElementById('city').value || null,
+                state: document.getElementById('state').value?.toUpperCase() || null,
+                latitude: document.getElementById('latitude').value ? parseFloat(document.getElementById('latitude').value) : null,
+                longitude: document.getElementById('longitude').value ? parseFloat(document.getElementById('longitude').value) : null,
             };
             
             // Validate all required fields
@@ -3120,12 +3130,17 @@
                 document.getElementById('airportId').value = airport.id;
                 document.getElementById('name').value = airport.name;
                 document.getElementById('code').value = airport.code;
+                document.getElementById('city').value = airport.city || airport.cidade || '';
+                document.getElementById('state').value = airport.state || airport.estado || '';
+                document.getElementById('latitude').value = airport.latitude ?? '';
+                document.getElementById('longitude').value = airport.longitude ?? '';
                 // size é calculado automaticamente, não precisa ser editado
                 document.getElementById('airport_type').value = airport.airport_type;
                 document.getElementById('usage_class').value = airport.usage_class || '';
                 document.getElementById('avsec_classification').value = airport.avsec_classification || '';
                 document.getElementById('aircraft_size_category').value = airport.aircraft_size_category || '';
                 document.getElementById('reference_code').value = airport.reference_code || '';
+                document.getElementById('fire_category').value = airport.fire_category || '';
                 // annual_passengers é calculado automaticamente, não precisa ser editado
                 document.getElementById('number_of_runways').value = airport.number_of_runways;
                 document.getElementById('max_aircraft_weight').value = airport.max_aircraft_weight || '';
@@ -3190,8 +3205,10 @@
             }
             
             // Calcular Categoria de Porte da Aeronave (baseado em max_aircraft_weight)
+            // Só preencher quando vazio - não sobrescrever valor do eAIS (lookup)
             // Classificação ANAC/ICAO: A/B até 5.700 kg, C entre 5.700-136.000 kg, D acima de 136.000 kg
-            if (maxAircraftWeight > 0) {
+            const currentCategory = aircraftSizeSelect.value;
+            if (maxAircraftWeight > 0 && !currentCategory) {
                 const weightKg = maxAircraftWeight * 1000; // Converter toneladas para kg
                 if (weightKg <= 5700) {
                     aircraftSizeSelect.value = 'A/B';
@@ -3243,7 +3260,7 @@
             // Desabilitar botão durante busca
             if (lookupBtn) lookupBtn.disabled = true;
             statusDiv.style.display = 'block';
-            statusDiv.innerHTML = '<span style="color: var(--anac-info);">🔍 Buscando dados da ANAC...</span>';
+            statusDiv.innerHTML = '<span style="color: var(--anac-info);">🔍 Buscando dados no eAIS...</span>';
             
             try {
                 const response = await fetch(`${API_BASE}/airports/lookup/${code}`);
@@ -3255,31 +3272,40 @@
                 
                 const data = await response.json();
                 
-                // Preencher todos os campos disponíveis
-                if (data.name) document.getElementById('name').value = data.name;
-                if (data.reference_code) document.getElementById('reference_code').value = data.reference_code;
-                if (data.usage_class) document.getElementById('usage_class').value = data.usage_class;
-                if (data.avsec_classification) document.getElementById('avsec_classification').value = data.avsec_classification;
-                if (data.aircraft_size_category) document.getElementById('aircraft_size_category').value = data.aircraft_size_category;
-                if (data.airport_type) document.getElementById('airport_type').value = data.airport_type;
+                // Preencher todos os campos disponíveis (usar != null para aceitar 0 e false)
+                if (data.name != null) document.getElementById('name').value = data.name || '';
+                if (data.city != null) document.getElementById('city').value = data.city || '';
+                if (data.state != null) document.getElementById('state').value = data.state || '';
+                if (data.latitude != null) document.getElementById('latitude').value = data.latitude;
+                if (data.longitude != null) document.getElementById('longitude').value = data.longitude;
+                if (data.reference_code != null) document.getElementById('reference_code').value = data.reference_code || '';
+                if (data.usage_class != null) document.getElementById('usage_class').value = data.usage_class || '';
+                if (data.avsec_classification != null) document.getElementById('avsec_classification').value = data.avsec_classification || '';
+                if (data.aircraft_size_category != null) document.getElementById('aircraft_size_category').value = data.aircraft_size_category || '';
+                if (data.airport_type != null) document.getElementById('airport_type').value = data.airport_type || '';
                 if (data.number_of_runways != null) document.getElementById('number_of_runways').value = data.number_of_runways;
+                if (data.fire_category != null) document.getElementById('fire_category').value = data.fire_category;
+                if (data.max_aircraft_weight != null) document.getElementById('max_aircraft_weight').value = data.max_aircraft_weight;
+                if (data.has_international_operations != null) document.getElementById('has_international_operations').checked = data.has_international_operations;
+                if (data.has_cargo_operations != null) document.getElementById('has_cargo_operations').checked = data.has_cargo_operations;
+                if (data.has_maintenance_facility != null) document.getElementById('has_maintenance_facility').checked = data.has_maintenance_facility;
                 
-                // Calcular campos derivados (avsec, aircraft_size) a partir de usage_class/max_weight
-                if (typeof calculateANACClassifications === 'function') {
+                // Calcular campos derivados apenas quando dados NÃO vêm do eAIS (evitar sobrescrever)
+                if (typeof calculateANACClassifications === 'function' && data.source !== 'eais') {
                     calculateANACClassifications();
                 }
                 
                 // Mostrar status de sucesso
-                const sourceLabel = data.source === 'local' ? 'Cadastro local' : (data.source === 'anac_db' ? 'ANAC (banco)' : (data.source === 'anac_cache' ? 'ANAC (cache)' : 'ANAC'));
+                const sourceLabel = data.source === 'eais' ? 'eAIS' : (data.source === 'local' ? 'Cadastro local' : (data.source === 'anac_db' ? 'ANAC (banco)' : (data.source === 'anac_cache' ? 'ANAC (cache)' : 'ANAC')));
                 statusDiv.innerHTML = `<span style="color: var(--anac-success);">✅ Dados da ${sourceLabel} - ${data.name || code}</span>`;
                 statusDiv.style.display = 'block';
                 
                 showToast(`Dados preenchidos (${sourceLabel})`, 'success');
                 
             } catch (error) {
-                console.error('Erro ao buscar da ANAC:', error);
-                const friendlyMsg = (error.message && (error.message.includes('ANAC') || error.message.includes('indisponível')))
-                    ? 'Base ANAC temporariamente indisponível. Preencha os dados manualmente ou cadastre o aeroporto primeiro.'
+                console.error('Erro ao buscar no eAIS:', error);
+                const friendlyMsg = (error.message && (error.message.includes('não encontrado') || error.message.includes('indisponível')))
+                    ? 'eAIS indisponível ou aeródromo não encontrado. Preencha os dados manualmente.'
                     : error.message;
                 statusDiv.innerHTML = `<span style="color: var(--anac-error);">❌ ${friendlyMsg}</span>`;
                 statusDiv.style.display = 'block';
@@ -3303,7 +3329,7 @@
                     showToast(msg || 'Site da ANAC temporariamente indisponível. Tente novamente mais tarde ou quando a conexão estiver estável.', 'error', 8000);
                 }
             } catch (e) {
-                showToast('Site da ANAC indisponível. A busca "Buscar da ANAC" usará o cache ou cadastro local.', 'warning', 8000);
+                showToast('eAIS indisponível. A busca usará o cadastro local se o aeroporto já estiver cadastrado.', 'warning', 8000);
             }
         }
 
@@ -3855,42 +3881,27 @@
             // Store original records for filtering
             window.allComplianceRecords = data.compliance_records;
             
-            // Helper function to get functional area for RBAC-153 regulations
+            // Helper function to get functional area for RBAC-153/154 - Áreas REA
             function getFunctionalArea(code) {
-                if (!code || !code.startsWith('RBAC-153')) return null;
-                
+                if (!code) return null;
                 const areaMap = {
-                    'RBAC-153-01': 'Gestão da CAT',
-                    'RBAC-153-02': 'Gestão da CAT',
-                    'RBAC-153-03': 'Gestão de Equipamentos',
-                    'RBAC-153-04': 'Gestão de Equipamentos',
-                    'RBAC-153-05': 'Gestão de Equipamentos',
-                    'RBAC-153-09': 'Gestão de Equipamentos',
-                    'RBAC-153-06': 'Gestão de Recursos Humanos',
-                    'RBAC-153-08': 'Gestão de Recursos Humanos',
-                    'RBAC-153-10': 'Gestão de Recursos Humanos',
-                    'RBAC-153-07': 'Gestão Operacional',
-                    'RBAC-153-11': 'Gestão Operacional',
-                    'RBAC-153-12': 'Gestão de Infraestrutura',
-                    'RBAC-153-13': 'Gestão de Infraestrutura',
-                    'RBAC-153-14': 'Gestão de Documentação'
+                    'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                    'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                    'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                    'RBAC-153-14': 'SESCINC', 'RBAC-153-11': 'PLANOS', 'RBAC-154-40': 'PLANOS', 'RBAC-154-43': 'SIMULADOS',
+                    'RBAC-153-15': 'SME', 'RBAC-153-16': 'COE', 'RBAC-153-17': 'PCM'
                 };
-                
                 return areaMap[code] || null;
             }
             
             // Group records by RBAC (153 vs 154) and then by functional area
             const groupedRecords = {
                 'RBAC-153': {
-                    'Gestão da CAT': [],
-                    'Gestão de Equipamentos': [],
-                    'Gestão de Recursos Humanos': [],
-                    'Gestão Operacional': [],
-                    'Gestão de Infraestrutura': [],
-                    'Gestão de Documentação': [],
+                    'SESCINC': [], 'SME': [], 'COE': [], 'PCM': [], 'SIMULADOS': [], 'PLANOS': [],
                     'Outros': []
                 },
                 'RBAC-154': {
+                    'PLANOS': [], 'SIMULADOS': [],
                     'Segurança Operacional': [],
                     'Segurança contra Incêndio': [],
                     'Segurança (AVSEC)': [],
@@ -3945,11 +3956,13 @@
                 const rbacNumber = getRBACNumber(code);
                 
                 let areaName;
+                const mappedArea = getFunctionalArea(code);
                 if (rbacNumber === 'RBAC-153') {
-                    // Use functional area mapping for RBAC-153
-                    areaName = getFunctionalArea(code) || 'Outros';
+                    areaName = mappedArea || 'Outros';
                 } else {
-                    // Use safety category for RBAC-154
+                    // RBAC-154: PLANOS/SIMULADOS se mapeado, senão categoria de segurança
+                    if (mappedArea) areaName = mappedArea;
+                    else {
                     let safetyCategory = regulation.safety_category;
                     if (typeof safetyCategory !== 'string' && safetyCategory?.value) {
                         safetyCategory = safetyCategory.value;
@@ -3957,6 +3970,7 @@
                         safetyCategory = String(safetyCategory);
                     }
                     areaName = getAreaName(safetyCategory);
+                    }
                 }
                 
                 if (!groupedRecords[rbacNumber]) {
@@ -3981,24 +3995,19 @@
                 // Helper function to get icon and description for functional area
                 function getAreaInfo(areaName) {
                     const areaInfoMap = {
-                        'Gestão da CAT': { icon: '📋', desc: 'Categoria Contraincêndio e Operações Compatíveis' },
-                        'Gestão de Equipamentos': { icon: '🚛', desc: 'CCI, Veículos de Apoio, Agentes Extintores e Equipamentos' },
-                        'Gestão de Recursos Humanos': { icon: '👥', desc: 'Equipe, Capacitação e Treinamento Recorrente' },
-                        'Gestão Operacional': { icon: '⚙️', desc: 'Tempo-Resposta e Plano Contraincêndio (PCINC)' },
-                        'Gestão de Infraestrutura': { icon: '🏗️', desc: 'SCI e Posto Avançado (PACI)' },
-                        'Gestão de Documentação': { icon: '📄', desc: 'Comunicação e Notificações à ANAC' }
+                        'SESCINC': { icon: '🚒', desc: 'Serviço de Salvamento e Combate a Incêndio' },
+                        'SME': { icon: '🏥', desc: 'Serviço Médico de Emergência' },
+                        'COE': { icon: '📡', desc: 'Centro de Operações de Emergências' },
+                        'PCM': { icon: '🚐', desc: 'Posto de Comando Móvel' },
+                        'SIMULADOS': { icon: '🎯', desc: 'Exercícios Simulados de Emergência (ESEA)' },
+                        'PLANOS': { icon: '📋', desc: 'PLEM, PCINC e planos relacionados' }
                     };
                     return areaInfoMap[areaName] || { icon: '📁', desc: '' };
                 }
                 
-                // Sort areas by priority (order matters for SESCINC)
+                // Sort areas by priority - Áreas REA
                 const areaOrder = [
-                    'Gestão da CAT',
-                    'Gestão de Equipamentos',
-                    'Gestão de Recursos Humanos',
-                    'Gestão Operacional',
-                    'Gestão de Infraestrutura',
-                    'Gestão de Documentação',
+                    'SESCINC', 'SME', 'COE', 'PCM', 'SIMULADOS', 'PLANOS',
                     'Outros'
                 ];
                 
@@ -5500,16 +5509,13 @@
             
             // Helper functions
             function getFunctionalArea(code) {
-                if (!code || !code.startsWith('RBAC-153')) return null;
+                if (!code) return null;
                 const areaMap = {
-                    'RBAC-153-01': 'Gestão da CAT', 'RBAC-153-02': 'Gestão da CAT',
-                    'RBAC-153-03': 'Gestão de Equipamentos', 'RBAC-153-04': 'Gestão de Equipamentos',
-                    'RBAC-153-05': 'Gestão de Equipamentos', 'RBAC-153-09': 'Gestão de Equipamentos',
-                    'RBAC-153-06': 'Gestão de Recursos Humanos', 'RBAC-153-08': 'Gestão de Recursos Humanos',
-                    'RBAC-153-10': 'Gestão de Recursos Humanos',
-                    'RBAC-153-07': 'Gestão Operacional', 'RBAC-153-11': 'Gestão Operacional',
-                    'RBAC-153-12': 'Gestão de Infraestrutura', 'RBAC-153-13': 'Gestão de Infraestrutura',
-                    'RBAC-153-14': 'Gestão de Documentação'
+                    'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                    'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                    'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                    'RBAC-153-14': 'SESCINC', 'RBAC-153-11': 'PLANOS', 'RBAC-154-40': 'PLANOS', 'RBAC-154-43': 'SIMULADOS',
+                    'RBAC-153-15': 'SME', 'RBAC-153-16': 'COE', 'RBAC-153-17': 'PCM'
                 };
                 return areaMap[code] || null;
             }
@@ -5614,9 +5620,12 @@
                 const rbacNumber = getRBACNumber(code);
                 
                 let areaName;
+                const mappedArea = getFunctionalArea(code);
                 if (rbacNumber === 'RBAC-153') {
-                    areaName = getFunctionalArea(code) || 'Outros';
+                    areaName = mappedArea || 'Outros';
                 } else {
+                    if (mappedArea) areaName = mappedArea;
+                    else {
                     let safetyCategory = regulation.safety_category;
                     if (typeof safetyCategory !== 'string' && safetyCategory?.value) {
                         safetyCategory = safetyCategory.value;
@@ -5624,6 +5633,7 @@
                         safetyCategory = String(safetyCategory);
                     }
                     areaName = getAreaName(safetyCategory);
+                    }
                 }
                 
                 if (!groupedRecords[rbacNumber][areaName]) {
@@ -5632,10 +5642,9 @@
                 groupedRecords[rbacNumber][areaName].push(record);
             });
             
-            // Render table rows
+            // Render table rows - Áreas REA
             const areaOrder = [
-                'Gestão da CAT', 'Gestão de Equipamentos', 'Gestão de Recursos Humanos',
-                'Gestão Operacional', 'Gestão de Infraestrutura', 'Gestão de Documentação'
+                'SESCINC', 'SME', 'COE', 'PCM', 'SIMULADOS', 'PLANOS'
             ];
             
             // RBAC-153 rows
@@ -6552,20 +6561,17 @@
                 
                 // Helper functions
                 function getFunctionalArea(code) {
-                    if (!code || !code.startsWith('RBAC-153')) return null;
+                    if (!code) return null;
                     const areaMap = {
-                        'RBAC-153-01': 'Gestão da CAT', 'RBAC-153-02': 'Gestão da CAT',
-                        'RBAC-153-03': 'Gestão de Equipamentos', 'RBAC-153-04': 'Gestão de Equipamentos',
-                        'RBAC-153-05': 'Gestão de Equipamentos', 'RBAC-153-09': 'Gestão de Equipamentos',
-                        'RBAC-153-06': 'Gestão de Recursos Humanos', 'RBAC-153-08': 'Gestão de Recursos Humanos',
-                        'RBAC-153-10': 'Gestão de Recursos Humanos',
-                        'RBAC-153-07': 'Gestão Operacional', 'RBAC-153-11': 'Gestão Operacional',
-                        'RBAC-153-12': 'Gestão de Infraestrutura', 'RBAC-153-13': 'Gestão de Infraestrutura',
-                        'RBAC-153-14': 'Gestão de Documentação'
+                        'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                        'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                        'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                        'RBAC-153-14': 'SESCINC', 'RBAC-153-11': 'PLANOS', 'RBAC-154-40': 'PLANOS', 'RBAC-154-43': 'SIMULADOS',
+                        'RBAC-153-15': 'SME', 'RBAC-153-16': 'COE', 'RBAC-153-17': 'PCM'
                     };
                     return areaMap[code] || null;
                 }
-                
+
                 function getAreaName(safetyCategory) {
                     const categoryMap = {
                         'operational_safety': 'Segurança Operacional',
@@ -6658,13 +6664,14 @@
                     html += '<h2>RBAC-153 - Serviço de Salvamento e Combate a Incêndio (SESCINC)</h2>';
                     
                     const areaOrder = [
-                        'Gestão da CAT', 'Gestão de Equipamentos', 'Gestão de Recursos Humanos',
-                        'Gestão Operacional', 'Gestão de Infraestrutura', 'Gestão de Documentação'
+                        'SESCINC', 'SME', 'COE', 'PCM', 'SIMULADOS', 'PLANOS'
                     ];
                     
                     areaOrder.forEach(areaName => {
-                        const areaRecords = groupedRecords['RBAC-153'][areaName];
-                        if (!areaRecords || areaRecords.length === 0) return;
+                        const r153 = groupedRecords['RBAC-153'][areaName] || [];
+                        const r154 = groupedRecords['RBAC-154'][areaName] || [];
+                        const areaRecords = [...r153, ...r154];
+                        if (areaRecords.length === 0) return;
                         
                         html += `<h3>${areaName} (${areaRecords.length} norma${areaRecords.length > 1 ? 's' : ''})</h3>`;
                         html += '<table>';
@@ -6764,7 +6771,7 @@
         
         // Export area report
         async function exportAreaReport(areaName) {
-            const airportId = document.getElementById('airportSelect')?.value;
+            const airportId = document.getElementById('areasAirportSelect')?.value || document.getElementById('airportSelect')?.value;
             if (!airportId) {
                 showToast('Selecione um aeroporto primeiro', 'warning');
                 return;
@@ -6785,20 +6792,17 @@
                 
                 // Filter records by area
                 function getFunctionalArea(code) {
-                    if (!code || !code.startsWith('RBAC-153')) return null;
+                    if (!code) return null;
                     const areaMap = {
-                        'RBAC-153-01': 'Gestão da CAT', 'RBAC-153-02': 'Gestão da CAT',
-                        'RBAC-153-03': 'Gestão de Equipamentos', 'RBAC-153-04': 'Gestão de Equipamentos',
-                        'RBAC-153-05': 'Gestão de Equipamentos', 'RBAC-153-09': 'Gestão de Equipamentos',
-                        'RBAC-153-06': 'Gestão de Recursos Humanos', 'RBAC-153-08': 'Gestão de Recursos Humanos',
-                        'RBAC-153-10': 'Gestão de Recursos Humanos',
-                        'RBAC-153-07': 'Gestão Operacional', 'RBAC-153-11': 'Gestão Operacional',
-                        'RBAC-153-12': 'Gestão de Infraestrutura', 'RBAC-153-13': 'Gestão de Infraestrutura',
-                        'RBAC-153-14': 'Gestão de Documentação'
+                        'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                        'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                        'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                        'RBAC-153-14': 'SESCINC', 'RBAC-153-11': 'PLANOS', 'RBAC-154-40': 'PLANOS', 'RBAC-154-43': 'SIMULADOS',
+                        'RBAC-153-15': 'SME', 'RBAC-153-16': 'COE', 'RBAC-153-17': 'PCM'
                     };
                     return areaMap[code] || null;
                 }
-                
+
                 const areaRecords = data.compliance_records.filter(record => {
                     const code = record.regulation?.code || '';
                     return getFunctionalArea(code) === areaName;
@@ -6894,7 +6898,7 @@
         
         // Generate PDF report for area
         async function generateAreaReport(areaName) {
-            const airportId = document.getElementById('airportSelect')?.value;
+            const airportId = document.getElementById('areasAirportSelect')?.value || document.getElementById('airportSelect')?.value;
             if (!airportId) {
                 showToast('Selecione um aeroporto primeiro', 'warning');
                 return;
@@ -6915,20 +6919,17 @@
                 
                 // Filter records by area
                 function getFunctionalArea(code) {
-                    if (!code || !code.startsWith('RBAC-153')) return null;
+                    if (!code) return null;
                     const areaMap = {
-                        'RBAC-153-01': 'Gestão da CAT', 'RBAC-153-02': 'Gestão da CAT',
-                        'RBAC-153-03': 'Gestão de Equipamentos', 'RBAC-153-04': 'Gestão de Equipamentos',
-                        'RBAC-153-05': 'Gestão de Equipamentos', 'RBAC-153-09': 'Gestão de Equipamentos',
-                        'RBAC-153-06': 'Gestão de Recursos Humanos', 'RBAC-153-08': 'Gestão de Recursos Humanos',
-                        'RBAC-153-10': 'Gestão de Recursos Humanos',
-                        'RBAC-153-07': 'Gestão Operacional', 'RBAC-153-11': 'Gestão Operacional',
-                        'RBAC-153-12': 'Gestão de Infraestrutura', 'RBAC-153-13': 'Gestão de Infraestrutura',
-                        'RBAC-153-14': 'Gestão de Documentação'
+                        'RBAC-153-01': 'SESCINC', 'RBAC-153-02': 'SESCINC', 'RBAC-153-03': 'SESCINC', 'RBAC-153-04': 'SESCINC',
+                        'RBAC-153-05': 'SESCINC', 'RBAC-153-06': 'SESCINC', 'RBAC-153-07': 'SESCINC', 'RBAC-153-08': 'SESCINC',
+                        'RBAC-153-09': 'SESCINC', 'RBAC-153-10': 'SESCINC', 'RBAC-153-12': 'SESCINC', 'RBAC-153-13': 'SESCINC',
+                        'RBAC-153-14': 'SESCINC', 'RBAC-153-11': 'PLANOS', 'RBAC-154-40': 'PLANOS', 'RBAC-154-43': 'SIMULADOS',
+                        'RBAC-153-15': 'SME', 'RBAC-153-16': 'COE', 'RBAC-153-17': 'PCM'
                     };
                     return areaMap[code] || null;
                 }
-                
+
                 const areaRecords = data.compliance_records.filter(record => {
                     const code = record.regulation?.code || '';
                     return getFunctionalArea(code) === areaName;
@@ -7232,6 +7233,7 @@
                         // Classificações serão calculadas automaticamente quando usage_class for selecionado
                     }
                     if (formData.reference_code) document.getElementById('reference_code').value = formData.reference_code;
+                    if (formData.fire_category) document.getElementById('fire_category').value = formData.fire_category;
                     // annual_passengers é calculado automaticamente, não precisa ser restaurado
                     if (formData.number_of_runways) document.getElementById('number_of_runways').value = formData.number_of_runways;
                     if (formData.max_aircraft_weight) document.getElementById('max_aircraft_weight').value = formData.max_aircraft_weight;

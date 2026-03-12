@@ -1,9 +1,10 @@
 """
 Service for synchronizing airport data with ANAC's official list.
 
-Priority: ANAC ao vivo > cache ANAC > banco local.
-Quando a ANAC responde, os dados são salvos em cache para uso offline.
+Priority: Características Gerais (completo) > Lista ANAC > cache > banco local.
+Características Gerais tem ~6800 aeródromos com todos os dados (RBAC 153/107, RCD, pistas).
 """
+import re
 import requests
 import csv
 import json
@@ -13,12 +14,15 @@ from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
 from sqlalchemy.orm import Session
-from app.models import Airport, AirportCategory, ANACAirport
+from app.models import Airport, AirportCategory, ANACAirport, AirportSize, AirportType
 from app.database import SessionLocal
 
 
 # Cache válido por 7 dias (ANAC atualiza ~a cada 40 dias)
 CACHE_MAX_AGE_DAYS = 7
+
+# Códigos de referência válidos (1-4 + A-E) para validação
+VALID_REF_CODE = re.compile(r'^[1-4][A-E]$', re.I)
 
 
 class ANACSyncService:
@@ -77,8 +81,26 @@ class ANACSyncService:
         except Exception as e:
             print(f"Aviso: não foi possível salvar cache ANAC: {e}")
 
+    def _parse_dms_to_decimal(self, dms_str: str) -> Optional[float]:
+        """Converte coordenada DMS (ex: 22°54'36,0\"S) para decimal."""
+        if not dms_str or not isinstance(dms_str, str):
+            return None
+        s = dms_str.strip().replace("Â°", "°")  # corrige encoding latin-1
+        # Formato: 22°54'36,0"S ou 043°09'45,0"W
+        m = re.match(r"(\d+)[°º]\s*(\d+)['′]\s*([\d,]+)[\"″]?\s*([NSOWE])", s, re.I)
+        if not m:
+            return None
+        try:
+            deg = int(m.group(1))
+            minu = int(m.group(2))
+            sec = float(m.group(3).replace(",", "."))
+            sign = -1 if m.group(4).upper() in ("S", "W") else 1
+            return sign * (deg + minu / 60 + sec / 3600)
+        except (ValueError, IndexError):
+            return None
+
     def _download_caracteristicas_gerais(self) -> Dict[str, Dict]:
-        """Baixa Características Gerais e retorna dict por Código OACI."""
+        """Baixa Características Gerais e retorna dict por Código OACI (para enriquecimento)."""
         try:
             r = requests.get(self.ANAC_CARAC_GERAIS_URL, headers=self.HEADERS, timeout=60)
             r.raise_for_status()
@@ -111,11 +133,129 @@ class ANACSyncService:
             print(f"Aviso: Características Gerais indisponível: {e}")
             return {}
 
+    def _normalize_caracteristicas_row(self, row: Dict) -> Optional[Dict]:
+        """Normaliza uma linha do CSV Características Gerais para o schema do banco."""
+        try:
+            code = (row.get('Código OACI') or '').strip().upper()
+            if not code or len(code) != 4:
+                return None
+            name = (row.get('Nome') or '').strip()
+            if not name:
+                return None
+            # Tipo de Uso: Público -> usage I-IV; Privado -> PRIVADO
+            tipo_uso = (row.get('Tipo de Uso') or '').strip()
+            rbac153 = row.get('Classe RBAC 153', '').strip()
+            if tipo_uso and 'rivado' in tipo_uso.lower():
+                usage_class = 'PRIVADO'
+            else:
+                usage_class = {'1': 'I', '2': 'II', '3': 'III', '4': 'IV'}.get(rbac153)
+            avsec = (row.get('Classe RBAC 107') or '').strip()
+            avsec = avsec if avsec and avsec.startswith('AP-') else None
+            p2 = (row.get('Designação (Pista 2)') or '').strip()
+            runways = 2 if p2 and len(p2) > 2 else 1
+            # Código de referência: Aeronave Crítica (Pista 1) ou (Pista 2) - ex: 4E, 3C
+            ref1 = (row.get('Aeronave Crítica (Pista 1)') or '').strip().upper()
+            ref2 = (row.get('Aeronave Crítica (Pista 2)') or '').strip().upper()
+            refs = [r for r in (ref1, ref2) if r and VALID_REF_CODE.match(r)]
+            reference_code = max(refs, key=lambda x: (int(x[0]), x[1])) if refs else None
+            # Coordenadas: DMS ou decimal
+            lat_str = (row.get('Latitude') or '').strip()
+            lon_str = (row.get('Longitude') or '').strip()
+            lat = self._parse_float(lat_str) or self._parse_dms_to_decimal(lat_str)
+            lon = self._parse_float(lon_str) or self._parse_dms_to_decimal(lon_str)
+            city = (row.get('Município Servido') or row.get('Município') or '').strip() or None
+            state = (row.get('UF') or '').strip().upper() or None
+            status = (row.get('Situação') or '').strip() or None
+            return {
+                'code': code,
+                'name': name,
+                'reference_code': reference_code,
+                'category': None,
+                'city': city,
+                'state': state,
+                'latitude': lat,
+                'longitude': lon,
+                'iata_code': None,
+                'status': status,
+                'usage_class': usage_class,
+                'avsec_classification': avsec,
+                'aircraft_size_category': self._ref_to_aircraft_size(reference_code),
+                'number_of_runways': runways,
+            }
+        except Exception as e:
+            print(f"⚠️ Erro ao normalizar Características: {e}")
+            return None
+
+    def _ref_to_aircraft_size(self, ref: Optional[str]) -> Optional[str]:
+        """Infere aircraft_size_category a partir do reference_code."""
+        if not ref or len(ref) < 2:
+            return None
+        lt = ref[-1].upper()
+        if lt in ('A', 'B'):
+            return 'A/B'
+        if lt == 'C':
+            return 'C'
+        if lt in ('D', 'E'):
+            return 'D'
+        return None
+
+    def download_from_caracteristicas_gerais(self) -> Optional[List[Dict]]:
+        """
+        Baixa a lista COMPLETA de aeródromos do CSV Características Gerais da ANAC.
+        Contém ~6800 aeródromos com nome, coordenadas, RBAC 153/107, RCD, pistas.
+        """
+        try:
+            r = requests.get(self.ANAC_CARAC_GERAIS_URL, headers=self.HEADERS, timeout=120)
+            r.raise_for_status()
+            for enc in ('utf-8', 'latin-1', 'cp1252'):
+                try:
+                    content = r.content.decode(enc)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                content = r.content.decode('latin-1', errors='replace')
+            reader = csv.DictReader(io.StringIO(content))
+            airports = []
+            for row in reader:
+                a = self._normalize_caracteristicas_row(row)
+                if a:
+                    airports.append(a)
+            if len(airports) < 100:
+                return None
+            from app.seed_data import ANAC_AIRPORTS_BOOTSTRAP
+            bootstrap_by_code = {b['code']: b for b in ANAC_AIRPORTS_BOOTSTRAP}
+            for a in airports:
+                code = a['code']
+                if code in bootstrap_by_code:
+                    b = bootstrap_by_code[code]
+                    if not a.get('reference_code') and b.get('reference_code'):
+                        a['reference_code'] = b['reference_code']
+                        a['aircraft_size_category'] = self._ref_to_aircraft_size(a['reference_code'])
+                    if not a.get('category') and b.get('category'):
+                        a['category'] = b['category']
+                    if not a.get('usage_class') and b.get('usage_class'):
+                        a['usage_class'] = b['usage_class']
+                    if not a.get('avsec_classification') and b.get('avsec_classification'):
+                        a['avsec_classification'] = b['avsec_classification']
+            self._save_cache(airports)
+            if self.db:
+                self._save_to_anac_airports_table(airports)
+            return airports
+        except Exception as e:
+            print(f"Erro ao baixar Características Gerais: {e}")
+            return None
+
     def download_anac_data(self) -> Optional[List[Dict]]:
         """
         Baixa e parseia dados da ANAC (fonte oficial).
-        Enriquece com Características Gerais (Classe RBAC 153/107, pistas) e bootstrap.
+        Prioridade: Características Gerais (lista completa ~6800) > Lista ANAC (enriquecida).
         """
+        # 1. Tentar Características Gerais primeiro (lista completa com todos os dados)
+        data = self.download_from_caracteristicas_gerais()
+        if data:
+            return data
+        # 2. Fallback: Lista ANAC + enriquecimento com Características Gerais
         for url in self.ANAC_URLS:
             try:
                 response = requests.get(url, headers=self.HEADERS, timeout=30)
@@ -395,53 +535,110 @@ class ANACSyncService:
             return results
     
     def _update_airport(self, airport: Airport, anac_data: Dict, dry_run: bool) -> List[str]:
-        """Update airport with ANAC data and return list of changed fields"""
+        """Update airport with ANAC data and return list of changed fields. Propagates usage_class, size, annual_passengers."""
         changes = []
-        
+
         # Update name if different
         if anac_data.get('name') and airport.name != anac_data['name']:
             if not dry_run:
                 airport.name = anac_data['name']
             changes.append(f"name: '{airport.name}' -> '{anac_data['name']}'")
-        
-        # Update category if provided and different
+
+        # Update usage_class and derived fields (size, annual_passengers) - critical for SME/COE/PCM
+        usage_class = anac_data.get('usage_class')
+        if usage_class is not None:
+            if str(airport.usage_class or '') != str(usage_class):
+                if not dry_run:
+                    airport.usage_class = usage_class
+                    size, annual_passengers = self._infer_from_usage_class(usage_class)
+                    airport.size = size
+                    airport.annual_passengers = annual_passengers
+                changes.append(f"usage_class: {airport.usage_class} -> {usage_class} (size/annual_passengers updated)")
+            elif not airport.annual_passengers and usage_class:
+                # Airport has usage_class but missing annual_passengers - backfill
+                if not dry_run:
+                    _, annual_passengers = self._infer_from_usage_class(usage_class)
+                    airport.annual_passengers = annual_passengers
+                changes.append("annual_passengers: backfilled from usage_class")
+
+        # Update avsec_classification
+        if anac_data.get('avsec_classification') is not None and airport.avsec_classification != anac_data['avsec_classification']:
+            if not dry_run:
+                airport.avsec_classification = anac_data['avsec_classification']
+            changes.append(f"avsec_classification: {airport.avsec_classification} -> {anac_data['avsec_classification']}")
+
+        # Update category if provided and different (fallback when usage_class not available)
         if anac_data.get('category'):
             try:
-                # Map category string (e.g., "3C") to enum (e.g., AirportCategory.CAT_3C)
                 category_key = f"CAT_{anac_data['category']}"
                 category_enum = AirportCategory[category_key]
                 if airport.category != category_enum:
                     if not dry_run:
                         airport.category = category_enum
                     changes.append(f"category: {airport.category.value if airport.category else None} -> {category_enum.value}")
-            except (KeyError, AttributeError) as e:
-                print(f"⚠️  Erro ao mapear categoria {anac_data.get('category')}: {e}")
+                # If no usage_class, infer size from category
+                if not usage_class and anac_data.get('category'):
+                    new_size = self._infer_size_from_category(anac_data['category'])
+                    if airport.size != new_size:
+                        if not dry_run:
+                            airport.size = new_size
+                        changes.append(f"size (from category): {airport.size} -> {new_size}")
+            except (KeyError, AttributeError):
                 pass
-        
-        # Update reference_code if provided and different
-        if anac_data.get('reference_code') and airport.reference_code != anac_data['reference_code']:
+
+        # Update reference_code, aircraft_size_category
+        if anac_data.get('reference_code') is not None and airport.reference_code != anac_data['reference_code']:
             if not dry_run:
                 airport.reference_code = anac_data['reference_code']
             changes.append(f"reference_code: '{airport.reference_code}' -> '{anac_data['reference_code']}'")
-        
+        if anac_data.get('aircraft_size_category') is not None and airport.aircraft_size_category != anac_data['aircraft_size_category']:
+            if not dry_run:
+                airport.aircraft_size_category = anac_data['aircraft_size_category']
+            changes.append(f"aircraft_size_category: {airport.aircraft_size_category} -> {anac_data['aircraft_size_category']}")
+
+        # Update number_of_runways, cidade, estado, coordinates
+        if anac_data.get('number_of_runways') is not None and airport.number_of_runways != anac_data['number_of_runways']:
+            if not dry_run:
+                airport.number_of_runways = anac_data['number_of_runways']
+            changes.append(f"number_of_runways: {airport.number_of_runways} -> {anac_data['number_of_runways']}")
+        if anac_data.get('city') is not None and airport.cidade != anac_data['city']:
+            if not dry_run:
+                airport.cidade = anac_data['city']
+            changes.append(f"cidade: {airport.cidade} -> {anac_data['city']}")
+        if anac_data.get('state') is not None and airport.estado != anac_data['state']:
+            if not dry_run:
+                airport.estado = anac_data['state']
+            changes.append(f"estado: {airport.estado} -> {anac_data['state']}")
+        if anac_data.get('latitude') is not None and airport.latitude != anac_data['latitude']:
+            if not dry_run:
+                airport.latitude = anac_data['latitude']
+            changes.append("latitude updated")
+        if anac_data.get('longitude') is not None and airport.longitude != anac_data['longitude']:
+            if not dry_run:
+                airport.longitude = anac_data['longitude']
+            changes.append("longitude updated")
+
         # Update sync metadata
         if not dry_run:
             airport.data_sincronizacao_anac = datetime.utcnow()
             airport.origem_dados = 'anac'
             if anac_data.get('status'):
                 airport.status_operacional = anac_data['status']
-        
+
         return changes
     
     def _create_airport(self, anac_data: Dict) -> Optional[Airport]:
-        """Create a new airport from ANAC data"""
+        """Create a new airport from ANAC data. Uses usage_class (RBAC 153) for size/annual_passengers."""
         try:
-            # Determine size based on category (fallback logic)
-            size = self._infer_size_from_category(anac_data.get('category'))
-            
-            # Determine airport type (default to commercial)
-            airport_type = 'commercial'  # Default, can be enhanced with more logic
-            
+            usage_class = anac_data.get('usage_class')
+            if usage_class:
+                size, annual_passengers = self._infer_from_usage_class(usage_class)
+            else:
+                size = self._infer_size_from_category(anac_data.get('category'))
+                annual_passengers = None
+
+            airport_type = AirportType.COMMERCIAL
+
             category_enum = None
             if anac_data.get('category'):
                 try:
@@ -449,40 +646,71 @@ class ANACSyncService:
                     category_enum = AirportCategory[category_key]
                 except KeyError:
                     pass
-            
+
             airport = Airport(
                 name=anac_data['name'],
                 code=anac_data['code'],
                 size=size,
                 airport_type=airport_type,
+                annual_passengers=annual_passengers,
                 category=category_enum,
                 reference_code=anac_data.get('reference_code'),
+                usage_class=anac_data.get('usage_class'),
+                avsec_classification=anac_data.get('avsec_classification'),
+                aircraft_size_category=anac_data.get('aircraft_size_category'),
+                number_of_runways=anac_data.get('number_of_runways') or 1,
+                cidade=anac_data.get('city'),
+                estado=anac_data.get('state'),
+                latitude=anac_data.get('latitude'),
+                longitude=anac_data.get('longitude'),
+                codigo_iata=anac_data.get('iata_code'),
                 data_sincronizacao_anac=datetime.utcnow(),
                 origem_dados='anac',
                 status_operacional=anac_data.get('status'),
             )
-            
+
             return airport
-            
+
         except Exception as e:
             print(f"⚠️  Erro ao criar aeroporto: {e}")
             return None
     
-    def _infer_size_from_category(self, category: Optional[str]) -> str:
-        """Infer airport size from category"""
+    def _infer_from_usage_class(self, usage_class: Optional[str]) -> Tuple[AirportSize, int]:
+        """
+        Infer size and annual_passengers from usage_class (RBAC 153).
+        Same logic as main.py create_airport/update_airport.
+        """
+        if not usage_class:
+            return AirportSize.SMALL, 100000
+        uc = str(usage_class).strip().upper()
+        if uc == 'PRIVADO':
+            return AirportSize.SMALL, 0
+        if uc == 'I':
+            return AirportSize.SMALL, 100000
+        if uc == 'II':
+            return AirportSize.MEDIUM, 600000
+        if uc == 'III':
+            return AirportSize.LARGE, 3000000
+        if uc == 'IV':
+            return AirportSize.INTERNATIONAL, 10000000
+        return AirportSize.SMALL, 100000
+
+    def _infer_size_from_category(self, category: Optional[str]) -> AirportSize:
+        """Infer airport size from category (fallback when usage_class is not available)"""
         if not category:
-            return 'small'  # Default
-        
-        category_num = int(category.replace('C', '')) if category.replace('C', '').isdigit() else 1
-        
+            return AirportSize.SMALL
+        try:
+            category_num = int(category.replace('C', '')) if category.replace('C', '').isdigit() else 1
+        except (ValueError, AttributeError):
+            return AirportSize.SMALL
         if category_num <= 2:
-            return 'small'
+            return AirportSize.SMALL
         elif category_num <= 4:
-            return 'medium'
+            return AirportSize.MEDIUM
         elif category_num <= 6:
-            return 'large'
+            return AirportSize.LARGE
         else:
-            return 'international'
+            return AirportSize.INTERNATIONAL
     
     def detect_changes(self, airport: Airport, anac_data: Dict) -> List[Dict]:
         """Detect changes between local airport and ANAC data"""

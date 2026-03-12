@@ -23,6 +23,11 @@ class AirportBase(BaseModel):
     avsec_classification: Optional[str] = None  # Classificação AVSEC: AP-0, AP-1, AP-2, AP-3
     aircraft_size_category: Optional[str] = None  # Categoria de Porte da Aeronave: A/B, C, D
     reference_code: Optional[str] = None  # Código de referência das aeronaves (ex: 3C, 4C, 4E) - configuração máxima permitida
+    fire_category: Optional[int] = None  # CAT CIVIL (1-10) do eAIS - SESCINC/RBAC-153
+    city: Optional[str] = None  # Cidade (eAIS)
+    state: Optional[str] = None  # Estado/UF (eAIS)
+    latitude: Optional[float] = None  # Coordenadas (eAIS)
+    longitude: Optional[float] = None
 class AirportCreate(AirportBase):
     pass
 class AirportResponse(AirportBase):

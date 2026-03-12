@@ -163,9 +163,19 @@ class Airport(Base):
     usage_class = Column(String(20), nullable=True)  # Classe por Uso (RBAC 153): I, II, III, IV, PRIVADO
     avsec_classification = Column(String(10), nullable=True)  # Classificação AVSEC: AP-0, AP-1, AP-2, AP-3
     aircraft_size_category = Column(String(5), nullable=True)  # Categoria de Porte da Aeronave: A/B, C, D
-    
+    fire_category = Column(Integer, nullable=True)  # CAT CIVIL (1-10) do eAIS - SESCINC/RBAC-153
+
     # Relationships
     compliance_records = relationship("ComplianceRecord", back_populates="airport", cascade="all, delete-orphan")
+
+    # Aliases para API (schema usa city/state, modelo usa cidade/estado)
+    @property
+    def city(self):
+        return self.cidade
+
+    @property
+    def state(self):
+        return self.estado
 
 
 class Regulation(Base):
