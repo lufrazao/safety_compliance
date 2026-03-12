@@ -23,35 +23,35 @@ class ComplianceEngine:
         Aligned with ANAC RBAC directives.
         """
         # Check size requirements
+        # PRIORIDADE: usage_class (ANAC) > size > annual_passengers
+        # usage_class é a fonte autoritativa; size pode estar desatualizado em aeroportos antigos
         if regulation.applies_to_sizes:
             try:
                 applicable_sizes = json.loads(regulation.applies_to_sizes)
-                # Se size não estiver definido, calcular a partir de usage_class ou annual_passengers
-                airport_size = airport.size
-                if not airport_size:
-                    if airport.usage_class:
-                        # usage_class é string no banco de dados
-                        usage_class_val = str(airport.usage_class)
-                        if usage_class_val in ['PRIVADO', 'I']:
-                            airport_size = AirportSize.SMALL
-                        elif usage_class_val == 'II':
-                            airport_size = AirportSize.MEDIUM
-                        elif usage_class_val == 'III':
-                            airport_size = AirportSize.LARGE
-                        elif usage_class_val == 'IV':
-                            airport_size = AirportSize.INTERNATIONAL
-                    elif airport.annual_passengers:
-                        if airport.annual_passengers < 200000:
-                            airport_size = AirportSize.SMALL
-                        elif airport.annual_passengers < 1000000:
-                            airport_size = AirportSize.MEDIUM
-                        elif airport.annual_passengers < 10000000:
-                            airport_size = AirportSize.LARGE
-                        else:
-                            airport_size = AirportSize.INTERNATIONAL
+                airport_size = None
+                if airport.usage_class:
+                    usage_class_val = str(airport.usage_class)
+                    if usage_class_val in ['PRIVADO', 'I']:
+                        airport_size = AirportSize.SMALL
+                    elif usage_class_val == 'II':
+                        airport_size = AirportSize.MEDIUM
+                    elif usage_class_val == 'III':
+                        airport_size = AirportSize.LARGE
+                    elif usage_class_val == 'IV':
+                        airport_size = AirportSize.INTERNATIONAL
+                if not airport_size and airport.size:
+                    airport_size = airport.size
+                if not airport_size and airport.annual_passengers is not None:
+                    if airport.annual_passengers < 200000:
+                        airport_size = AirportSize.SMALL
+                    elif airport.annual_passengers < 1000000:
+                        airport_size = AirportSize.MEDIUM
+                    elif airport.annual_passengers < 10000000:
+                        airport_size = AirportSize.LARGE
                     else:
-                        airport_size = AirportSize.SMALL  # Default
-                
+                        airport_size = AirportSize.INTERNATIONAL
+                if not airport_size:
+                    airport_size = AirportSize.SMALL
                 size_val = airport_size.value if hasattr(airport_size, 'value') else str(airport_size) if airport_size else None
                 if size_val and size_val not in applicable_sizes:
                     return False
@@ -73,31 +73,21 @@ class ComplianceEngine:
         
         # Check passenger threshold
         # If min_passengers is set, we need to verify
+        # usage_class é fonte autoritativa ANAC - usar SEMPRE para inferir passageiros quando disponível
         if regulation.min_passengers:
-            # If airport has annual_passengers, use it directly
-            if airport.annual_passengers:
+            if airport.usage_class:
+                # usage_class prevalece sobre annual_passengers (pode estar desatualizado)
+                usage_class_val = str(airport.usage_class)
+                inferred_passengers = {
+                    'PRIVADO': 100000, 'I': 100000,
+                    'II': 600000, 'III': 3000000, 'IV': 10000000
+                }.get(usage_class_val, 100000)
+                if inferred_passengers < regulation.min_passengers:
+                    return False
+            elif airport.annual_passengers:
                 if airport.annual_passengers < regulation.min_passengers:
                     return False
-            else:
-                # If annual_passengers is not provided, infer from usage_class or airport size
-                # This ensures regulations are not incorrectly excluded
-                if airport.usage_class:
-                    # Usar usage_class para inferir passageiros (usage_class é string)
-                    usage_class_val = str(airport.usage_class)
-                    if usage_class_val == 'PRIVADO' or usage_class_val == 'I':
-                        inferred_passengers = 100000  # Estimativa conservadora
-                    elif usage_class_val == 'II':
-                        inferred_passengers = 600000
-                    elif usage_class_val == 'III':
-                        inferred_passengers = 3000000
-                    elif usage_class_val == 'IV':
-                        inferred_passengers = 10000000
-                    else:
-                        inferred_passengers = 100000
-                    
-                    if inferred_passengers < regulation.min_passengers:
-                        return False
-                elif airport.size:
+            elif airport.size:
                     # Fallback para size se usage_class não estiver disponível
                     size_passenger_ranges = {
                         'small': (0, 200000),
@@ -198,33 +188,36 @@ class ComplianceEngine:
         if not airport:
             raise ValueError(f"Airport with id {airport_id} not found")
         
-        # Garantir que size e annual_passengers estejam calculados se não estiverem definidos
-        if not airport.size or (airport.annual_passengers is None):
-            if airport.usage_class:
-                # usage_class é string no banco de dados
-                usage_class = str(airport.usage_class)
-                if usage_class == 'PRIVADO':
-                    airport.size = AirportSize.SMALL
-                    airport.annual_passengers = 0
-                elif usage_class == 'I':
-                    airport.size = AirportSize.SMALL
-                    airport.annual_passengers = 100000
-                elif usage_class == 'II':
-                    airport.size = AirportSize.MEDIUM
-                    airport.annual_passengers = 600000
-                elif usage_class == 'III':
-                    airport.size = AirportSize.LARGE
-                    airport.annual_passengers = 3000000
-                elif usage_class == 'IV':
-                    airport.size = AirportSize.INTERNATIONAL
-                    airport.annual_passengers = 10000000
-                # Salvar no banco se foi calculado
+        # Sincronizar size/annual_passengers a partir de usage_class quando disponível (fonte autoritativa ANAC)
+        if airport.usage_class:
+            usage_class = str(airport.usage_class)
+            needs_update = False
+            if usage_class == 'PRIVADO':
+                if airport.size != AirportSize.SMALL or airport.annual_passengers != 0:
+                    airport.size, airport.annual_passengers = AirportSize.SMALL, 0
+                    needs_update = True
+            elif usage_class == 'I':
+                if airport.size != AirportSize.SMALL or airport.annual_passengers != 100000:
+                    airport.size, airport.annual_passengers = AirportSize.SMALL, 100000
+                    needs_update = True
+            elif usage_class == 'II':
+                if airport.size != AirportSize.MEDIUM or airport.annual_passengers != 600000:
+                    airport.size, airport.annual_passengers = AirportSize.MEDIUM, 600000
+                    needs_update = True
+            elif usage_class == 'III':
+                if airport.size != AirportSize.LARGE or airport.annual_passengers != 3000000:
+                    airport.size, airport.annual_passengers = AirportSize.LARGE, 3000000
+                    needs_update = True
+            elif usage_class == 'IV':
+                if airport.size != AirportSize.INTERNATIONAL or airport.annual_passengers != 10000000:
+                    airport.size, airport.annual_passengers = AirportSize.INTERNATIONAL, 10000000
+                    needs_update = True
+            if needs_update:
                 self.db.commit()
-            elif not airport.size:
-                # Fallback: se não houver usage_class, usar default
-                airport.size = AirportSize.SMALL
-                airport.annual_passengers = 100000
-                self.db.commit()
+        elif not airport.size or airport.annual_passengers is None:
+            airport.size = airport.size or AirportSize.SMALL
+            airport.annual_passengers = airport.annual_passengers if airport.annual_passengers is not None else 100000
+            self.db.commit()
         
         applicable_regulations = self.get_applicable_regulations(airport)
         
@@ -571,21 +564,51 @@ class ComplianceEngine:
                 action_items.append("Implementar controle de temperatura quando necessário")
         
         elif safety_val == "emergency_response":
-            if "plano de emergência" in requirements:
-                action_items.append("Desenvolver plano de emergência aeroportuária documentado")
-                action_items.append("Coordenar com órgãos externos (bombeiros, polícia, saúde)")
-                action_items.append("Realizar exercício completo a cada 2 anos")
-                action_items.append("Realizar exercícios parciais anuais")
-            
-            if "comunicação" in requirements:
-                action_items.append("Verificar sistema de comunicação de emergência")
-                action_items.append("Garantir rádios para equipes de resposta")
-                action_items.append("Estabelecer rotina de testes mensais")
-            
-            if "resgate" in requirements or "ambulâncias" in requirements:
-                action_items.append("Garantir disponibilidade de ambulâncias")
-                action_items.append("Adquirir equipamentos de resgate adequados")
-                action_items.append("Estabelecer área médica no terminal")
+            code = regulation.code if regulation.code else ""
+
+            # SME - Ambulâncias (RBAC-153-15 / 153.309)
+            if code == "RBAC-153-15" or "ambulâncias" in requirements:
+                action_items.append("Prover quantidade mínima de ambulâncias (Classe II/III: 1; Classe IV: 2, sendo uma tipo D)")
+                action_items.append("Garantir condutor habilitado e capacitado para cada ambulância")
+                action_items.append("Assegurar tripulação conforme normas ANVISA e Ministério da Saúde")
+                action_items.append("Manter características técnicas e operacionais das ambulâncias conforme MS/ANVISA")
+
+            # COE (RBAC-153-16 / 153.301/153.303)
+            elif code == "RBAC-153-16" or "coe" in requirements:
+                action_items.append("Garantir que todos os elementos do SREA tenham acesso a informações, procedimentos e responsabilidades")
+                action_items.append("Estabelecer COE com capacidade de ativação e coordenação do SREA")
+                action_items.append("Manter composição do COE conforme planejamento do SREA")
+                action_items.append("Testar ativação do COE periodicamente")
+
+            # PCM (RBAC-153-17 / 153.313)
+            elif code == "RBAC-153-17" or "pcm" in requirements:
+                action_items.append("Manter PCM interno ao aeródromo, em local de fácil e rápido acesso")
+                action_items.append("Garantir capacidade de rápida locomoção até o local da emergência")
+                action_items.append("Possuir sistema de comunicação imediata e segura com o COE e recursos envolvidos")
+                action_items.append("Possuir sistema de iluminação capaz de dar suporte à execução das atividades")
+                action_items.append("Definir responsável pela operação do PCM no planejamento do SREA")
+
+            # SIMULADOS/ESEA (RBAC-154-43 / 153.331)
+            elif code == "RBAC-154-43" or "exercício" in requirements or "esea" in requirements:
+                action_items.append("Aferir todos os módulos do ESEA num ciclo não superior a 3 anos")
+                action_items.append("Realizar ao menos 4 módulos do ESEA por ano (1 por trimestre ou até 2 por semestre)")
+                action_items.append("Elaborar relatório final de avaliação de cada módulo")
+                action_items.append("Realizar ESEA em diferentes áreas do aeródromo, horários e tipos de emergência")
+                action_items.append("Preceder exercícios com recursos externos de reuniões de planejamento (com atas)")
+                action_items.append("Estabelecer procedimentos padronizados para execução e avaliação do ESEA")
+
+            # Genérico emergency_response (fallback)
+            else:
+                if "plano de emergência" in requirements:
+                    action_items.append("Desenvolver plano de emergência aeroportuária documentado")
+                    action_items.append("Coordenar com órgãos externos (bombeiros, polícia, saúde)")
+                    action_items.append("Realizar exercício completo a cada 2 anos")
+                    action_items.append("Realizar exercícios parciais anuais")
+
+                if "comunicação" in requirements:
+                    action_items.append("Verificar sistema de comunicação de emergência")
+                    action_items.append("Garantir rádios para equipes de resposta")
+                    action_items.append("Estabelecer rotina de testes mensais")
         
         elif safety_val == "environmental":
             if "ruído" in requirements:

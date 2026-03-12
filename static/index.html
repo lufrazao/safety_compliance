@@ -2615,8 +2615,28 @@
             
             // Ordem das áreas REA conforme Sistema.xlsx (Organização Setores)
             const areaOrder = ['SESCINC', 'SME', 'COE', 'PCM', 'SIMULADOS', 'PLANOS'];
+            const areasRequiringClass2Plus = ['SME', 'COE', 'PCM', 'SIMULADOS'];
+            const hasEmptyClass2Areas = areasRequiringClass2Plus.every(a => !areasData[a] || areasData[a].records.length === 0);
             
-            let html = '<div style="display: grid; gap: 20px;">';
+            const totalRecords = (data.compliance_records || []).length;
+
+            let html = '';
+            // Indicar escopo REA e total de normas
+            if (totalRecords > 0) {
+                html += `
+                <div style="background: #eef2ff; border: 1px solid #6366f1; border-radius: 8px; padding: 12px 18px; margin-bottom: 16px; font-size: 13px; color: #4338ca; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">📋</span>
+                    <span>Exibindo <strong>${rbac153Count} norma${rbac153Count !== 1 ? 's' : ''} REA</strong> (Resposta a Emergência Aeroportuária) de ${totalRecords} normas aplicáveis ao aeródromo. Para ver todas as normas, use a aba <strong>Verificar Conformidades</strong>.</span>
+                </div>`;
+            }
+            if (hasEmptyClass2Areas && rbac153Count > 0) {
+                html += `
+                <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 14px;">
+                    <strong>💡 SME, COE, PCM e SIMULADOS</strong> aplicam-se a aeródromos <strong>Classe II, III ou IV</strong> (≥200 mil passageiros/ano).
+                    Se o aeródromo for Santos Dumont (SBRJ), Guarulhos (SBGR) ou similar, verifique se o campo <strong>Classe por Uso (usage_class)</strong> está preenchido no perfil e clique em <strong>Atualizar Conformidades</strong>.
+                </div>`;
+            }
+            html += '<div style="display: grid; gap: 20px;">';
             
             areaOrder.forEach(areaName => {
                 const areaData = areasData[areaName] || { records: [], compliant: 0, partial: 0, nonCompliant: 0, pending: 0 };
@@ -2668,7 +2688,11 @@
                                     📄 Gerar Relatório PDF
                                 </button>
                             ` : `
-                                <span style="font-size: 13px; color: #999;">Gestão desta área conforme checklist ANAC/operador do aeródromo.</span>
+                                <span style="font-size: 13px; color: #999;">
+                                    ${['SME','COE','PCM','SIMULADOS'].includes(areaName) 
+                                        ? 'Aplica-se a aeródromos Classe II, III ou IV (≥200 mil pass./ano). Verifique usage_class no perfil do aeródromo e clique em "Atualizar Conformidades".'
+                                        : 'Gestão desta área conforme checklist ANAC/operador do aeródromo.'}
+                                </span>
                             `}
                         </div>
                     </div>

@@ -42,10 +42,14 @@ ANAC_AIRPORTS_BOOTSTRAP = [
 ]
 
 
-def seed_regulations():
-    """Seed initial ANAC regulations based on airport variables."""
+def seed_regulations(update_existing=False):
+    """Seed initial ANAC regulations based on airport variables.
+
+    Args:
+        update_existing: Se True, atualiza regulações existentes com os dados do seed.
+    """
     db = SessionLocal()
-    
+
     try:
         existing_codes = {r.code for r in db.query(Regulation.code).all()}
         
@@ -339,12 +343,18 @@ def seed_regulations():
             },
             {
                 "code": "RBAC-154-43",
-                "title": "Exercícios de Emergência",
-                "description": "Requisitos para exercícios simulados de emergência",
+                "title": "Exercícios Simulados de Emergência (ESEA)",
+                "description": "Requisitos para exercícios simulados de emergência aeroportuária conforme RBAC 153.331",
                 "safety_category": SafetyCategory.EMERGENCY_RESPONSE,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
                 "min_passengers": 200000,
-                "requirements": "Exercício completo a cada 2 anos, exercícios parciais anuais, participação de órgãos externos, relatórios de exercícios."
+                "requirements": "Aferir todos os módulos do ESEA num ciclo não superior a 3 anos, em diferentes áreas do aeródromo e adjacências, com diferentes horários e tipos de emergências simuladas. Realizar ao menos 4 módulos por ano (1 por trimestre ou até 2 agrupados por semestre), elaborando relatório final de avaliação. Preceder exercícios com recursos externos de reuniões de planejamento com atas formais. Estabelecer procedimentos padronizados para execução e avaliação do ESEA.",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.331",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "ESEA executado conforme ciclo, módulos trimestrais, relatórios de avaliação"
             },
             
             # Additional Environmental regulations
@@ -685,7 +695,7 @@ def seed_regulations():
             {
                 "code": "RBAC-153-16",
                 "title": "Centro de Operações de Emergências (COE)",
-                "description": "Requisitos para COE - existência, ativação, composição e coordenação conforme RBAC 153.301",
+                "description": "Requisitos para COE - existência, ativação, composição e coordenação conforme RBAC 153.301/153.303",
                 "safety_category": SafetyCategory.EMERGENCY_RESPONSE,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
                 "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
@@ -693,7 +703,7 @@ def seed_regulations():
                 "requirements": "Estabelecer e manter operacional Centro de Operações de Emergências (COE) adequado ao SREA. Garantir que todos os elementos do SREA tenham acesso às informações, procedimentos e responsabilidades. Composição conforme planejamento do SREA, testes MGI, PRAI, PLEM.",
                 "requirement_classification": RequirementClassification.D,
                 "weight": 9,
-                "anac_reference": "RBAC 153.301",
+                "anac_reference": "RBAC 153.301/153.303",
                 "evaluation_type": EvaluationType.BOTH,
                 "expected_performance": "COE estabelecido, ativável e integrado ao SREA"
             },
@@ -718,10 +728,26 @@ def seed_regulations():
         for reg_data in to_add:
             regulation = Regulation(**reg_data)
             db.add(regulation)
-        
-        if to_add:
+
+        updated_count = 0
+        if update_existing:
+            to_update = [r for r in regulations if r["code"] in existing_codes]
+            for reg_data in to_update:
+                existing = db.query(Regulation).filter(Regulation.code == reg_data["code"]).first()
+                if existing:
+                    for key, value in reg_data.items():
+                        if key != "code" and hasattr(existing, key):
+                            setattr(existing, key, value)
+                    updated_count += 1
+
+        if to_add or updated_count:
             db.commit()
-            print(f"Seeded {len(to_add)} new regulation(s) successfully! (Total: {len(existing_codes) + len(to_add)})")
+            parts = []
+            if to_add:
+                parts.append(f"{len(to_add)} adicionada(s)")
+            if updated_count:
+                parts.append(f"{updated_count} atualizada(s)")
+            print(f"Seed regulações: {', '.join(parts)}. Total: {len(existing_codes) + len(to_add)}")
         else:
             print(f"All {len(regulations)} regulations already exist. Nothing to add.")
         

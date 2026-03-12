@@ -172,11 +172,38 @@ def _run_anac_enrichment_migration():
         pass
 
 
+def _populate_anac_airports_background():
+    """Popula anac_airports com ~6800 aeródromos da ANAC (ou bootstrap se offline)."""
+    try:
+        from app.seed_data import seed_anac_airports_full
+        count = seed_anac_airports_full()
+        print(f"✓ anac_airports pré-populado: {count} aeródromos (lookup disponível offline)")
+    except Exception as e:
+        print(f"⚠ Erro ao pré-popular anac_airports: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize database on startup."""
+    import asyncio
     init_db()
     _run_anac_enrichment_migration()
+    # Pré-popular anac_airports se vazio: lookup funciona mesmo com eAIS offline
+    if not os.getenv("SKIP_ANAC_STARTUP_SYNC"):
+        from app.database import SessionLocal
+        from app.seed_data import seed_anac_airports_bootstrap
+        db = SessionLocal()
+        try:
+            count = db.query(ANACAirport).count()
+        except Exception:
+            count = 0
+        finally:
+            db.close()
+        if count < 50:
+            # Bootstrap imediato (27 principais) para lookup funcionar já no primeiro acesso
+            seed_anac_airports_bootstrap()
+            # Sincronização completa em background (~6800 aeródromos da ANAC)
+            asyncio.create_task(asyncio.to_thread(_populate_anac_airports_background))
 
 
 @app.post("/api/login")
@@ -216,7 +243,7 @@ async def run_seed():
     """
     try:
         from app.seed_data import seed_regulations, seed_sample_airports, seed_anac_airports_full
-        seed_regulations()
+        seed_regulations(update_existing=True)
         seed_sample_airports()
         count = seed_anac_airports_full()
         return {"message": f"Seed concluído. Normas, aeroportos de exemplo e {count} aeródromos ANAC carregados."}
@@ -435,6 +462,29 @@ async def search_anac_airports(
 
 
 # ANAC Synchronization endpoints
+def _infer_fire_and_weight_from_anac(usage_class: str, reference_code: str) -> tuple:
+    """
+    Infere max_aircraft_weight a partir de reference_code quando lookup vem do fallback ANAC.
+    fire_category (CAT CIVIL): NÃO inferir — depende dos recursos reais (CCI, ambulâncias) validados pela ANAC,
+    não do volume de passageiros. Ex: SBRJ é Classe IV mas tem CAT 7. Fonte correta: eAIS.
+    """
+    ref = (reference_code or "").upper().strip()
+    fire_cat = None  # Deixar vazio para preenchimento manual ou via eAIS
+    # max_aircraft_weight (toneladas): inferido do RCD
+    max_weight = None
+    if len(ref) >= 2:
+        num, letter = int(ref[0]) if ref[0].isdigit() else 1, ref[-1]
+        if num >= 4 and letter in ("D", "E"):
+            max_weight = 400 if letter == "D" else 575  # A380
+        elif num >= 4:
+            max_weight = 80  # A320/737
+        elif num >= 3:
+            max_weight = 80 if letter in ("C", "D", "E") else 50
+        else:
+            max_weight = 50
+    return fire_cat, max_weight
+
+
 def _infer_missing_lookup_fields(result: dict, airport: Airport) -> None:
     """Infere usage_class, avsec, aircraft_size quando ausentes no lookup."""
     ref = (result.get('reference_code') or getattr(airport, 'reference_code', None) or '').upper()
@@ -560,6 +610,8 @@ async def lookup_airport_from_eais(
             if local_airport:
                 at = local_airport.airport_type
                 at_val = at.value if hasattr(at, 'value') else str(at) if at else ''
+                # fire_category: não propagar do cadastro local — pode estar incorreto (ex: inferido antes).
+                # Fonte correta: eAIS. Usuário deve preencher manualmente ou buscar no eAIS quando disponível.
                 result = {
                     "name": local_airport.name,
                     "code": local_airport.code,
@@ -567,7 +619,7 @@ async def lookup_airport_from_eais(
                     "usage_class": local_airport.usage_class,
                     "avsec_classification": local_airport.avsec_classification,
                     "aircraft_size_category": local_airport.aircraft_size_category,
-                    "fire_category": getattr(local_airport, 'fire_category', None),
+                    "fire_category": None,
                     "max_aircraft_weight": local_airport.max_aircraft_weight,
                     "airport_type": at_val,
                     "number_of_runways": local_airport.number_of_runways or 1,
@@ -583,6 +635,52 @@ async def lookup_airport_from_eais(
                 }
                 _infer_missing_lookup_fields(result, local_airport)
                 return result
+
+            # 3. Fallback: ANAC (tabela anac_airports ou cache)
+            sync_service = ANACSyncService(db=db)
+            anac_row = sync_service.get_from_anac_airports_table(icao_code)
+            if not anac_row:
+                anac_data, _ = sync_service.get_anac_data(use_cache_if_live_fails=True)
+                if anac_data:
+                    anac_row = next((a for a in anac_data if (a.get("code") or "").upper() == icao_code), None)
+            if not anac_row:
+                from app.seed_data import ANAC_AIRPORTS_BOOTSTRAP
+                anac_row = next((a for a in ANAC_AIRPORTS_BOOTSTRAP if (a.get("code") or "").upper() == icao_code), None)
+                if anac_row:
+                    anac_row = dict(anac_row)
+
+            if anac_row and anac_row.get("name"):
+                ref = (anac_row.get("reference_code") or "").upper()
+                uc = anac_row.get("usage_class") or ""
+                ac = anac_row.get("aircraft_size_category")
+                if not ac and len(ref) >= 2:
+                    lt = ref[-1]
+                    ac = "A/B" if lt in ("A", "B") else "C" if lt == "C" else "D"
+                # Inferir fire_category e max_aircraft_weight a partir de usage_class e reference_code (ANAC não fornece)
+                fire_cat, max_weight = _infer_fire_and_weight_from_anac(uc, ref)
+                result = {
+                    "name": anac_row.get("name"),
+                    "code": anac_row.get("code", icao_code),
+                    "reference_code": anac_row.get("reference_code"),
+                    "usage_class": anac_row.get("usage_class"),
+                    "avsec_classification": anac_row.get("avsec_classification"),
+                    "aircraft_size_category": ac,
+                    "fire_category": fire_cat,
+                    "max_aircraft_weight": max_weight,
+                    "airport_type": "commercial",
+                    "number_of_runways": anac_row.get("number_of_runways") or 1,
+                    "city": anac_row.get("city"),
+                    "state": anac_row.get("state"),
+                    "latitude": anac_row.get("latitude"),
+                    "longitude": anac_row.get("longitude"),
+                    "has_international_operations": False,
+                    "has_cargo_operations": False,
+                    "has_maintenance_facility": False,
+                    "source": "anac",
+                    "lookup_timestamp": datetime.utcnow().isoformat(),
+                }
+                return result
+
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Aeródromo {icao_code} não encontrado no eAIS. Verifique o código ICAO ou preencha manualmente."
@@ -980,9 +1078,62 @@ async def check_compliance(
     )
 
 
+@app.post("/api/airports/backfill-usage-class")
+async def backfill_usage_class(db: Session = Depends(get_db)):
+    """
+    Preenche usage_class, size e annual_passengers em aeroportos que não têm,
+    a partir da tabela anac_airports ou bootstrap. Útil para aeroportos criados antes das correções.
+    """
+    from app.services.anac_sync import ANACSyncService
+    from app.models import AirportSize
+    sync = ANACSyncService(db=db)
+    updated = 0
+    for airport in db.query(Airport).all():
+        if airport.usage_class:
+            continue
+        anac = sync.get_from_anac_airports_table(airport.code)
+        if not anac:
+            from app.seed_data import ANAC_AIRPORTS_BOOTSTRAP
+            anac = next((a for a in ANAC_AIRPORTS_BOOTSTRAP if (a.get("code") or "").upper() == airport.code), None)
+        if anac and anac.get("usage_class"):
+            uc = anac["usage_class"]
+            airport.usage_class = uc
+            if uc == "PRIVADO":
+                airport.size, airport.annual_passengers = AirportSize.SMALL, 0
+            elif uc == "I":
+                airport.size, airport.annual_passengers = AirportSize.SMALL, 100000
+            elif uc == "II":
+                airport.size, airport.annual_passengers = AirportSize.MEDIUM, 600000
+            elif uc == "III":
+                airport.size, airport.annual_passengers = AirportSize.LARGE, 3000000
+            elif uc == "IV":
+                airport.size, airport.annual_passengers = AirportSize.INTERNATIONAL, 10000000
+            updated += 1
+    if updated:
+        db.commit()
+    return {"message": f"{updated} aeroporto(s) atualizado(s) com usage_class"}
+
+
 @app.post("/api/compliance/refresh-all")
 async def refresh_all_compliance(db: Session = Depends(get_db)):
     """Re-executa verificação de conformidade para todos os aeroportos. Cria registros para normas novas (ex: SME, COE, PCM)."""
+    # Preencher usage_class em aeroportos que não têm (backfill antes de recalcular)
+    await backfill_usage_class(db=db)
+
+    # Forçar regeneração de action_items para regulações SME/COE/PCM/SIMULADOS
+    # (limpa action_items antigos para que check_compliance gere os novos baseados no CEF)
+    srea_codes = ["RBAC-153-15", "RBAC-153-16", "RBAC-153-17", "RBAC-154-43"]
+    srea_regs = db.query(Regulation).filter(Regulation.code.in_(srea_codes)).all()
+    srea_reg_ids = [r.id for r in srea_regs]
+    if srea_reg_ids:
+        srea_records = db.query(ComplianceRecord).filter(
+            ComplianceRecord.regulation_id.in_(srea_reg_ids)
+        ).all()
+        for rec in srea_records:
+            rec.action_items = None
+            rec.completed_action_items = None
+        db.commit()
+
     airports = db.query(Airport).all()
     engine = ComplianceEngine(db)
     updated = 0
