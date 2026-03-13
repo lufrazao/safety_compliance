@@ -145,9 +145,23 @@ def fetch_eais_airport(icao_code: str) -> Optional[Dict]:
                     pass
 
         # CAT CIVIL (categoria contraincêndio 1-10) - crítico para RBAC-153/SESCINC
-        cat_match = re.search(r"CAT CIVIL\s*-\s*(\d+)", text)
-        fire_category = int(cat_match.group(1)) if cat_match and cat_match.group(1).isdigit() else None
-        if fire_category and 1 <= fire_category <= 10:
+        # Formato oficial eAIS/ROTAER: "RFFS - CAT CIVIL - 7" ou "CAT CIVIL - 10" (tabela COMPL)
+        # Priorizar padrões explícitos; evitar "CAT 1" de outros contextos (ex: categoria 1)
+        fire_category = None
+        for pat in [
+            r"CAT\s+CIVIL\s*[-–]\s*(\d+)",  # Formato exato: "CAT CIVIL - 7" (hífen ou en-dash)
+            r"CAT\s+CIVIL\s*:\s*(\d+)",
+            r"CAT\s+CIVIL\s+(\d+)\b",
+            r"RFFS\s*[-–]\s*CAT\s+CIVIL\s*[-–]\s*(\d+)",  # Formato ROTAER COMPL
+            r"Categoria\s+Contraincêndio\s*[:\-]\s*(\d+)",
+        ]:
+            cat_match = re.search(pat, text, re.I)
+            if cat_match and cat_match.group(1).isdigit():
+                val = int(cat_match.group(1))
+                if 1 <= val <= 10:
+                    fire_category = val
+                    break
+        if fire_category:
             result["fire_category"] = fire_category
             result["usage_class"], result["avsec_classification"] = _infer_usage_avsec_from_cat(fire_category)
 
@@ -235,9 +249,14 @@ def fetch_eais_airport(icao_code: str) -> Optional[Dict]:
         # Peso máximo de aeronaves (toneladas) - PRAI "Peso 575.000 Kg" ou "80 toneladas"
         # Prioridade: seção PRAI > busca em toda a página
         def _parse_weight(num_str: str, unit: str) -> Optional[int]:
-            raw = num_str.replace(".", "").replace(",", ".").strip()
+            s = num_str.replace(" ", "").strip()
+            # Formato BR: "575.000" = 575 mil kg; formato US: "575,000" = 575 mil
+            if "," in s and len(s.split(",")[-1]) == 3 and s.split(",")[-1].isdigit():
+                s = s.replace(",", "").replace(".", "")
+            else:
+                s = s.replace(".", "").replace(",", ".")
             try:
-                val = float(raw)
+                val = float(s) if s else 0
                 if val <= 0:
                     return None
                 u = (unit or "").lower()
@@ -252,17 +271,25 @@ def fetch_eais_airport(icao_code: str) -> Optional[Dict]:
             except (ValueError, ZeroDivisionError):
                 return None
 
+        # Seção PRAI/Remoção: ampliar busca para formatos variados do eAIS
         prai_section = ""
-        if "PRAI" in text or "Plano de Remoção" in text:
-            idx_prai = text.find("PRAI") if "PRAI" in text else text.find("Plano de Remoção")
-            if idx_prai >= 0:
-                prai_section = text[idx_prai : idx_prai + 1200]
+        for kw in ["PRAI", "Plano de Remoção", "Remoção de ACFT", "Capacidade para remoção", "SALVAMENTO", "COMBATE"]:
+            idx = text.find(kw)
+            if idx >= 0:
+                prai_section = text[idx : idx + 3500]
+                break
         search_text = prai_section if prai_section else text
+        # Padrões em ordem de especificidade (mais específico primeiro)
         for pat, unit in [
-            (r"Peso\s+([\d.,]+)\s*(Kg|toneladas?|ton\.?|t\b)", 1),  # unit = group 2
-            (r"([\d.,]+)\s*toneladas?\b", 0),  # assume ton
-            (r"([\d.,]+)\s*ton\.?\b", 0),  # "223 Ton" no PRAI
-            (r"Peso\s+([\d.,]+)\s*(?:Kg)?", 0),  # "Peso 575.000" sem unidade -> kg se > 100
+            (r"ACFT\s+[A-Z0-9\-]+\s*-\s*Peso\s*([\d.,]+)\s*Kg", 0),  # "ACFT A380-800 - Peso 575.000 Kg"
+            (r"Capacidade\s+para\s+remoção[^.]*?Peso\s*([\d.,]+)\s*Kg", 0),
+            (r"Peso\s+([\d.,\s]+)\s*(Kg|toneladas?|ton\.?|t\b)", 1),
+            (r"([\d.,]+)\s*(?:Kg|kg)\b", 0),
+            (r"([\d.,]+)\s*toneladas?\b", 0),
+            (r"([\d.,]+)\s*ton\.?\b", 0),
+            (r"Peso\s+([\d.,]+)\s*(?:Kg)?", 0),
+            (r"(?:peso|Peso)\s*m[áa]x[.\s]*[:\-]?\s*([\d.,]+)", 0),
+            (r"remoção[^.]*?([\d.,]+)\s*(?:kg|Kg|toneladas?)", 0),
         ]:
             m = re.search(pat, search_text, re.I)
             if m:
@@ -277,6 +304,18 @@ def fetch_eais_airport(icao_code: str) -> Optional[Dict]:
                         continue
                     result["max_aircraft_weight"] = w
                     break
+
+        # Fallback: inferir max_aircraft_weight do RCD quando PRAI não tem peso explícito
+        if not result.get("max_aircraft_weight") and rcd and len(rcd) >= 2:
+            num, letter = int(rcd[0]) if rcd[0].isdigit() else 1, rcd[-1].upper()
+            if num >= 4 and letter in ("D", "E"):
+                result["max_aircraft_weight"] = 400 if letter == "D" else 575
+            elif num >= 4:
+                result["max_aircraft_weight"] = 80
+            elif num >= 3:
+                result["max_aircraft_weight"] = 80 if letter in ("C", "D", "E") else 50
+            else:
+                result["max_aircraft_weight"] = 50
 
         # Fallback: inferir usage/avsec do RCD quando CAT CIVIL não encontrada
         if not result.get("usage_class") and rcd:
