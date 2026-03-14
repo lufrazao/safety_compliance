@@ -172,6 +172,71 @@ def _run_anac_enrichment_migration():
         pass
 
 
+def _run_schema_migration():
+    """Adiciona colunas que existem no modelo mas não na tabela do PostgreSQL.
+    create_all() só cria tabelas novas — não adiciona colunas em tabelas existentes."""
+    from sqlalchemy import text, inspect
+    from app.database import engine
+
+    # Mapeia: tabela → [(coluna, tipo SQL)]
+    migrations = {
+        "airports": [
+            ("category", "VARCHAR(10)"),
+            ("reference_code", "VARCHAR(10)"),
+            ("data_sincronizacao_anac", "TIMESTAMP"),
+            ("origem_dados", "VARCHAR(20) DEFAULT 'manual'"),
+            ("versao_dados_anac", "VARCHAR(50)"),
+            ("codigo_iata", "VARCHAR(3)"),
+            ("latitude", "DOUBLE PRECISION"),
+            ("longitude", "DOUBLE PRECISION"),
+            ("cidade", "VARCHAR(100)"),
+            ("estado", "VARCHAR(2)"),
+            ("status_operacional", "VARCHAR(50)"),
+            ("usage_class", "VARCHAR(20)"),
+            ("avsec_classification", "VARCHAR(10)"),
+            ("aircraft_size_category", "VARCHAR(5)"),
+            ("fire_category", "INTEGER"),
+        ],
+        "regulations": [
+            ("requirement_classification", "VARCHAR(5)"),
+            ("evaluation_type", "VARCHAR(10)"),
+            ("weight", "INTEGER"),
+            ("anac_reference", "VARCHAR(200)"),
+            ("expected_performance", "TEXT"),
+        ],
+        "compliance_records": [
+            ("docs_score", "INTEGER"),
+            ("tops_score", "INTEGER"),
+            ("weighted_score", "INTEGER"),
+            ("is_essential_compliant", "BOOLEAN"),
+            ("action_items", "TEXT"),
+            ("completed_action_items", "TEXT"),
+            ("action_item_due_dates", "TEXT"),
+            ("custom_fields", "TEXT"),
+        ],
+    }
+
+    try:
+        insp = inspect(engine)
+        with engine.connect() as conn:
+            for table, columns in migrations.items():
+                if not insp.has_table(table):
+                    continue
+                existing = {c["name"] for c in insp.get_columns(table)}
+                for col_name, col_type in columns:
+                    if col_name not in existing:
+                        try:
+                            conn.execute(text(f'ALTER TABLE {table} ADD COLUMN {col_name} {col_type}'))
+                            conn.commit()
+                            print(f"  migração: {table}.{col_name} adicionada")
+                        except Exception as e:
+                            if "duplicate" not in str(e).lower() and "already exists" not in str(e).lower():
+                                print(f"  migração: erro ao adicionar {table}.{col_name}: {e}")
+                            conn.rollback()
+    except Exception as e:
+        print(f"⚠ Erro na migração de schema: {e}")
+
+
 def _populate_anac_airports_background():
     """Popula anac_airports com ~6800 aeródromos da ANAC (ou bootstrap se offline)."""
     try:
@@ -187,6 +252,7 @@ async def startup_event():
     """Initialize database on startup."""
     import asyncio
     init_db()
+    _run_schema_migration()
     _run_anac_enrichment_migration()
     # Pré-popular anac_airports se vazio: lookup funciona mesmo com eAIS offline
     if not os.getenv("SKIP_ANAC_STARTUP_SYNC"):
