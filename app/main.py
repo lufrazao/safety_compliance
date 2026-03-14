@@ -1900,7 +1900,7 @@ def list_documents(record_id: int, db: Session = Depends(get_db)):
             DocumentAttachment.compliance_record_id == record_id
         ).all()
     except Exception:
-        # Table may not exist yet — return empty list
+        db.rollback()
         return []
 
     return [

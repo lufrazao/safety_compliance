@@ -29,10 +29,15 @@ if "sqlite" in DATABASE_URL and (os.getenv("RAILWAY_ENVIRONMENT_NAME") or os.get
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+_is_pg = "postgresql" in DATABASE_URL
 engine = create_engine(
     DATABASE_URL,
     connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
-    pool_pre_ping=True if "postgresql" in DATABASE_URL else False,
+    pool_pre_ping=True if _is_pg else False,
+    pool_size=10 if _is_pg else 5,
+    max_overflow=20 if _is_pg else 10,
+    pool_timeout=60 if _is_pg else 30,
+    pool_recycle=300 if _is_pg else -1,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
