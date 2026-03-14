@@ -170,6 +170,7 @@ def seed_regulations(update_existing=False):
                 "safety_category": SafetyCategory.ENVIRONMENTAL,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
                 "min_passengers": 200000,
+                "requires_international": True,
                 "requirements": "Plano de gestão ambiental, monitoramento de ruído, gestão de resíduos, controle de emissões."
             },
             
@@ -189,7 +190,8 @@ def seed_regulations(update_existing=False):
                 "title": "Manutenção de Equipamentos",
                 "description": "Requisitos para manutenção de equipamentos aeroportuários",
                 "safety_category": SafetyCategory.MAINTENANCE,
-                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["large", "international"]),
+                "min_passengers": 1000000,
                 "requirements": "Programa de manutenção preventiva, registro de manutenções, calibração de equipamentos críticos."
             },
             {
@@ -236,7 +238,8 @@ def seed_regulations(update_existing=False):
                 "title": "Treinamento de Pessoal Operacional",
                 "description": "Requisitos de treinamento para pessoal operacional",
                 "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
-                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "min_passengers": 200000,
                 "requirements": "Programa de treinamento inicial e reciclagem anual, certificação de instrutores, registro de treinamentos realizados."
             },
             {
@@ -255,7 +258,8 @@ def seed_regulations(update_existing=False):
                 "title": "Categoria de SCIR por Tamanho de Aeronave",
                 "description": "Categorização do serviço de combate a incêndio baseado no maior aeronave",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
-                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "min_passengers": 200000,
                 "requirements": "Categoria SCIR determinada pela maior aeronave que opera regularmente. Pequenos: Categoria 1-2, Médios: Categoria 3-4, Grandes: Categoria 5-7, Internacionais: Categoria 7-9."
             },
             {
@@ -285,6 +289,7 @@ def seed_regulations(update_existing=False):
                 "safety_category": SafetyCategory.SECURITY,
                 "applies_to_sizes": json.dumps(["medium", "large", "international"]),
                 "min_passengers": 200000,
+                "requires_international": True,
                 "requirements": "Equipamentos de raio-X para bagagens, detectores de metais, inspeção manual quando necessário, pessoal treinado e certificado."
             },
             {
@@ -311,7 +316,8 @@ def seed_regulations(update_existing=False):
                 "title": "Iluminação de Pistas e Pátios",
                 "description": "Requisitos de iluminação para operações noturnas",
                 "safety_category": SafetyCategory.INFRASTRUCTURE,
-                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "min_passengers": 200000,
                 "requirements": "Sistema de iluminação de pista operacional, iluminação de pátio adequada, sistema de backup para emergências, manutenção preventiva."
             },
             {
@@ -338,7 +344,8 @@ def seed_regulations(update_existing=False):
                 "title": "Comunicação de Emergência",
                 "description": "Sistemas de comunicação para emergências",
                 "safety_category": SafetyCategory.EMERGENCY_RESPONSE,
-                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "min_passengers": 200000,
                 "requirements": "Sistema de comunicação de emergência, rádios para equipes de resposta, coordenação com serviços externos, testes mensais."
             },
             {
@@ -363,8 +370,8 @@ def seed_regulations(update_existing=False):
                 "title": "Monitoramento de Ruído",
                 "description": "Requisitos para monitoramento de ruído aeronáutico",
                 "safety_category": SafetyCategory.ENVIRONMENTAL,
-                "applies_to_sizes": json.dumps(["large", "international"]),
-                "min_passengers": 1000000,
+                "applies_to_sizes": json.dumps(["international"]),
+                "min_passengers": 5000000,
                 "requirements": "Sistema de monitoramento de ruído, relatórios trimestrais, medidas de mitigação quando necessário, comunicação com comunidades vizinhas."
             },
             {
@@ -381,8 +388,8 @@ def seed_regulations(update_existing=False):
                 "title": "Controle de Emissões",
                 "description": "Requisitos para controle de emissões atmosféricas",
                 "safety_category": SafetyCategory.ENVIRONMENTAL,
-                "applies_to_sizes": json.dumps(["large", "international"]),
-                "min_passengers": 1000000,
+                "applies_to_sizes": json.dumps(["international"]),
+                "min_passengers": 5000000,
                 "requirements": "Monitoramento de qualidade do ar, medidas de redução de emissões, uso de equipamentos elétricos quando possível, relatórios anuais."
             },
             
@@ -411,7 +418,8 @@ def seed_regulations(update_existing=False):
                 "title": "Calibração de Equipamentos Críticos",
                 "description": "Requisitos para calibração de equipamentos",
                 "safety_category": SafetyCategory.MAINTENANCE,
-                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["large", "international"]),
+                "min_passengers": 1000000,
                 "requirements": "Calibração anual de equipamentos críticos (balanças, medidores, etc.), certificados de calibração, registro de histórico."
             },
             {
@@ -439,7 +447,8 @@ def seed_regulations(update_existing=False):
                 "title": "Treinamento de Segurança para Funcionários",
                 "description": "Requisitos de treinamento de segurança para todos os funcionários",
                 "safety_category": SafetyCategory.PERSONNEL_CERTIFICATION,
-                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "min_passengers": 200000,
                 "requirements": "Treinamento inicial de segurança para todos os funcionários, reciclagem anual, certificação de conclusão, registro de treinamentos."
             },
             
@@ -449,8 +458,8 @@ def seed_regulations(update_existing=False):
                 "title": "Equipamentos de Navegação",
                 "description": "Requisitos para equipamentos de navegação aérea",
                 "safety_category": SafetyCategory.AIR_TRAFFIC_SERVICES,
-                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
-                "min_passengers": 200000,
+                "applies_to_sizes": json.dumps(["large", "international"]),
+                "min_passengers": 1000000,
                 "requirements": "Equipamentos de navegação certificados (ILS, VOR, NDB quando aplicável), calibração regular, sistema de backup."
             },
             {
@@ -458,8 +467,8 @@ def seed_regulations(update_existing=False):
                 "title": "Comunicações Aéreas",
                 "description": "Requisitos para sistemas de comunicação aérea",
                 "safety_category": SafetyCategory.AIR_TRAFFIC_SERVICES,
-                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
-                "min_passengers": 200000,
+                "applies_to_sizes": json.dumps(["large", "international"]),
+                "min_passengers": 1000000,
                 "requirements": "Sistema de comunicação VHF operacional, frequências certificadas, sistema de backup, testes diários."
             },
             
@@ -663,9 +672,9 @@ def seed_regulations(update_existing=False):
                 "title": "Posto Avançado de Contraincêndio (PACI)",
                 "description": "Requisitos para postos avançados em aeroportos grandes",
                 "safety_category": SafetyCategory.FIRE_SAFETY,
-                "applies_to_sizes": json.dumps(["large", "international"]),
+                "applies_to_sizes": json.dumps(["international"]),
                 "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
-                "min_passengers": 1000000,
+                "min_passengers": 5000000,
                 "requirements": "Estabelecer PACI (posto satélite da SCI) quando a localização da SCI inviabilizar o tempo-resposta de 3 minutos a alguma área do aeródromo. O PACI deve atender aos mesmos requisitos de infraestrutura da SCI (153.425). Comunicação com SCI garantida. Equipamentos básicos do SESCINC disponíveis no PACI.",
                 "requirement_classification": RequirementClassification.B,
                 "weight": 4,
@@ -958,9 +967,9 @@ def seed_regulations(update_existing=False):
                 "title": "Operações em Baixa Visibilidade",
                 "description": "Procedimentos para operação em condições de baixa visibilidade conforme RBAC 153.131",
                 "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
-                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_sizes": json.dumps(["large", "international"]),
                 "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
-                "min_passengers": 200000,
+                "min_passengers": 1000000,
                 "requirements": "Implementar procedimentos específicos para operações em baixa visibilidade (LVO). Definir critérios de ativação e desativação do LVO. Aplicar SOCMS conforme 153.131. Treinar pessoal para operações em LVO (vincular ao PISOA). Verificar auxílios visuais e iluminação operacional.",
                 "requirement_classification": RequirementClassification.C,
                 "weight": 7,
