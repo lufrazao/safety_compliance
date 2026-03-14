@@ -237,6 +237,42 @@ def _run_schema_migration():
         print(f"⚠ Erro na migração de schema: {e}")
 
 
+def _backfill_usage_class():
+    """Preenche usage_class para aeroportos existentes que têm size mas não têm usage_class.
+    Necessário após migração que adiciona a coluna usage_class."""
+    from sqlalchemy import text
+    from app.database import SessionLocal
+    from app.models import Airport, AirportSize
+
+    db = SessionLocal()
+    try:
+        airports_without_uc = db.query(Airport).filter(
+            Airport.usage_class.is_(None),
+            Airport.size.isnot(None)
+        ).all()
+        if not airports_without_uc:
+            return
+        size_to_uc = {
+            AirportSize.SMALL: 'I',
+            AirportSize.MEDIUM: 'II',
+            AirportSize.LARGE: 'III',
+            AirportSize.INTERNATIONAL: 'IV',
+        }
+        count = 0
+        for airport in airports_without_uc:
+            uc = size_to_uc.get(airport.size)
+            if uc:
+                airport.usage_class = uc
+                count += 1
+        if count:
+            db.commit()
+            print(f"  backfill: usage_class preenchido para {count} aeroporto(s)")
+    except Exception as e:
+        print(f"⚠ Erro ao preencher usage_class: {e}")
+    finally:
+        db.close()
+
+
 def _populate_anac_airports_background():
     """Popula anac_airports com ~6800 aeródromos da ANAC (ou bootstrap se offline)."""
     try:
@@ -254,6 +290,10 @@ async def startup_event():
     init_db()
     _run_schema_migration()
     _run_anac_enrichment_migration()
+    _backfill_usage_class()
+    # Seed/atualizar regulações automaticamente no startup
+    from app.seed_data import seed_regulations
+    seed_regulations(update_existing=True)
     # Pré-popular anac_airports se vazio: lookup funciona mesmo com eAIS offline
     if not os.getenv("SKIP_ANAC_STARTUP_SYNC"):
         from app.database import SessionLocal
