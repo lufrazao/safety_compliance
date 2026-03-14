@@ -754,6 +754,280 @@ def seed_regulations(update_existing=False):
                 "evaluation_type": EvaluationType.BOTH,
                 "expected_performance": "SESAQ operacional quando aplicável (corpo d'água ou terreno difícil dentro de 1000m das pistas)"
             },
+
+            # ============================================
+            # RBAC-153: Subparte B — Responsáveis e Treinamentos
+            # ============================================
+            {
+                "code": "RBAC-153-20",
+                "title": "Responsáveis pelas Atividades Operacionais",
+                "description": "Designação de profissionais responsáveis conforme RBAC 153.15",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Designar profissionais responsáveis pelas atividades operacionais: gestor responsável pelo aeródromo, responsável pela segurança operacional, responsável pelas operações aeroportuárias, responsável pela manutenção, responsável pela resposta a emergências [153.15(a)]. Definir estrutura organizacional no MOPS. Enviar formulário cadastral à ANAC em até 30 dias. Acumulação de funções permitida conforme 153.15(b).",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.15",
+                "evaluation_type": EvaluationType.DOCS,
+                "expected_performance": "Responsáveis designados, cadastrados na ANAC, estrutura no MOPS"
+            },
+            {
+                "code": "RBAC-153-21",
+                "title": "Responsabilidades do Gestor Responsável",
+                "description": "Prerrogativas e responsabilidades do gestor do aeródromo conforme RBAC 153.23",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Gestor deve: garantir cumprimento de todos os requisitos do RBAC 153; manter condições operacionais/infraestrutura; alocar recursos para objetivos de segurança; conduzir análises críticas de segurança; revisar desempenho de segurança regularmente; assegurar comunicação clara de segurança em toda organização; garantir qualificação do pessoal; assegurar integridade da segurança durante mudanças [153.23(a)].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.23",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Gestor cumprindo suas responsabilidades, análises críticas documentadas"
+            },
+            {
+                "code": "RBAC-153-22",
+                "title": "Habilitação dos Responsáveis",
+                "description": "Requisitos de qualificação profissional conforme RBAC 153.35",
+                "safety_category": SafetyCategory.PERSONNEL_CERTIFICATION,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Profissionais responsáveis devem ser habilitados conforme 153.35. Engenharia/manutenção com registro em conselho profissional. Condutores de veículos com CNH válida para categoria do veículo. Profissionais de manejo de fauna com formação na área ambiental.",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 7,
+                "anac_reference": "RBAC 153.35",
+                "evaluation_type": EvaluationType.DOCS,
+                "expected_performance": "Todos os responsáveis habilitados e com documentação em dia"
+            },
+            {
+                "code": "RBAC-153-23",
+                "title": "Programa Integrado de Segurança Operacional em Aeródromo (PISOA)",
+                "description": "Programa de treinamentos obrigatórios conforme RBAC 153.37",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Implementar PISOA com 9 treinamentos obrigatórios: (1) Treinamento Geral de conscientização para pessoal da área operacional; (2) Treinamento básico de segurança operacional; (3) Condução de veículos na área operacional; (4) Acesso/permanência na área de manobras; (5) Operações em baixa visibilidade; (6) PTR-BA (bombeiros — ver RBAC-153-10); (7) Treinamento básico de operações; (8) Risco fauna; (9) Condição de pista (avaliação/reporte). Vincular credenciamento à conclusão dos treinamentos. Realizar avaliação periódica das necessidades de treinamento [153.37(f)].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.37",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "PISOA implementado, 9 treinamentos ativos, credenciamento vinculado"
+            },
+            {
+                "code": "RBAC-153-24",
+                "title": "Documentação e Informações à ANAC",
+                "description": "Requisitos de documentação e controle de versões conforme RBAC 153.39",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Enviar documentos à ANAC em formato eletrônico extraível. Manter controle de versão para revisões/atualizações/emendas. Manter informações cadastrais atualizadas junto à ANAC [153.39].",
+                "requirement_classification": RequirementClassification.C,
+                "weight": 5,
+                "anac_reference": "RBAC 153.39",
+                "evaluation_type": EvaluationType.DOCS,
+                "expected_performance": "Documentação em dia, controle de versões, cadastro ANAC atualizado"
+            },
+
+            # ============================================
+            # RBAC-153: Subparte C — SGSO (Sistema de Gerenciamento de Segurança Operacional)
+            # ============================================
+            {
+                "code": "RBAC-153-30",
+                "title": "SGSO — Política e Objetivos de Segurança",
+                "description": "Política de segurança, CSO e MGSO conforme RBAC 153.53",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Estabelecer e manter SGSO compatível com porte do aeródromo [153.51]. Definir política de segurança operacional aprovada pelo gestor. Criar Comissão de Segurança Operacional (CSO). Elaborar MGSO (Manual de Gerenciamento de Segurança Operacional) com política, objetivos mensuráveis, estrutura organizacional, responsabilidades e processos [153.53].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.53",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "SGSO implementado, CSO ativa, MGSO aprovado e publicado"
+            },
+            {
+                "code": "RBAC-153-31",
+                "title": "SGSO — Gestão de Riscos",
+                "description": "Processos de identificação de perigos e gestão de riscos conforme RBAC 153.55",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Implementar processo formal de identificação de perigos. Realizar avaliação de riscos (probabilidade × severidade). Definir e implantar controles/mitigações. Manter sistema de reporte de segurança da aviação civil. Manter biblioteca de perigos atualizada [153.55].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.55",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Processo de gestão de riscos ativo, biblioteca de perigos mantida"
+            },
+            {
+                "code": "RBAC-153-32",
+                "title": "SGSO — Garantia de Segurança",
+                "description": "Monitoramento, indicadores, auditorias e relatórios à ANAC conforme RBAC 153.57",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Manter monitoramento contínuo da segurança operacional. Definir e acompanhar indicadores de desempenho de segurança. Realizar auditorias internas do SGSO. Enviar relatórios quadrimestrais à ANAC. Implementar ações corretivas. Gerenciar mudanças (change management). Promover melhoria contínua [153.57].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.57",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Indicadores monitorados, auditorias realizadas, relatórios quadrimestrais enviados"
+            },
+            {
+                "code": "RBAC-153-33",
+                "title": "SGSO — Promoção da Segurança",
+                "description": "Treinamento e comunicação de segurança conforme RBAC 153.59",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Implementar programa de treinamento em segurança operacional para todo pessoal. Estabelecer canais de comunicação de segurança. Disseminar lições aprendidas de incidentes/acidentes. Promover cultura de reporte não-punitiva [153.59].",
+                "requirement_classification": RequirementClassification.C,
+                "weight": 7,
+                "anac_reference": "RBAC 153.59",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Cultura de segurança promovida, comunicação ativa, treinamentos realizados"
+            },
+
+            # ============================================
+            # RBAC-153: Subparte D — Operação do Aeródromo
+            # ============================================
+            {
+                "code": "RBAC-153-40",
+                "title": "Proteção da Área Operacional e Credenciamento",
+                "description": "Proteção, cercamento, controle de acesso e credenciamento conforme RBAC 153.107/153.109",
+                "safety_category": SafetyCategory.SECURITY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Manter sistema de proteção da área operacional com cercamento adequado e controle de acesso. Implementar sistema de credenciamento vinculado aos treinamentos do PISOA. Monitorar integridade do sistema de proteção perimetral [153.107/153.109].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.107/153.109",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Proteção operacional ativa, credenciamento vinculado ao PISOA"
+            },
+            {
+                "code": "RBAC-153-41",
+                "title": "Movimentação de Veículos e Pessoas na Área Operacional",
+                "description": "Regras para veículos e pessoal na área de movimento conforme RBAC 153.111-153.117",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Estabelecer regras de movimentação na área operacional: acesso à área de manobras (com radiocomunicação e fraseologia padrão), proibições de entrada, velocidades máximas, prioridade de aeronaves, prevenção de incursão em pista. Implementar SOCMS (Sistema de Orientação e Controle do Movimento de Superfície) quando aplicável [153.111-153.117].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.111/153.117",
+                "evaluation_type": EvaluationType.TOPS,
+                "expected_performance": "Regras de movimentação implementadas, prevenção de incursão ativa"
+            },
+            {
+                "code": "RBAC-153-42",
+                "title": "Gestão de Pátios de Aeronaves",
+                "description": "Supervisão, alocação de posições e procedimentos de pátio conforme RBAC 153.119/153.121",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Supervisionar operações de pátio. Definir alocação de posições de estacionamento de aeronaves. Implementar procedimentos de aproximação e pushback. Coordenar operações com empresas aéreas e prestadores de serviço [153.119/153.121].",
+                "requirement_classification": RequirementClassification.C,
+                "weight": 7,
+                "anac_reference": "RBAC 153.119/153.121",
+                "evaluation_type": EvaluationType.TOPS,
+                "expected_performance": "Operações de pátio supervisionadas, procedimentos documentados"
+            },
+            {
+                "code": "RBAC-153-43",
+                "title": "Abastecimento de Aeronaves",
+                "description": "Requisitos de segurança para abastecimento de combustível conforme RBAC 153.125",
+                "safety_category": SafetyCategory.FIRE_SAFETY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Assegurar que operações de abastecimento atendem aos requisitos de segurança. Procedimentos para abastecimento com passageiros a bordo. Posicionamento de equipamentos de combate a incêndio. Coordenação entre equipe de solo e tripulação [153.125].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.125",
+                "evaluation_type": EvaluationType.TOPS,
+                "expected_performance": "Abastecimento seguro conforme procedimentos aprovados"
+            },
+            {
+                "code": "RBAC-153-44",
+                "title": "Operações em Baixa Visibilidade",
+                "description": "Procedimentos para operação em condições de baixa visibilidade conforme RBAC 153.131",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "min_passengers": 200000,
+                "requirements": "Implementar procedimentos específicos para operações em baixa visibilidade (LVO). Definir critérios de ativação e desativação do LVO. Aplicar SOCMS conforme 153.131. Treinar pessoal para operações em LVO (vincular ao PISOA). Verificar auxílios visuais e iluminação operacional.",
+                "requirement_classification": RequirementClassification.C,
+                "weight": 7,
+                "anac_reference": "RBAC 153.131",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Procedimentos LVO implementados, pessoal treinado, auxílios visuais verificados"
+            },
+            {
+                "code": "RBAC-153-45",
+                "title": "Monitoramento e Inspeções Operacionais",
+                "description": "Inspeções diárias e monitoramento contínuo conforme RBAC 153.133",
+                "safety_category": SafetyCategory.OPERATIONAL_SAFETY,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Realizar monitoramento contínuo e inspeções diárias da área de movimento: obstáculos, fauna, sistema de proteção, estacionamento, veículos, obras. Avaliar e reportar condição de pista. Inspecionar antes das primeiras operações diárias. Documentar achados e ações corretivas [153.133].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 9,
+                "anac_reference": "RBAC 153.133",
+                "evaluation_type": EvaluationType.TOPS,
+                "expected_performance": "Inspeções diárias realizadas, condição de pista avaliada e reportada"
+            },
+            {
+                "code": "RBAC-153-46",
+                "title": "Informações Aeronáuticas e Auxílios Visuais",
+                "description": "Manutenção de informações AIS e auxílios visuais conforme RBAC 153.105",
+                "safety_category": SafetyCategory.INFRASTRUCTURE,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Manter informações aeronáuticas atualizadas no AIS (AIP, NOTAM). Assegurar funcionamento de auxílios visuais (sinalização, iluminação de pista, balizamento). Reportar indisponibilidade de auxílios. Manter equipamentos e posicionamento conforme norma [153.105].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.105",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Informações AIS atualizadas, auxílios visuais operacionais"
+            },
+            {
+                "code": "RBAC-153-47",
+                "title": "Gestão de Obstáculos e Faixa de Pista",
+                "description": "Controle de obstáculos e preservação de superfícies conforme RBAC 153.101/153.103",
+                "safety_category": SafetyCategory.INFRASTRUCTURE,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Controlar posicionamento de objetos na área operacional (faixa de pista, RESA, taxiway, clearway). Monitorar e gerenciar obstáculos. Manter superfícies limitadoras. Garantir condições do pavimento dentro dos limites ACN/PCN [153.101/153.103].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.101/153.103",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Obstáculos controlados, superfícies preservadas, ACN/PCN compatíveis"
+            },
+
+            # ============================================
+            # RBAC-153: Subparte E — Manutenção do Aeródromo
+            # ============================================
+            {
+                "code": "RBAC-153-50",
+                "title": "Programa de Manutenção do Aeródromo",
+                "description": "Programas de manutenção para áreas pavimentadas, não-pavimentadas, drenagem e sistemas conforme RBAC 153.201-153.221",
+                "safety_category": SafetyCategory.MAINTENANCE,
+                "applies_to_sizes": json.dumps(["small", "medium", "large", "international"]),
+                "applies_to_types": json.dumps(["commercial", "mixed", "general_aviation"]),
+                "requirements": "Manter programas de manutenção para: áreas pavimentadas (estrutural e funcional), áreas não-pavimentadas, drenagem, áreas verdes, auxílios visuais, sistemas elétricos, perímetro operacional, veículos e equipamentos. Responsável técnico com registro em conselho profissional. Gerenciar defeitos de pavimento e desníveis. Documentar todas as manutenções [153.201-153.221].",
+                "requirement_classification": RequirementClassification.D,
+                "weight": 8,
+                "anac_reference": "RBAC 153.201/153.221",
+                "evaluation_type": EvaluationType.BOTH,
+                "expected_performance": "Programas de manutenção ativos, responsável técnico designado, registros em dia"
+            },
         ]
         
         to_add = [r for r in regulations if r["code"] not in existing_codes]

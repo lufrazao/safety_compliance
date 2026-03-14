@@ -477,24 +477,100 @@ class ComplianceEngine:
         
         # Generate action items based on regulation requirements and safety category
         if safety_val == "operational_safety":
-            if "sms" in requirements or "sistema de gerenciamento" in requirements:
-                action_items.append("Desenvolver e documentar política de segurança operacional")
-                action_items.append("Implementar processo de gestão de riscos operacionais")
-                action_items.append("Estabelecer sistema de garantia de segurança (auditorias internas)")
-                action_items.append("Criar programa de promoção da segurança")
-                sz_val = airport.size.value if (airport.size and hasattr(airport.size, 'value')) else (str(airport.size) if airport.size else None)
-                if sz_val in ["large", "international"]:
-                    action_items.append("Realizar auditoria externa anual do SMS")
-            
-            if "incidentes" in requirements or "acidentes" in requirements:
-                action_items.append("Implementar sistema de registro de incidentes")
-                action_items.append("Estabelecer procedimento de notificação à ANAC (24h para graves)")
-                action_items.append("Treinar equipe em investigação de incidentes")
-            
-            if "treinamento" in requirements:
-                action_items.append("Desenvolver programa de treinamento inicial para novo pessoal")
-                action_items.append("Estabelecer programa de reciclagem anual")
-                action_items.append("Manter registro de todos os treinamentos realizados")
+            code = regulation.code if regulation.code else ""
+
+            # Responsáveis (RBAC-153-20 / 153.15)
+            if code == "RBAC-153-20":
+                action_items.append("Designar formalmente os 5 responsáveis obrigatórios (gestor, segurança, operações, manutenção, emergência)")
+                action_items.append("Definir estrutura organizacional no MOPS")
+                action_items.append("Enviar formulário cadastral à ANAC em até 30 dias após designação/alteração")
+                action_items.append("Documentar eventual acumulação de funções conforme 153.15(b)")
+
+            # Gestor Responsável (RBAC-153-21 / 153.23)
+            elif code == "RBAC-153-21":
+                action_items.append("Verificar que gestor conduz análises críticas de segurança periodicamente")
+                action_items.append("Confirmar alocação de recursos para objetivos de segurança")
+                action_items.append("Garantir comunicação clara de segurança em toda a organização")
+                action_items.append("Documentar revisões de desempenho de segurança")
+
+            # PISOA / Treinamentos (RBAC-153-23 / 153.37)
+            elif code == "RBAC-153-23":
+                action_items.append("Implementar os 9 treinamentos obrigatórios do PISOA")
+                action_items.append("Vincular credenciamento à conclusão dos treinamentos aplicáveis")
+                action_items.append("Realizar avaliação periódica das necessidades de treinamento [153.37(f)]")
+                action_items.append("Garantir treinamentos: geral, segurança operacional, veículos, área de manobras, baixa visibilidade, PTR-BA, operações, fauna, condição de pista")
+
+            # Documentação (RBAC-153-24 / 153.39)
+            elif code == "RBAC-153-24":
+                action_items.append("Enviar documentos à ANAC em formato eletrônico extraível")
+                action_items.append("Manter controle de versão para todas as revisões/atualizações")
+                action_items.append("Manter informações cadastrais atualizadas junto à ANAC")
+
+            # SGSO Política (RBAC-153-30 / 153.53)
+            elif code == "RBAC-153-30":
+                action_items.append("Elaborar e aprovar política de segurança operacional pelo gestor")
+                action_items.append("Criar e ativar Comissão de Segurança Operacional (CSO)")
+                action_items.append("Elaborar MGSO com política, objetivos, estrutura e processos")
+                action_items.append("Definir objetivos mensuráveis de segurança operacional")
+
+            # SGSO Gestão de Riscos (RBAC-153-31 / 153.55)
+            elif code == "RBAC-153-31":
+                action_items.append("Implementar processo formal de identificação de perigos")
+                action_items.append("Realizar avaliação de riscos (probabilidade × severidade)")
+                action_items.append("Definir e implantar controles/mitigações para riscos identificados")
+                action_items.append("Manter sistema de reporte de segurança e biblioteca de perigos atualizada")
+
+            # SGSO Garantia (RBAC-153-32 / 153.57)
+            elif code == "RBAC-153-32":
+                action_items.append("Definir e monitorar indicadores de desempenho de segurança")
+                action_items.append("Realizar auditorias internas do SGSO")
+                action_items.append("Enviar relatórios quadrimestrais à ANAC")
+                action_items.append("Implementar processo de gestão de mudanças (change management)")
+                action_items.append("Documentar ações corretivas e verificar eficácia")
+
+            # SGSO Promoção (RBAC-153-33 / 153.59)
+            elif code == "RBAC-153-33":
+                action_items.append("Implementar programa de treinamento em segurança para todo pessoal")
+                action_items.append("Estabelecer canais de comunicação de segurança")
+                action_items.append("Disseminar lições aprendidas de incidentes/acidentes")
+                action_items.append("Promover cultura de reporte não-punitiva")
+
+            # Movimentação (RBAC-153-41 / 153.111-117)
+            elif code == "RBAC-153-41":
+                action_items.append("Estabelecer regras de acesso à área de manobras com radiocomunicação obrigatória")
+                action_items.append("Definir velocidades máximas e regras de prioridade na área operacional")
+                action_items.append("Implementar medidas de prevenção de incursão em pista")
+                action_items.append("Implementar SOCMS quando aplicável")
+
+            # Operações em Baixa Visibilidade (RBAC-153-44 / 153.131)
+            elif code == "RBAC-153-44":
+                action_items.append("Definir critérios de ativação/desativação de LVO")
+                action_items.append("Implementar procedimentos SOCMS para baixa visibilidade")
+                action_items.append("Treinar pessoal para operações LVO (vincular ao PISOA)")
+                action_items.append("Verificar operacionalidade dos auxílios visuais e iluminação")
+
+            # Monitoramento/Inspeções (RBAC-153-45 / 153.133)
+            elif code == "RBAC-153-45":
+                action_items.append("Realizar inspeções diárias antes das primeiras operações")
+                action_items.append("Monitorar: obstáculos, fauna, sistema de proteção, área de movimento, veículos, obras")
+                action_items.append("Avaliar e reportar condição de pista conforme procedimento")
+                action_items.append("Documentar achados e ações corretivas de cada inspeção")
+
+            # Genérico operational_safety (fallback para RBAC-154-xx)
+            else:
+                if "sms" in requirements or "sistema de gerenciamento" in requirements:
+                    action_items.append("Desenvolver e documentar política de segurança operacional")
+                    action_items.append("Implementar processo de gestão de riscos operacionais")
+                    action_items.append("Estabelecer sistema de garantia de segurança (auditorias internas)")
+                    action_items.append("Criar programa de promoção da segurança")
+                if "incidentes" in requirements or "acidentes" in requirements:
+                    action_items.append("Implementar sistema de registro de incidentes")
+                    action_items.append("Estabelecer procedimento de notificação à ANAC (24h para graves)")
+                    action_items.append("Treinar equipe em investigação de incidentes")
+                if "treinamento" in requirements:
+                    action_items.append("Desenvolver programa de treinamento inicial para novo pessoal")
+                    action_items.append("Estabelecer programa de reciclagem anual")
+                    action_items.append("Manter registro de todos os treinamentos realizados")
         
         elif safety_val == "fire_safety":
             code = regulation.code if regulation.code else ""
@@ -624,6 +700,13 @@ class ComplianceEngine:
                 action_items.append("Treinar equipe SESAQ em: PLEM, familiarização com aeronaves, EPR, comunicações e salvamento aquático")
                 action_items.append("Manter recursos recomendados: salva-vidas flutuantes, veículos para vítimas, iluminação noturna")
 
+            # Abastecimento (RBAC-153-43 / 153.125)
+            elif code == "RBAC-153-43":
+                action_items.append("Implementar procedimentos de segurança para abastecimento de aeronaves")
+                action_items.append("Definir procedimentos específicos para abastecimento com passageiros a bordo")
+                action_items.append("Posicionar equipamentos de combate a incêndio durante operações de abastecimento")
+                action_items.append("Coordenar operações de abastecimento entre equipe de solo e tripulação")
+
             # Genérico fire_safety (fallback para RBAC-154-10, RBAC-154-11 etc.)
             else:
                 if "scir" in requirements or "combate a incêndio" in requirements:
@@ -642,7 +725,16 @@ class ComplianceEngine:
                     action_items.append("Realizar testes semanais do sistema de alarme")
         
         elif safety_val == "security":
-            if "avsec" in requirements or "segurança da aviação" in requirements:
+            code = regulation.code if regulation.code else ""
+
+            # Proteção da Área Operacional (RBAC-153-40 / 153.107/109)
+            if code == "RBAC-153-40":
+                action_items.append("Manter sistema de cercamento e controle de acesso à área operacional")
+                action_items.append("Implementar credenciamento vinculado aos treinamentos do PISOA")
+                action_items.append("Monitorar integridade do sistema de proteção perimetral")
+                action_items.append("Documentar e corrigir vulnerabilidades no perímetro")
+
+            elif "avsec" in requirements or "segurança da aviação" in requirements:
                 action_items.append("Desenvolver programa AVSEC documentado")
                 action_items.append("Treinar pessoal de segurança conforme padrões AVSEC")
                 action_items.append("Implementar controle de acesso a áreas restritas")
@@ -664,30 +756,44 @@ class ComplianceEngine:
                 action_items.append("Estabelecer rotina de patrulhamento")
         
         elif safety_val == "infrastructure":
-            if "pistas" in requirements or "pátios" in requirements:
-                action_items.append("Estabelecer rotina de inspeção diária de pistas")
-                action_items.append("Implementar programa de manutenção preventiva de pátios")
-                action_items.append("Garantir sinalização adequada conforme padrões ICAO")
-            
-            if "sinalização" in requirements:
-                action_items.append("Auditar sinalização existente conforme padrões ICAO")
-                action_items.append("Atualizar marcações de pista se necessário")
-                action_items.append("Verificar visibilidade de placas de identificação")
-            
-            if "iluminação" in requirements:
-                action_items.append("Verificar operação de sistema de iluminação de pista")
-                action_items.append("Implementar sistema de backup para emergências")
-                action_items.append("Estabelecer programa de manutenção preventiva")
-            
-            if "drenagem" in requirements:
-                action_items.append("Inspecionar sistema de drenagem após chuvas")
-                action_items.append("Limpar e manter canais e bueiros")
-                action_items.append("Avaliar necessidade de melhorias estruturais")
-            
-            if "carga" in requirements:
-                action_items.append("Garantir área de carga coberta adequada")
-                action_items.append("Adquirir equipamentos de movimentação de carga")
-                action_items.append("Implementar controle de temperatura quando necessário")
+            code = regulation.code if regulation.code else ""
+
+            # Informações Aeronáuticas e Auxílios Visuais (RBAC-153-46 / 153.105)
+            if code == "RBAC-153-46":
+                action_items.append("Manter informações aeronáuticas atualizadas no AIS (AIP, NOTAM)")
+                action_items.append("Verificar funcionamento de auxílios visuais (sinalização, iluminação, balizamento)")
+                action_items.append("Reportar indisponibilidade de auxílios visuais imediatamente")
+                action_items.append("Manter equipamentos posicionados conforme norma")
+
+            # Obstáculos e Faixa de Pista (RBAC-153-47 / 153.101/103)
+            elif code == "RBAC-153-47":
+                action_items.append("Controlar posicionamento de objetos na área operacional (faixa de pista, RESA, taxiway)")
+                action_items.append("Monitorar e gerenciar obstáculos nas superfícies limitadoras")
+                action_items.append("Verificar compatibilidade ACN/PCN dos pavimentos")
+                action_items.append("Manter registro atualizado de obstáculos")
+
+            # Genérico infrastructure (fallback para RBAC-154-xx)
+            else:
+                if "pistas" in requirements or "pátios" in requirements:
+                    action_items.append("Estabelecer rotina de inspeção diária de pistas")
+                    action_items.append("Implementar programa de manutenção preventiva de pátios")
+                    action_items.append("Garantir sinalização adequada conforme padrões ICAO")
+                if "sinalização" in requirements:
+                    action_items.append("Auditar sinalização existente conforme padrões ICAO")
+                    action_items.append("Atualizar marcações de pista se necessário")
+                    action_items.append("Verificar visibilidade de placas de identificação")
+                if "iluminação" in requirements:
+                    action_items.append("Verificar operação de sistema de iluminação de pista")
+                    action_items.append("Implementar sistema de backup para emergências")
+                    action_items.append("Estabelecer programa de manutenção preventiva")
+                if "drenagem" in requirements:
+                    action_items.append("Inspecionar sistema de drenagem após chuvas")
+                    action_items.append("Limpar e manter canais e bueiros")
+                    action_items.append("Avaliar necessidade de melhorias estruturais")
+                if "carga" in requirements:
+                    action_items.append("Garantir área de carga coberta adequada")
+                    action_items.append("Adquirir equipamentos de movimentação de carga")
+                    action_items.append("Implementar controle de temperatura quando necessário")
         
         elif safety_val == "emergency_response":
             code = regulation.code if regulation.code else ""
@@ -761,8 +867,35 @@ class ComplianceEngine:
                 action_items.append("Remover fontes de alimento para fauna")
                 action_items.append("Adquirir equipamentos de dispersão de fauna")
         
+        elif safety_val == "personnel_certification":
+            code = regulation.code if regulation.code else ""
+
+            # Habilitação dos Responsáveis (RBAC-153-22 / 153.35)
+            if code == "RBAC-153-22":
+                action_items.append("Verificar habilitação de todos os profissionais responsáveis conforme 153.35")
+                action_items.append("Confirmar registro em conselho profissional para engenharia/manutenção")
+                action_items.append("Verificar CNH válida de condutores de veículos na área operacional")
+                action_items.append("Confirmar formação ambiental dos profissionais de manejo de fauna")
+            else:
+                if "certificação" in requirements:
+                    action_items.append("Verificar certificações de todo o pessoal operacional")
+                    action_items.append("Manter registro centralizado de certificações")
+                if "supervisores" in requirements:
+                    action_items.append("Certificar supervisores de operação conforme norma")
+                if "treinamento" in requirements or "segurança" in requirements:
+                    action_items.append("Implementar treinamento de segurança para funcionários")
+
         elif safety_val == "maintenance":
-            if "calibração" in requirements:
+            code = regulation.code if regulation.code else ""
+
+            # Programa de Manutenção do Aeródromo (RBAC-153-50 / 153.201-221)
+            if code == "RBAC-153-50":
+                action_items.append("Implementar programas de manutenção: pavimentos, drenagem, áreas verdes, auxílios visuais, sistemas elétricos")
+                action_items.append("Designar responsável técnico com registro em conselho profissional")
+                action_items.append("Gerenciar defeitos de pavimento e desníveis sistematicamente")
+                action_items.append("Manter programa de manutenção para veículos e equipamentos operacionais")
+                action_items.append("Documentar todas as manutenções realizadas com registros rastreáveis")
+            elif "calibração" in requirements:
                 action_items.append("Identificar todos os equipamentos críticos que requerem calibração")
                 action_items.append("Estabelecer cronograma de calibração anual")
                 action_items.append("Manter certificados de calibração atualizados")
