@@ -502,14 +502,14 @@ class ComplianceEngine:
             uc_val = str(airport.usage_class) if airport.usage_class else ""
 
             # CAT - Categoria Contraincêndio (RBAC-153-01 / 153.403)
-            if code == "RBAC-153-01" or "cat do aeródromo" in requirements or "153.403" in requirements:
+            if code == "RBAC-153-01":
                 action_items.append("Determinar a CAT do aeródromo baseada na maior aeronave que opera regularmente (tabela 153.403-1)")
                 action_items.append("Documentar a CAT vigente e manter histórico de alterações")
                 action_items.append("Notificar ANAC (gtre.sia@anac.gov.br) imediatamente em caso de redução de CAT por limitação de recursos")
                 action_items.append("Comunicar companhias aéreas operadoras sobre qualquer redução temporária de CAT")
 
             # Operações Compatíveis com a CAT (RBAC-153-02 / 153.413)
-            elif code == "RBAC-153-02" or "janela móvel" in requirements or "153.413" in requirements:
+            elif code == "RBAC-153-02":
                 action_items.append("Implementar controle de movimentos por janela móvel de 3 meses consecutivos")
                 action_items.append("Monitorar limite de 900 movimentos/trimestre para aeronaves CAT-AV 1 nível acima (Classe II/III)")
                 action_items.append("Monitorar limite de 26 movimentos/trimestre para aeronaves CAT-AV 2 níveis acima (Classe II/III)")
@@ -518,7 +518,7 @@ class ComplianceEngine:
                 action_items.append("Notificar ANAC quando operações ultrapassarem os limites de compatibilidade")
 
             # Agentes Extintores (RBAC-153-03 / 153.405)
-            elif code == "RBAC-153-03" or "lge" in requirements or "líquido gerador" in requirements:
+            elif code == "RBAC-153-03":
                 action_items.append("Verificar que o LGE utilizado possui eficácia nível B ou C (classe AV)")
                 action_items.append("Confirmar concentração do LGE (1%, 3% ou 6%) conforme especificação do fabricante")
                 action_items.append("Garantir que PQ seja do tipo BC (bicarbonato de sódio) conforme ABNT NBR 9695")
@@ -527,7 +527,7 @@ class ComplianceEngine:
                 action_items.append("Verificar validade e condições de armazenamento de todos os agentes extintores")
 
             # CCI (RBAC-153-04 / 153.407)
-            elif code == "RBAC-153-04" or "aceleração" in requirements or "153.407" in requirements:
+            elif code == "RBAC-153-04":
                 action_items.append("Verificar capacidade de água e espuma do CCI conforme tabela 153.407-1 para a CAT vigente")
                 action_items.append("Confirmar que CCI possui tração fora-de-estrada [FC obrigatório]")
                 action_items.append("Testar aceleração do CCI: 0 a 80 km/h em ≤25s (tanque 2000-6000L) ou conforme capacidade")
@@ -537,20 +537,20 @@ class ComplianceEngine:
                 action_items.append("Manter cronograma de manutenção preventiva do CCI")
 
             # Veículos de Apoio CACE/CRS (RBAC-153-05 / 153.407)
-            elif code == "RBAC-153-05" or "cace" in requirements or "crs" in requirements:
+            elif code == "RBAC-153-05":
                 action_items.append("Avaliar necessidade de CACE (recomendado para Classe IV e Classe III com CAT 8+)")
                 action_items.append("Avaliar necessidade de CRS para transporte da equipe de resgate")
                 action_items.append("Manter certificação e manutenção dos veículos de apoio em dia")
 
             # Equipe SESCINC (RBAC-153-06 / 153.417)
-            elif code == "RBAC-153-06" or "ba-ce" in requirements or "ba-lr" in requirements:
+            elif code == "RBAC-153-06":
                 action_items.append("Confirmar composição mínima da equipe conforme CAT (CAT 5-6: 4 BA; CAT 7-8: 5 BA; CAT 9: 6 BA)")
                 action_items.append("Verificar que todas as funções operacionais são desempenhadas por profissionais com CAP-BA")
                 action_items.append("Garantir disponibilidade 24/7 com equipe completa e pronta para resposta imediata")
                 action_items.append("Manter registro atualizado de habilitações e certificações de toda a equipe")
 
             # Tempo-Resposta (RBAC-153-07 / 153.409)
-            elif code == "RBAC-153-07" or "tempo-resposta" in requirements or "153.409" in requirements:
+            elif code == "RBAC-153-07":
                 action_items.append("Realizar aferição de tempo-resposta trimestralmente [FC obrigatório]")
                 action_items.append("Registrar cada aferição: data/hora, equipe, veículos utilizados e hora de chegada de cada veículo")
                 action_items.append("Confirmar que tempo-resposta é ≤3 minutos a qualquer ponto das pistas")
@@ -558,7 +558,7 @@ class ComplianceEngine:
                 action_items.append("Manter histórico de todas as aferições e acionar plano de melhoria se meta não for atingida")
 
             # Capacitação/CAP-BA (RBAC-153-08 / 153.417)
-            elif code == "RBAC-153-08" or "cap-ba" in requirements or "habilitação" in requirements:
+            elif code == "RBAC-153-08":
                 action_items.append("Verificar que 100% do pessoal operacional possui CAP-BA válido")
                 action_items.append("Monitorar vencimento dos CAP-BA e agendar renovações com antecedência")
                 action_items.append("Confirmar que GS (Gerente da Seção) está ciente da isenção do curso de atualização")
@@ -566,7 +566,7 @@ class ComplianceEngine:
                 action_items.append("Manter registro central de certificações com datas de validade")
 
             # Equipamentos EPI/EPR/TP e Resgate (RBAC-153-09 / 153.421/153.423)
-            elif code == "RBAC-153-09" or "traje de proteção" in requirements or "ca (certificado" in requirements:
+            elif code == "RBAC-153-09":
                 action_items.append("Verificar CA (Certificado de Aprovação do MTE) de todos os componentes do TP [FC obrigatório]")
                 action_items.append("Confirmar que EPR é do tipo pressão positiva conforme ABNT NBR 13716 [FC obrigatório]")
                 action_items.append("Estabelecer procedimento de recarga de cilindros do EPR e manter reserva de cilindros")
@@ -576,20 +576,20 @@ class ComplianceEngine:
                 action_items.append("Avaliar implantação de sensor de inércia 'homem-morto' para operações de resgate (recomendação)")
 
             # PTR-BA Treinamento Recorrente (RBAC-153-10)
-            elif code == "RBAC-153-10" or "ptr-ba" in requirements or "treinamento recorrente" in requirements:
+            elif code == "RBAC-153-10":
                 action_items.append("Implementar PTR-BA com ciclo mínimo anual de treinamentos teóricos e práticos")
                 action_items.append("Incluir no PTR-BA: combate a incêndio, resgate, uso de equipamentos e procedimentos operacionais")
                 action_items.append("Registrar todos os treinamentos realizados com avaliação de desempenho individual")
                 action_items.append("Manter histórico de treinamentos de cada profissional")
 
             # PCINC (RBAC-153-11)
-            elif code == "RBAC-153-11" or "pcinc" in requirements:
+            elif code == "RBAC-153-11":
                 action_items.append("Elaborar/atualizar PCINC com: organização do serviço, recursos, procedimentos operacionais e coordenação externa")
                 action_items.append("Incluir no PCINC cronograma de exercícios simulados com recursos externos")
                 action_items.append("Revisar PCINC periodicamente e notificar ANAC sobre atualizações")
 
             # SCI Infraestrutura (RBAC-153-12 / 153.425)
-            elif code == "RBAC-153-12" or "sala de observação" in requirements or "reservatório" in requirements:
+            elif code == "RBAC-153-12":
                 action_items.append("Verificar que SCI possui fornecimento de energia secundário para sistemas críticos [FC]")
                 action_items.append("Garantir Sala de Observação exclusiva para OC com visão de toda a área de movimento (direta ou câmeras)")
                 action_items.append("Confirmar reservatório de água com válvula 1/4-giro e reabastecimento em ≤10 minutos [FC]")
@@ -597,20 +597,20 @@ class ComplianceEngine:
                 action_items.append("Verificar sistema de recarga de ar comprimido para EPR na SCI")
 
             # PACI (RBAC-153-13 / 153.425)
-            elif code == "RBAC-153-13" or "paci" in requirements or "posto avançado" in requirements:
+            elif code == "RBAC-153-13":
                 action_items.append("Avaliar se localização da SCI permite tempo-resposta ≤3 min a todas as áreas do aeródromo")
                 action_items.append("Instalar PACI quando SCI não consegue cobrir alguma área dentro do tempo-resposta")
                 action_items.append("Garantir que PACI atende aos mesmos requisitos de infraestrutura da SCI (153.425)")
 
             # Informações à ANAC (RBAC-153-14 / 153.431)
-            elif code == "RBAC-153-14" or "dias úteis" in requirements or "saci" in requirements:
+            elif code == "RBAC-153-14":
                 action_items.append("Reportar acionamentos envolvendo aeronaves à ANAC em até 5 dias úteis via SACI ou gtre.sia@anac.gov.br [FC]")
                 action_items.append("Enviar relatório semestral de todos os acionamentos em janeiro e em julho [FC]")
                 action_items.append("Manter template de relatório conforme Apêndice A da IS 153.431")
                 action_items.append("Notificar ANAC sobre mudanças de CAT e alterações no PCINC")
 
             # Comunicação e Alarme (RBAC-153-18 / 153.427)
-            elif code == "RBAC-153-18" or "estação portátil" in requirements or "153.427" in requirements:
+            elif code == "RBAC-153-18":
                 action_items.append("Garantir rádio individual para cada profissional operacional com cobertura em toda a área operacional [FC]")
                 action_items.append("Confirmar tipo de rádio por função: BA-CE/BA-LR = portátil [FC]; BA-MC no CCI = veicular [Rec]; OC = fixo [Rec]")
                 action_items.append("Verificar linha telefônica exclusiva entre TWR e operador da SCI [FC obrigatório]")
@@ -618,7 +618,7 @@ class ComplianceEngine:
                 action_items.append("Avaliar extensão do sistema de alarme ao COE e demais participantes do SREA (recomendação)")
 
             # SESAQ (RBAC-153-19 / 153.433)
-            elif code == "RBAC-153-19" or "salvamento aquático" in requirements or "sesaq" in requirements:
+            elif code == "RBAC-153-19":
                 action_items.append("Verificar se existem superfícies aquáticas ou terrenos de difícil acesso dentro de 1000m dos limiares de pista")
                 action_items.append("Se aplicável: estruturar SESAQ (próprio, externo ou misto) com recursos e pessoal habilitado")
                 action_items.append("Treinar equipe SESAQ em: PLEM, familiarização com aeronaves, EPR, comunicações e salvamento aquático")
@@ -693,21 +693,21 @@ class ComplianceEngine:
             code = regulation.code if regulation.code else ""
 
             # SME - Ambulâncias (RBAC-153-15 / 153.309)
-            if code == "RBAC-153-15" or "ambulâncias" in requirements:
+            if code == "RBAC-153-15":
                 action_items.append("Prover quantidade mínima de ambulâncias (Classe II/III: 1; Classe IV: 2, sendo uma tipo D)")
                 action_items.append("Garantir condutor habilitado e capacitado para cada ambulância")
                 action_items.append("Assegurar tripulação conforme normas ANVISA e Ministério da Saúde")
                 action_items.append("Manter características técnicas e operacionais das ambulâncias conforme MS/ANVISA")
 
             # COE (RBAC-153-16 / 153.301/153.303)
-            elif code == "RBAC-153-16" or "coe" in requirements:
+            elif code == "RBAC-153-16":
                 action_items.append("Garantir que todos os elementos do SREA tenham acesso a informações, procedimentos e responsabilidades")
                 action_items.append("Estabelecer COE com capacidade de ativação e coordenação do SREA")
                 action_items.append("Manter composição do COE conforme planejamento do SREA")
                 action_items.append("Testar ativação do COE periodicamente")
 
             # PCM (RBAC-153-17 / 153.313)
-            elif code == "RBAC-153-17" or "pcm" in requirements:
+            elif code == "RBAC-153-17":
                 action_items.append("Manter PCM interno ao aeródromo, em local de fácil e rápido acesso")
                 action_items.append("Garantir capacidade de rápida locomoção até o local da emergência")
                 action_items.append("Possuir sistema de comunicação imediata e segura com o COE e recursos envolvidos")
@@ -715,7 +715,7 @@ class ComplianceEngine:
                 action_items.append("Definir responsável pela operação do PCM no planejamento do SREA")
 
             # SIMULADOS/ESEA (RBAC-154-43 / 153.331)
-            elif code == "RBAC-154-43" or "exercício" in requirements or "esea" in requirements:
+            elif code == "RBAC-154-43":
                 action_items.append("Aferir todos os módulos do ESEA num ciclo não superior a 3 anos")
                 action_items.append("Realizar ao menos 4 módulos do ESEA por ano (1 por trimestre ou até 2 por semestre)")
                 action_items.append("Elaborar relatório final de avaliação de cada módulo")
