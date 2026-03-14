@@ -19,7 +19,7 @@ from pathlib import Path
 from app.database import get_db, init_db
 from app import schemas
 from app.compliance_engine import ComplianceEngine
-from app.models import Airport, ANACAirport, Regulation, ComplianceRecord, DocumentAttachment, AirportSize, AirportType
+from app.models import Airport, ANACAirport, Regulation, ComplianceRecord, DocumentAttachment, AirportSize, AirportType, SafetyCategory, RequirementClassification, EvaluationType, ComplianceStatus
 from app.services.anac_sync import ANACSyncService
 
 app = FastAPI(
@@ -172,6 +172,53 @@ def _run_anac_enrichment_migration():
         pass
 
 
+def _run_enum_migration():
+    """Garante que tipos ENUM do PostgreSQL possuem todos os valores definidos no modelo.
+    create_all() cria o tipo ENUM com os valores existentes no momento da criação,
+    mas não adiciona valores novos se o Python enum for expandido depois."""
+    from sqlalchemy import text
+    from app.database import engine, DATABASE_URL
+
+    if "sqlite" in DATABASE_URL:
+        return  # SQLite não usa enum nativo
+
+    # Mapeia: nome do tipo pg → valores esperados
+    enum_types = {
+        "safetycategory": [e.value for e in SafetyCategory],
+        "requirementclassification": [e.value for e in RequirementClassification],
+        "evaluationtype": [e.value for e in EvaluationType],
+        "compliancestatus": [e.value for e in ComplianceStatus],
+    }
+
+    try:
+        with engine.connect() as conn:
+            for type_name, expected_values in enum_types.items():
+                # Verificar valores atuais do enum no PostgreSQL
+                try:
+                    result = conn.execute(text(
+                        "SELECT unnest(enum_range(NULL::{}))::text".format(type_name)
+                    ))
+                    existing_values = {row[0] for row in result}
+                except Exception:
+                    # Tipo enum pode não existir ainda (create_all vai criá-lo)
+                    continue
+
+                for val in expected_values:
+                    if val not in existing_values:
+                        try:
+                            conn.execute(text(
+                                f"ALTER TYPE {type_name} ADD VALUE IF NOT EXISTS '{val}'"
+                            ))
+                            conn.commit()
+                            print(f"  enum migration: {type_name} += '{val}'")
+                        except Exception as e:
+                            if "already exists" not in str(e).lower():
+                                print(f"  enum migration: erro ao adicionar '{val}' a {type_name}: {e}")
+                            conn.rollback()
+    except Exception as e:
+        print(f"⚠ Erro na migração de enums: {e}")
+
+
 def _run_schema_migration():
     """Adiciona colunas que existem no modelo mas não na tabela do PostgreSQL.
     create_all() só cria tabelas novas — não adiciona colunas em tabelas existentes."""
@@ -288,6 +335,7 @@ async def startup_event():
     """Initialize database on startup."""
     import asyncio
     init_db()
+    _run_enum_migration()
     _run_schema_migration()
     _run_anac_enrichment_migration()
     _backfill_usage_class()

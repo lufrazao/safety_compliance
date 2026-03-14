@@ -911,18 +911,6 @@ class ComplianceEngine:
                 action_items.append("Garantir pessoal qualificado e certificado")
                 action_items.append("Implementar controle de ferramentas")
         
-        elif safety_val == "personnel_certification":
-            if "supervisores" in requirements:
-                action_items.append("Verificar certificação ANAC de supervisores")
-                action_items.append("Garantir reciclagem a cada 2 anos")
-                action_items.append("Manter registro de certificações e experiência")
-            
-            if "treinamento" in requirements:
-                action_items.append("Desenvolver programa de treinamento de segurança")
-                action_items.append("Garantir treinamento inicial para todos os funcionários")
-                action_items.append("Estabelecer programa de reciclagem anual")
-                action_items.append("Manter certificados de conclusão de treinamentos")
-        
         elif safety_val == "air_traffic_services":
             if "torre" in requirements or "controle" in requirements:
                 action_items.append("Verificar certificação da torre de controle")
