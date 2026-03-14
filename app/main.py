@@ -1895,10 +1895,14 @@ async def upload_document(
 @app.get("/api/compliance/records/{record_id}/documents", response_model=List[schemas.DocumentAttachmentResponse])
 def list_documents(record_id: int, db: Session = Depends(get_db)):
     """List all documents for a compliance record."""
-    documents = db.query(DocumentAttachment).filter(
-        DocumentAttachment.compliance_record_id == record_id
-    ).all()
-    
+    try:
+        documents = db.query(DocumentAttachment).filter(
+            DocumentAttachment.compliance_record_id == record_id
+        ).all()
+    except Exception:
+        # Table may not exist yet — return empty list
+        return []
+
     return [
         schemas.DocumentAttachmentResponse(
             id=doc.id,
